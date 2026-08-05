@@ -1,4 +1,4 @@
--- Админ Панель - Морской стиль с якорями и волнами + Клик-Телепорт + Полёт с анимацией бега + Авто-ходьба по точкам с визуализацией + Noclip + Платформы + Телепорт к игрокам + X-Ray + SPI
+-- Админ Панель - Морской стиль с якорями и волнами + Клик-Телепорт + Полёт с анимацией бега + Авто-ходьба по точкам с визуализацией + Noclip + Платформы + Телепорт к игрокам + X-Ray + SPI + Плавный скролл вкладок
 
 -- ===== АНИМАЦИЯ ЗАГРУЗКИ (полноэкранная, увеличенная в 10 раз) =====
 local function ShowLoadingAnimation()
@@ -2866,6 +2866,280 @@ ClearPlatformsBtn.MouseButton1Click:Connect(function()
     ClearAllPlatforms()
 end)
 
+-- ===== ФУНКЦИОНАЛ ИЗМЕНЕНИЯ РАЗМЕРА И СКРОЛЛИНГА ВКЛАДОК =====
+
+-- Переменные для изменения размера панели
+local ResizeHandle = Instance.new("Frame")
+ResizeHandle.Size = UDim2.new(0, 15, 0, 15)
+ResizeHandle.Position = UDim2.new(1, -15, 1, -15)
+ResizeHandle.BackgroundColor3 = Library.Theme.Accent
+ResizeHandle.BackgroundTransparency = 0.7
+ResizeHandle.BorderSizePixel = 1
+ResizeHandle.BorderColor3 = Library.Theme.Border
+ResizeHandle.Parent = MenuPanel
+ResizeHandle.ZIndex = 100
+
+local ResizeIcon = Instance.new("TextLabel")
+ResizeIcon.Size = UDim2.new(1, 0, 1, 0)
+ResizeIcon.BackgroundTransparency = 1
+ResizeIcon.Text = "↘"
+ResizeIcon.TextColor3 = Library.Theme.Text
+ResizeIcon.TextScaled = true
+ResizeIcon.Font = Enum.Font.SourceSansBold
+ResizeIcon.Parent = ResizeHandle
+
+local isResizing = false
+local resizeStart = nil
+local resizeStartSize = nil
+local MIN_PANEL_WIDTH = 400
+local MIN_PANEL_HEIGHT = 500
+local MAX_PANEL_WIDTH = 900
+local MAX_PANEL_HEIGHT = 900
+
+ResizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isResizing = true
+        resizeStart = input.Position
+        resizeStartSize = MenuPanel.Size
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - resizeStart
+        
+        local newWidth = math.clamp(resizeStartSize.X.Offset + delta.X, MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+        local newHeight = math.clamp(resizeStartSize.Y.Offset + delta.Y, MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
+        
+        MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+        MenuPanel.Position = UDim2.new(0.5, -newWidth/2, 0.5, -newHeight/2)
+        
+        TabContainer.Size = UDim2.new(1, -20, 1, -70)
+        UpdateTabSizes()
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
+        isResizing = false
+        resizeStart = nil
+        resizeStartSize = nil
+    end
+end)
+
+-- ===== ПЛАВНАЯ АНИМАЦИЯ ПРОЛИСТЫВАНИЯ ВКЛАДОК =====
+local TabScrollAnimations = {}
+local TabScrollTarget = 1
+local TabScrollCurrent = 1
+local TabScrollSpeed = 0.15 -- Скорость анимации (0-1)
+local TabScrollRunning = false
+local LeftArrowBtn = nil
+local RightArrowBtn = nil
+
+-- Функция для плавного обновления позиций вкладок
+local function AnimateTabScroll()
+    if not TabScrollRunning then return end
+    
+    local panelWidth = MenuPanel.Size.X.Offset
+    local tabBarWidth = TabBar.Size.X.Offset - 10
+    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
+    local totalTabs = #TabButtons
+    local maxScroll = math.max(0, totalTabs - visibleTabs)
+    
+    -- Интерполяция текущей позиции к целевой
+    TabScrollCurrent = TabScrollCurrent + (TabScrollTarget - TabScrollCurrent) * TabScrollSpeed
+    
+    -- Округляем до ближайшего целого для отображения
+    local currentScroll = math.round(TabScrollCurrent)
+    currentScroll = math.max(1, math.min(maxScroll + 1, currentScroll))
+    
+    -- Обновляем видимые вкладки
+    for i, btn in ipairs(TabButtons) do
+        if i >= currentScroll and i < currentScroll + visibleTabs then
+            btn.Visible = true
+            local posInScroll = i - currentScroll + 1
+            btn.Size = UDim2.new(1/visibleTabs - 0.01, -2, 1, -2)
+            btn.Position = UDim2.new((posInScroll-1) * (1/visibleTabs) + 0.005, 0, 0.005, 0)
+            
+            -- Плавное появление
+            btn.BackgroundTransparency = 0
+            btn.TextTransparency = 0
+        else
+            btn.Visible = false
+        end
+    end
+    
+    -- Обновляем видимость стрелок
+    if LeftArrowBtn and RightArrowBtn then
+        LeftArrowBtn.Visible = (TabScrollCurrent > 1.5)
+        RightArrowBtn.Visible = (TabScrollCurrent < maxScroll + 0.5)
+    end
+    
+    -- Проверяем, достигли ли цели
+    if math.abs(TabScrollCurrent - TabScrollTarget) < 0.01 then
+        TabScrollCurrent = TabScrollTarget
+        TabScrollRunning = false
+    end
+end
+
+-- Функция для скролла вкладок с анимацией
+local function ScrollTabs(direction)
+    local panelWidth = MenuPanel.Size.X.Offset
+    local tabBarWidth = TabBar.Size.X.Offset - 10
+    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
+    local totalTabs = #TabButtons
+    local maxScroll = math.max(0, totalTabs - visibleTabs)
+    
+    -- Рассчитываем новую целевую позицию
+    local newTarget = TabScrollTarget + direction
+    
+    -- Ограничиваем
+    newTarget = math.max(1, math.min(maxScroll + 1, newTarget))
+    
+    if newTarget ~= TabScrollTarget then
+        TabScrollTarget = newTarget
+        TabScrollRunning = true
+    end
+end
+
+-- Функция обновления вкладок с анимацией
+local function UpdateTabSizes()
+    local panelWidth = MenuPanel.Size.X.Offset
+    local tabBarWidth = TabBar.Size.X.Offset - 10
+    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
+    local totalTabs = #TabButtons
+    local maxScroll = math.max(0, totalTabs - visibleTabs)
+    
+    if totalTabs <= visibleTabs then
+        -- Все вкладки видны
+        for i, btn in ipairs(TabButtons) do
+            btn.Visible = true
+            btn.Size = UDim2.new(1/totalTabs - 0.01, -2, 1, -2)
+            btn.Position = UDim2.new((i-1) * (1/totalTabs) + 0.005, 0, 0.005, 0)
+        end
+        
+        if LeftArrowBtn and RightArrowBtn then
+            LeftArrowBtn.Visible = false
+            RightArrowBtn.Visible = false
+        end
+        TabScrollCurrent = 1
+        TabScrollTarget = 1
+        TabScrollRunning = false
+    else
+        -- Создаем кнопки навигации если их нет
+        if not LeftArrowBtn then
+            LeftArrowBtn = Instance.new("TextButton")
+            LeftArrowBtn.Size = UDim2.new(0, 25, 1, -2)
+            LeftArrowBtn.Position = UDim2.new(0, 0, 0.005, 0)
+            LeftArrowBtn.BackgroundColor3 = Library.Theme.Panel
+            LeftArrowBtn.BorderColor3 = Library.Theme.Border
+            LeftArrowBtn.BorderSizePixel = 1
+            LeftArrowBtn.Text = "◀"
+            LeftArrowBtn.TextColor3 = Library.Theme.Text
+            LeftArrowBtn.TextScaled = true
+            LeftArrowBtn.Font = Enum.Font.SourceSansBold
+            LeftArrowBtn.Parent = TabBar
+            LeftArrowBtn.ZIndex = 10
+            
+            RightArrowBtn = Instance.new("TextButton")
+            RightArrowBtn.Size = UDim2.new(0, 25, 1, -2)
+            RightArrowBtn.Position = UDim2.new(1, -25, 0.005, 0)
+            RightArrowBtn.BackgroundColor3 = Library.Theme.Panel
+            RightArrowBtn.BorderColor3 = Library.Theme.Border
+            RightArrowBtn.BorderSizePixel = 1
+            RightArrowBtn.Text = "▶"
+            RightArrowBtn.TextColor3 = Library.Theme.Text
+            RightArrowBtn.TextScaled = true
+            RightArrowBtn.Font = Enum.Font.SourceSansBold
+            RightArrowBtn.Parent = TabBar
+            RightArrowBtn.ZIndex = 10
+            
+            LeftArrowBtn.MouseButton1Click:Connect(function()
+                ScrollTabs(-1)
+            end)
+            
+            RightArrowBtn.MouseButton1Click:Connect(function()
+                ScrollTabs(1)
+            end)
+        end
+        
+        -- Инициализируем если еще не инициализировано
+        if TabScrollTarget == 0 then
+            TabScrollTarget = 1
+            TabScrollCurrent = 1
+        end
+        
+        -- Ограничиваем целевое значение
+        if TabScrollTarget > maxScroll + 1 then
+            TabScrollTarget = maxScroll + 1
+        end
+        
+        -- Запускаем анимацию
+        TabScrollRunning = true
+    end
+end
+
+-- Обработчик колесика мыши для плавного скролла
+local function SetupSmoothWheelScrolling()
+    local scrollCooldown = false
+    
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        
+        -- Проверяем, наведена ли мышь на панель вкладок
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local tabBarAbsPos = TabBar.AbsolutePosition
+        local tabBarAbsSize = TabBar.AbsoluteSize
+        
+        local isHoveringTabBar = false
+        if TabBar.Visible and MenuPanel.Visible then
+            local mousePos = mouse.X
+            if mousePos >= tabBarAbsPos.X and mousePos <= tabBarAbsPos.X + tabBarAbsSize.X then
+                local mouseY = mouse.Y
+                if mouseY >= tabBarAbsPos.Y and mouseY <= tabBarAbsPos.Y + tabBarAbsSize.Y then
+                    isHoveringTabBar = true
+                end
+            end
+        end
+        
+        if isHoveringTabBar and input.UserInputType == Enum.UserInputType.MouseWheel then
+            if scrollCooldown then return end
+            
+            local direction = 0
+            if input.Position.Z < 0 then -- Скролл вниз
+                direction = 1
+            elseif input.Position.Z > 0 then -- Скролл вверх
+                direction = -1
+            end
+            
+            if direction ~= 0 then
+                ScrollTabs(direction)
+                scrollCooldown = true
+                task.delay(0.05, function()
+                    scrollCooldown = false
+                end)
+            end
+        end
+    end)
+end
+
+-- Создаем новый цикл анимации
+local function StartTabAnimationLoop()
+    spawn(function()
+        while true do
+            wait(0.03) -- 30 FPS для плавности
+            AnimateTabScroll()
+        end
+    end)
+end
+
+-- Настройка скроллинга с колесиком
+SetupSmoothWheelScrolling()
+
+-- Запуск анимации
+StartTabAnimationLoop()
+
+-- Остальной код
 local menuOpen = false
 MainButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
@@ -2881,6 +3155,8 @@ MainButton.MouseButton1Click:Connect(function()
         if SPIEnabled then
             UpdateSPI()
         end
+        task.wait(0.05)
+        UpdateTabSizes()
     end
 end)
 
@@ -3075,3 +3351,8 @@ print("📈 Максимум 1000 точек в каждой вкладке!")
 print("⏸️ ОСТАНОВКА НА КАЖДОЙ ТОЧКЕ НА " .. STOP_DURATION .. " СЕКУНД!")
 print("🪄 ПРИ ОСТАНОВКЕ ПЕРСОНАЖ ФИКСИРУЕТСЯ НА МЕСТЕ И НЕ ПАДАЕТ!")
 print("⬇️ НА ПОСЛЕДНЕЙ ТОЧКЕ - МГНОВЕННОЕ ПАДЕНИЕ!")
+print("📐 Перетащите угол панели (↘) для изменения размера")
+print("🔄 Используйте колесико мыши на панели вкладок для плавной навигации")
+print("📏 Размер панели регулируется от " .. MIN_PANEL_WIDTH .. "x" .. MIN_PANEL_HEIGHT .. " до " .. MAX_PANEL_WIDTH .. "x" .. MAX_PANEL_HEIGHT)
+print("✅ Плавная анимация пролистывания вкладок активирована!")
+print("⚡ Скорость анимации: " .. TabScrollSpeed * 100 .. "%")
