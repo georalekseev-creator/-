@@ -1,15 +1,13 @@
--- Админ Панель - Морской стиль с якорями и волнами + Клик-Телепорт + Полёт с анимацией бега + Авто-ходьба по точкам с визуализацией + Noclip + Платформы + Телепорт к игрокам + X-Ray + SPI + Плавный скролл вкладок
+-- Админ Панель - Морской стиль с якорями и волнами + Клик-Телепорт + Полёт с анимацией бега + Авто-ходьба по точкам с визуализацией + Noclip + Платформы + Телепорт к игрокам + X-Ray + SPI + Плавный скролл вкладок + Невидимые зоны растягивания
 
 -- ===== АНИМАЦИЯ ЗАГРУЗКИ (полноэкранная, увеличенная в 10 раз) =====
 local function ShowLoadingAnimation()
-    -- Создаём ScreenGui для анимации
     local loadingGui = Instance.new("ScreenGui")
     loadingGui.Name = "LoadingScreen"
     loadingGui.Parent = game.CoreGui
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
     
-    -- Чёрный фон увеличенный в 10 раз
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
     background.Position = UDim2.new(-4.5, 0, -4.5, 0)
@@ -18,7 +16,6 @@ local function ShowLoadingAnimation()
     background.Parent = loadingGui
     background.ZIndex = 999
     
-    -- Дополнительный слой для гарантии
     local background2 = Instance.new("Frame")
     background2.Size = UDim2.new(10, 0, 10, 0)
     background2.Position = UDim2.new(-4.5, 0, -4.5, 0)
@@ -27,7 +24,6 @@ local function ShowLoadingAnimation()
     background2.Parent = loadingGui
     background2.ZIndex = 998
     
-    -- Центральный контейнер (увеличен)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(0, 500, 0, 300)
     container.Position = UDim2.new(0.5, -250, 0.5, -150)
@@ -35,7 +31,6 @@ local function ShowLoadingAnimation()
     container.Parent = background
     container.ZIndex = 1000
     
-    -- Основной текст "АДМИН ПАНЕЛЬ"
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, 0, 0, 60)
     textLabel.Position = UDim2.new(0, 0, 0.05, 0)
@@ -48,7 +43,6 @@ local function ShowLoadingAnimation()
     textLabel.TextStrokeTransparency = 0.3
     textLabel.Parent = container
     
-    -- Подзаголовок
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(1, 0, 0, 30)
     subtitle.Position = UDim2.new(0, 0, 0.3, 0)
@@ -59,7 +53,6 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
     
-    -- Время до конца загрузки
     local timeLabel = Instance.new("TextLabel")
     timeLabel.Size = UDim2.new(1, 0, 0, 30)
     timeLabel.Position = UDim2.new(0, 0, 0.75, 0)
@@ -70,7 +63,6 @@ local function ShowLoadingAnimation()
     timeLabel.Font = Enum.Font.SourceSans
     timeLabel.Parent = container
     
-    -- Строка catnap220564
     local line1Label = Instance.new("TextLabel")
     line1Label.Size = UDim2.new(1, 0, 0, 30)
     line1Label.Position = UDim2.new(0, 0, 0.45, 0)
@@ -82,7 +74,6 @@ local function ShowLoadingAnimation()
     line1Label.TextTransparency = 1
     line1Label.Parent = container
     
-    -- Строка GGpoVer220564
     local line2Label = Instance.new("TextLabel")
     line2Label.Size = UDim2.new(1, 0, 0, 30)
     line2Label.Position = UDim2.new(0, 0, 0.6, 0)
@@ -94,7 +85,6 @@ local function ShowLoadingAnimation()
     line2Label.TextTransparency = 1
     line2Label.Parent = container
     
-    -- Прогресс-бар
     local progressBar = Instance.new("Frame")
     progressBar.Size = UDim2.new(0.8, 0, 0, 4)
     progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
@@ -108,7 +98,6 @@ local function ShowLoadingAnimation()
     progressFill.BorderSizePixel = 0
     progressFill.Parent = progressBar
     
-    -- Текст для анимации
     local text = "АДМИН ПАНЕЛЬ"
     local currentText = ""
     local charIndex = 1
@@ -125,14 +114,11 @@ local function ShowLoadingAnimation()
         local elapsed = tick() - startTime
         local progress = math.min(elapsed / duration, 1)
         
-        -- Обновляем прогресс-бар
         progressFill.Size = UDim2.new(progress, 0, 1, 0)
         
-        -- Обновляем время до конца загрузки
         local timeLeft = math.max(0, math.ceil(duration - elapsed))
         timeLabel.Text = "Осталось: " .. timeLeft .. " сек"
         
-        -- Печатаем текст
         local targetChars = math.floor(progress * #text * 1.5)
         targetChars = math.min(targetChars, #text)
         
@@ -142,13 +128,11 @@ local function ShowLoadingAnimation()
             charIndex = charIndex + 1
         end
         
-        -- Анимация точек
         if charIndex <= #text then
             local dots = math.floor(elapsed * 2) % 4
             subtitle.Text = "Загрузка" .. string.rep(".", dots)
         end
         
-        -- Показываем первую строку
         if charIndex > #text and not line1Shown then
             line1Shown = true
             spawn(function()
@@ -159,7 +143,6 @@ local function ShowLoadingAnimation()
             end)
         end
         
-        -- Показываем вторую строку
         if line1Shown and not line2Shown and line1Label.TextTransparency < 0.1 then
             line2Shown = true
             spawn(function()
@@ -171,16 +154,13 @@ local function ShowLoadingAnimation()
             end)
         end
         
-        -- Когда загрузка завершена
         if progress >= 1 and not animationComplete then
             animationComplete = true
             subtitle.Text = "ГОТОВО!"
             timeLabel.Text = "✅ Загрузка завершена!"
             
-            -- Ждём пока появятся все строки
             task.wait(0.5)
             
-            -- Начинаем плавное исчезновение
             isFading = true
             local fadeStart = tick()
             local fadeDuration = 0.8
@@ -189,13 +169,11 @@ local function ShowLoadingAnimation()
                 local fadeProgress = (tick() - fadeStart) / fadeDuration
                 
                 if fadeProgress >= 1 then
-                    -- Полностью скрыли
                     loadingGui:Destroy()
                     fadeConnection:Disconnect()
                     connection:Disconnect()
                     print("✅ Анимация загрузки завершена!")
                 else
-                    -- Плавное затемнение
                     local transparency = fadeProgress
                     background.BackgroundTransparency = transparency
                     background2.BackgroundTransparency = transparency
@@ -203,7 +181,6 @@ local function ShowLoadingAnimation()
                     subtitle.TextTransparency = transparency
                     timeLabel.TextTransparency = transparency
                     
-                    -- Строки тоже исчезают
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
                     line1Label.TextTransparency = math.min(lineTransparency, 1)
                     line2Label.TextTransparency = math.min(lineTransparency, 1)
@@ -215,7 +192,6 @@ local function ShowLoadingAnimation()
         end
     end)
     
-    -- Защита от зависания (принудительное завершение через 10 секунд)
     task.spawn(function()
         task.wait(10)
         if loadingGui and loadingGui.Parent then
@@ -226,10 +202,7 @@ local function ShowLoadingAnimation()
     end)
 end
 
--- Запускаем анимацию загрузки
 ShowLoadingAnimation()
-
--- Даём время на отображение загрузки
 task.wait(0.5)
 
 -- Основная библиотека
@@ -272,7 +245,6 @@ MainButton.Image = "rbxassetid://1234567890"
 MainButton.ImageColor3 = Library.Theme.Accent
 MainButton.Parent = ScreenGui
 
--- Текст "А_Д" на кнопке
 local ButtonLabel = Instance.new("TextLabel")
 ButtonLabel.Size = UDim2.new(1, 0, 1, 0)
 ButtonLabel.BackgroundTransparency = 1
@@ -282,7 +254,6 @@ ButtonLabel.TextScaled = true
 ButtonLabel.Font = Enum.Font.SourceSansBold
 ButtonLabel.Parent = MainButton
 
--- Тень
 local Shadow = Instance.new("ImageLabel")
 Shadow.Name = "Shadow"
 Shadow.Size = UDim2.new(1, 10, 1, 10)
@@ -296,8 +267,8 @@ Shadow.Parent = MainButton
 -- Панель меню
 local MenuPanel = Instance.new("Frame")
 MenuPanel.Name = "MenuPanel"
-MenuPanel.Size = UDim2.new(0, 520, 0, 800)
-MenuPanel.Position = UDim2.new(0.5, -260, 0.5, -400)
+MenuPanel.Size = UDim2.new(0, 750, 0, 600)
+MenuPanel.Position = UDim2.new(0.5, -375, 0.5, -300)
 MenuPanel.BackgroundColor3 = Library.Theme.Background
 MenuPanel.BorderColor3 = Library.Theme.Border
 MenuPanel.BorderSizePixel = 3
@@ -320,7 +291,6 @@ Title.TextScaled = true
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = TitleFrame
 
--- Кнопка закрытия
 local CloseBtn = Instance.new("ImageButton")
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseBtn.Position = UDim2.new(1, -40, 0, 10)
@@ -339,20 +309,26 @@ CloseLabel.TextScaled = true
 CloseLabel.Font = Enum.Font.SourceSansBold
 CloseLabel.Parent = CloseBtn
 
--- Основное содержимое с вкладками
+-- Основное содержимое с вкладками (вертикальными)
 local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(1, -20, 1, -70)
 TabContainer.Position = UDim2.new(0, 10, 0, 60)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MenuPanel
 
--- Вкладки
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, 0, 0, 30)
+TabBar.Size = UDim2.new(0, 120, 1, 0)
+TabBar.Position = UDim2.new(0, 0, 0, 0)
 TabBar.BackgroundColor3 = Library.Theme.Panel
 TabBar.BorderColor3 = Library.Theme.Border
 TabBar.BorderSizePixel = 2
 TabBar.Parent = TabContainer
+
+local TabContentContainer = Instance.new("Frame")
+TabContentContainer.Size = UDim2.new(1, -130, 1, 0)
+TabContentContainer.Position = UDim2.new(0, 125, 0, 0)
+TabContentContainer.BackgroundTransparency = 1
+TabContentContainer.Parent = TabContainer
 
 local Tabs = {}
 local TabButtons = {}
@@ -360,28 +336,41 @@ local CurrentTab = 1
 
 local TabNames = {"📍 Точки", "🖱️ Клик-ТП", "✈️ Полёт", "🚶 Ходьба", "🛡️ Noclip", "🏗️ Платформы", "👥 Игроки", "👁️ X-Ray", "👾 SPI"}
 
+local TabScrollingFrame = Instance.new("ScrollingFrame")
+TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
+TabScrollingFrame.Position = UDim2.new(0, 2.5, 0, 2.5)
+TabScrollingFrame.BackgroundTransparency = 1
+TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+TabScrollingFrame.ScrollBarThickness = 6
+TabScrollingFrame.Parent = TabBar
+
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabListLayout.Padding = UDim.new(0, 3)
+TabListLayout.Parent = TabScrollingFrame
+
 for i, name in ipairs(TabNames) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.112, -2, 1, -2)
-    btn.Position = UDim2.new((i-1) * 0.112 + 0.005, 0, 0.005, 0)
-    btn.BackgroundColor3 = Library.Theme.Button
+    btn.Size = UDim2.new(1, -5, 0, 35)
+    btn.BackgroundColor3 = (i == 1) and Library.Theme.Accent or Library.Theme.Button
     btn.BorderColor3 = Library.Theme.Border
-    btn.BorderSizePixel = 1
+    btn.BorderSizePixel = 2
     btn.Text = name
     btn.TextColor3 = Library.Theme.Text
     btn.TextScaled = true
     btn.Font = Enum.Font.SourceSansBold
-    btn.Parent = TabBar
+    btn.Parent = TabScrollingFrame
     TabButtons[i] = btn
     
     local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 1, -35)
-    content.Position = UDim2.new(0, 0, 0, 35)
+    content.Size = UDim2.new(1, 0, 1, 0)
     content.BackgroundTransparency = 1
     content.Visible = (i == 1)
-    content.Parent = TabContainer
+    content.Parent = TabContentContainer
     Tabs[i] = content
 end
+
+TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
 
 -- ===== ВКЛАДКА 1: ТОЧКИ =====
 local PointsTab = Tabs[1]
@@ -476,7 +465,7 @@ ClickTitle.Parent = ClickTeleportFrame
 local ClickToggleBtn = Instance.new("TextButton")
 ClickToggleBtn.Size = UDim2.new(0.4, -10, 0.4, -5)
 ClickToggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-ClickToggleBtn.BackgroundColor3 = Library.Theme.Button
+ClickToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
 ClickToggleBtn.BorderColor3 = Library.Theme.Border
 ClickToggleBtn.BorderSizePixel = 2
 ClickToggleBtn.Text = "🔴 ВЫКЛ"
@@ -490,7 +479,7 @@ ModeIndicator.Size = UDim2.new(1, 0, 0.2, 0)
 ModeIndicator.Position = UDim2.new(0, 0, 0.8, 0)
 ModeIndicator.BackgroundTransparency = 1
 ModeIndicator.Text = "Режим: Выключен"
-ModeIndicator.TextColor3 = Library.Theme.Text
+ModeIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 ModeIndicator.TextScaled = true
 ModeIndicator.Font = Enum.Font.SourceSans
 ModeIndicator.Parent = ClickTeleportFrame
@@ -518,7 +507,7 @@ FlyTitle.Parent = FlyFrame
 local FlyToggleBtn = Instance.new("TextButton")
 FlyToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
 FlyToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
-FlyToggleBtn.BackgroundColor3 = Library.Theme.Button
+FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
 FlyToggleBtn.BorderColor3 = Library.Theme.Border
 FlyToggleBtn.BorderSizePixel = 2
 FlyToggleBtn.Text = "🔴 ВЫКЛ"
@@ -532,7 +521,7 @@ FlyIndicator.Size = UDim2.new(1, 0, 0.15, 0)
 FlyIndicator.Position = UDim2.new(0, 0, 0.7, 0)
 FlyIndicator.BackgroundTransparency = 1
 FlyIndicator.Text = "Полет: Выключен"
-FlyIndicator.TextColor3 = Library.Theme.Text
+FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 FlyIndicator.TextScaled = true
 FlyIndicator.Font = Enum.Font.SourceSans
 FlyIndicator.Parent = FlyFrame
@@ -707,7 +696,7 @@ NoclipTitle.Parent = NoclipFrame
 local NoclipToggleBtn = Instance.new("TextButton")
 NoclipToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
 NoclipToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
-NoclipToggleBtn.BackgroundColor3 = Library.Theme.Button
+NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
 NoclipToggleBtn.BorderColor3 = Library.Theme.Border
 NoclipToggleBtn.BorderSizePixel = 2
 NoclipToggleBtn.Text = "🔴 ВЫКЛ"
@@ -721,7 +710,7 @@ NoclipIndicator.Size = UDim2.new(1, 0, 0.15, 0)
 NoclipIndicator.Position = UDim2.new(0, 0, 0.7, 0)
 NoclipIndicator.BackgroundTransparency = 1
 NoclipIndicator.Text = "Noclip: Выключен"
-NoclipIndicator.TextColor3 = Library.Theme.Text
+NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 NoclipIndicator.TextScaled = true
 NoclipIndicator.Font = Enum.Font.SourceSans
 NoclipIndicator.Parent = NoclipFrame
@@ -894,7 +883,6 @@ HotkeyLabelPlatform.Parent = HotkeyFramePlatform
 -- ===== ВКЛАДКА 7: ТЕЛЕПОРТ К ИГРОКАМ =====
 local PlayersTab = Tabs[7]
 
--- Верхняя панель с кнопками
 local PlayersControlPanel = Instance.new("Frame")
 PlayersControlPanel.Size = UDim2.new(1, 0, 0.1, 0)
 PlayersControlPanel.Position = UDim2.new(0, 0, 0, 0)
@@ -914,7 +902,6 @@ PlayersTitle.TextXAlignment = Enum.TextXAlignment.Left
 PlayersTitle.Font = Enum.Font.SourceSansBold
 PlayersTitle.Parent = PlayersControlPanel
 
--- Кнопка обновления
 local RefreshPlayersBtn = Instance.new("TextButton")
 RefreshPlayersBtn.Size = UDim2.new(0.2, -10, 0.7, 0)
 RefreshPlayersBtn.Position = UDim2.new(0.78, 0, 0.15, 0)
@@ -927,7 +914,6 @@ RefreshPlayersBtn.TextScaled = true
 RefreshPlayersBtn.Font = Enum.Font.SourceSansBold
 RefreshPlayersBtn.Parent = PlayersControlPanel
 
--- Информация о количестве игроков
 local PlayersCountLabel = Instance.new("TextLabel")
 PlayersCountLabel.Size = UDim2.new(0.3, 0, 0.4, 0)
 PlayersCountLabel.Position = UDim2.new(0.55, 0, 0.3, 0)
@@ -939,7 +925,6 @@ PlayersCountLabel.TextXAlignment = Enum.TextXAlignment.Right
 PlayersCountLabel.Font = Enum.Font.SourceSans
 PlayersCountLabel.Parent = PlayersControlPanel
 
--- Список игроков
 local PlayersList = Instance.new("ScrollingFrame")
 PlayersList.Size = UDim2.new(1, 0, 0.88, 0)
 PlayersList.Position = UDim2.new(0, 0, 0.11, 0)
@@ -955,58 +940,39 @@ PlayersListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 PlayersListLayout.Padding = UDim.new(0, 5)
 PlayersListLayout.Parent = PlayersList
 
--- Переменная для хранения времени последнего обновления
 local lastPlayerUpdate = 0
 local UPDATE_INTERVAL = 30
 
--- Функция для телепортации к игроку
 local function TeleportToPlayer(targetPlayer)
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then
-        print("❌ Ошибка: ваш персонаж не найден!")
-        return
-    end
+    if not player or not player.Character then return end
     
-    if not targetPlayer or not targetPlayer.Character then
-        print("❌ Ошибка: целевой игрок не найден!")
-        return
-    end
+    if not targetPlayer or not targetPlayer.Character then return end
     
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
     local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     
-    if not hrp or not targetHrp then
-        print("❌ Ошибка: HumanoidRootPart не найден!")
-        return
-    end
+    if not hrp or not targetHrp then return end
     
     local targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
     hrp.CFrame = CFrame.new(targetPos)
-    
-    print("✅ Телепорт к игроку " .. targetPlayer.Name)
 end
 
--- Функция обновления списка игроков
 local function UpdatePlayersList()
     for _, child in pairs(PlayersList:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
+        if child:IsA("Frame") then child:Destroy() end
     end
     
     local players = game.Players:GetPlayers()
     local localPlayer = game.Players.LocalPlayer
     
-    table.sort(players, function(a, b)
-        return a.Name < b.Name
-    end)
+    table.sort(players, function(a, b) return a.Name < b.Name end)
     
     local count = 0
     
     for _, player in ipairs(players) do
         if player ~= localPlayer then
             count = count + 1
-            
             local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
             
             local ItemFrame = Instance.new("Frame")
@@ -1061,38 +1027,18 @@ local function UpdatePlayersList()
             TeleportPlayerBtn.Parent = ItemFrame
             
             TeleportPlayerBtn.MouseButton1Click:Connect(function()
-                if isOnline then
-                    TeleportToPlayer(player)
-                else
-                    print("❌ Игрок " .. player.Name .. " оффлайн!")
-                end
+                if isOnline then TeleportToPlayer(player) end
             end)
             
             local function onDoubleClick()
-                if isOnline then
-                    TeleportToPlayer(player)
-                else
-                    print("❌ Игрок " .. player.Name .. " оффлайн!")
-                end
+                if isOnline then TeleportToPlayer(player) end
             end
             
             local lastClickTime = 0
             NameLabel.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     local currentTime = tick()
-                    if currentTime - lastClickTime < 0.3 then
-                        onDoubleClick()
-                    end
-                    lastClickTime = currentTime
-                end
-            end)
-            
-            ItemFrame.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    local currentTime = tick()
-                    if currentTime - lastClickTime < 0.3 then
-                        onDoubleClick()
-                    end
+                    if currentTime - lastClickTime < 0.3 then onDoubleClick() end
                     lastClickTime = currentTime
                 end
             end)
@@ -1100,7 +1046,6 @@ local function UpdatePlayersList()
     end
     
     PlayersCountLabel.Text = "Игроков: " .. count
-    
     local totalHeight = count * 50 + 10
     PlayersList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
@@ -1128,50 +1073,38 @@ end)
 -- ===== ВКЛАДКА 8: X-RAY =====
 local XRayTab = Tabs[8]
 
--- Переменные для X-Ray
 local XRayActive = false
-local XRayTransparency = 50 -- 50% по умолчанию
+local XRayTransparency = 50
 local XRayParts = {}
 local XRayOriginalTransparencies = {}
 
--- Функция обновления X-Ray (только прозрачность, не трогает CanCollide)
 local function UpdateXRay()
     local player = game.Players.LocalPlayer
     local character = player and player.Character
     
     if XRayActive then
-        -- Преобразуем проценты в прозрачность (1% = 0.01, 100% = 1.0)
         local targetTransparency = XRayTransparency / 100
         
         for _, part in pairs(workspace:GetDescendants()) do
             if part:IsA("BasePart") then
-                -- Пропускаем части персонажа игрока
-                if character and part:IsDescendantOf(character) then
-                    continue
-                end
+                if character and part:IsDescendantOf(character) then continue end
                 
-                -- Сохраняем оригинальную прозрачность
                 if not XRayOriginalTransparencies[part] then
                     XRayOriginalTransparencies[part] = part.Transparency
                     table.insert(XRayParts, part)
                 end
-                -- Меняем только прозрачность, НЕ трогаем CanCollide
                 part.Transparency = targetTransparency
             end
         end
     else
-        -- Восстанавливаем оригинальную прозрачность
         for part, origTrans in pairs(XRayOriginalTransparencies) do
-            if part and part.Parent then
-                part.Transparency = origTrans
-            end
+            if part and part.Parent then part.Transparency = origTrans end
         end
         XRayOriginalTransparencies = {}
         XRayParts = {}
     end
 end
 
--- Создаем интерфейс для X-Ray
 local XRayControlFrame = Instance.new("Frame")
 XRayControlFrame.Size = UDim2.new(1, 0, 0.5, 0)
 XRayControlFrame.Position = UDim2.new(0, 0, 0.15, 0)
@@ -1189,7 +1122,6 @@ XRayTitle.TextScaled = true
 XRayTitle.Font = Enum.Font.SourceSansBold
 XRayTitle.Parent = XRayControlFrame
 
--- Информация о режиме
 local XRayInfo = Instance.new("TextLabel")
 XRayInfo.Size = UDim2.new(1, 0, 0.15, 0)
 XRayInfo.Position = UDim2.new(0, 0, 0.2, 0)
@@ -1200,11 +1132,10 @@ XRayInfo.TextScaled = true
 XRayInfo.Font = Enum.Font.SourceSans
 XRayInfo.Parent = XRayControlFrame
 
--- Кнопка включения/выключения
 local XRayToggleBtn = Instance.new("TextButton")
 XRayToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
 XRayToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
-XRayToggleBtn.BackgroundColor3 = Library.Theme.Button
+XRayToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
 XRayToggleBtn.BorderColor3 = Library.Theme.Border
 XRayToggleBtn.BorderSizePixel = 2
 XRayToggleBtn.Text = "🔴 ВЫКЛ"
@@ -1213,18 +1144,16 @@ XRayToggleBtn.TextScaled = true
 XRayToggleBtn.Font = Enum.Font.SourceSansBold
 XRayToggleBtn.Parent = XRayControlFrame
 
--- Индикатор состояния
 local XRayIndicator = Instance.new("TextLabel")
 XRayIndicator.Size = UDim2.new(1, 0, 0.12, 0)
 XRayIndicator.Position = UDim2.new(0, 0, 0.62, 0)
 XRayIndicator.BackgroundTransparency = 1
 XRayIndicator.Text = "X-Ray: Выключен"
-XRayIndicator.TextColor3 = Library.Theme.Text
+XRayIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 XRayIndicator.TextScaled = true
 XRayIndicator.Font = Enum.Font.SourceSans
 XRayIndicator.Parent = XRayControlFrame
 
--- Слайдер прозрачности
 local XRayTransparencyLabel = Instance.new("TextLabel")
 XRayTransparencyLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
 XRayTransparencyLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -1264,35 +1193,24 @@ local function UpdateXRaySlider()
     XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
 end
 
--- Функция переключения X-Ray
 local function ToggleXRay()
     XRayActive = not XRayActive
     XRayToggleBtn.Text = XRayActive and "🟢 ВКЛ" or "🔴 ВЫКЛ"
-    XRayToggleBtn.BackgroundColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Library.Theme.Button
+    XRayToggleBtn.BackgroundColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     XRayIndicator.Text = XRayActive and "X-Ray: Включен" or "X-Ray: Выключен"
-    XRayIndicator.TextColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Library.Theme.Text
+    XRayIndicator.TextColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     
-    if XRayActive then
-        UpdateXRay()
-        print("👁️ X-Ray активирован (прозрачность: " .. math.floor(XRayTransparency) .. "%)")
-    else
-        UpdateXRay()
-        print("👁️ X-Ray деактивирован")
-    end
+    UpdateXRay()
+    print(XRayActive and "👁️ X-Ray активирован" or "👁️ X-Ray деактивирован")
 end
 
 XRayToggleBtn.MouseButton1Click:Connect(ToggleXRay)
 
--- Слайдер прозрачности
 local xrayDragging = false
-XRaySliderButton.MouseButton1Down:Connect(function()
-    xrayDragging = true
-end)
+XRaySliderButton.MouseButton1Down:Connect(function() xrayDragging = true end)
 
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        xrayDragging = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then xrayDragging = false end
 end)
 
 game:GetService("UserInputService").InputChanged:Connect(function(input)
@@ -1302,16 +1220,12 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local mouseX = input.Position.X
         
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-        XRayTransparency = math.floor(1 + percent * 99) -- От 1% до 100%
+        XRayTransparency = math.floor(1 + percent * 99)
         UpdateXRaySlider()
-        if XRayActive then
-            UpdateXRay()
-            print("👁️ Прозрачность X-Ray: " .. math.floor(XRayTransparency) .. "%")
-        end
+        if XRayActive then UpdateXRay() end
     end
 end)
 
--- Хоткей для X-Ray (Alt+R)
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.R and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
@@ -1319,16 +1233,14 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     end
 end)
 
--- ===== ВКЛАДКА 9: SPI (Игроки на карте) =====
+-- ===== ВКЛАДКА 9: SPI =====
 local SPITab = Tabs[9]
 
--- Переменные для SPI
 local SPIEnabled = false
-local SPIPlayers = {} -- Храним данные об игроках для отображения
+local SPIPlayers = {}
 local SPIConnection = nil
 local SPIRenderConnection = nil
 
--- Создаем интерфейс для SPI
 local SPIControlFrame = Instance.new("Frame")
 SPIControlFrame.Size = UDim2.new(1, 0, 0.5, 0)
 SPIControlFrame.Position = UDim2.new(0, 0, 0.15, 0)
@@ -1346,7 +1258,6 @@ SPITitle.TextScaled = true
 SPITitle.Font = Enum.Font.SourceSansBold
 SPITitle.Parent = SPIControlFrame
 
--- Информация о режиме
 local SPIInfo = Instance.new("TextLabel")
 SPIInfo.Size = UDim2.new(1, 0, 0.15, 0)
 SPIInfo.Position = UDim2.new(0, 0, 0.2, 0)
@@ -1357,11 +1268,10 @@ SPIInfo.TextScaled = true
 SPIInfo.Font = Enum.Font.SourceSans
 SPIInfo.Parent = SPIControlFrame
 
--- Кнопка включения/выключения
 local SPIToggleBtn = Instance.new("TextButton")
 SPIToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
 SPIToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
-SPIToggleBtn.BackgroundColor3 = Library.Theme.Button
+SPIToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
 SPIToggleBtn.BorderColor3 = Library.Theme.Border
 SPIToggleBtn.BorderSizePixel = 2
 SPIToggleBtn.Text = "🔴 ВЫКЛ"
@@ -1370,13 +1280,12 @@ SPIToggleBtn.TextScaled = true
 SPIToggleBtn.Font = Enum.Font.SourceSansBold
 SPIToggleBtn.Parent = SPIControlFrame
 
--- Индикатор состояния
 local SPIIndicator = Instance.new("TextLabel")
 SPIIndicator.Size = UDim2.new(1, 0, 0.12, 0)
 SPIIndicator.Position = UDim2.new(0, 0, 0.62, 0)
 SPIIndicator.BackgroundTransparency = 1
 SPIIndicator.Text = "SPI: Выключен"
-SPIIndicator.TextColor3 = Library.Theme.Text
+SPIIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 SPIIndicator.TextScaled = true
 SPIIndicator.Font = Enum.Font.SourceSans
 SPIIndicator.Parent = SPIControlFrame
@@ -1401,42 +1310,31 @@ SPIHotkeyLabel.TextScaled = true
 SPIHotkeyLabel.Font = Enum.Font.SourceSansBold
 SPIHotkeyLabel.Parent = SPIControlFrame
 
--- Функция для создания Highlight для игрока (показывает скин через стены)
 local function CreatePlayerHighlight(player)
     if not player or not player.Character then return nil end
     
-    -- Создаем Highlight для всего персонажа
     local highlight = Instance.new("Highlight")
     highlight.Parent = player.Character
     highlight.FillTransparency = 0.3
     highlight.OutlineTransparency = 0
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- Показывает через стены
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     
-    -- Случайный цвет для каждого игрока
     local colors = {
-        Color3.fromRGB(255, 0, 0),
-        Color3.fromRGB(0, 255, 0),
-        Color3.fromRGB(0, 0, 255),
-        Color3.fromRGB(255, 255, 0),
-        Color3.fromRGB(255, 0, 255),
-        Color3.fromRGB(0, 255, 255),
-        Color3.fromRGB(255, 128, 0),
-        Color3.fromRGB(128, 255, 0),
-        Color3.fromRGB(0, 255, 128),
-        Color3.fromRGB(128, 0, 255)
+        Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 0, 255), Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(255, 0, 255), Color3.fromRGB(0, 255, 255),
+        Color3.fromRGB(255, 128, 0), Color3.fromRGB(128, 255, 0),
+        Color3.fromRGB(0, 255, 128), Color3.fromRGB(128, 0, 255)
     }
     
     local hash = 0
-    for i = 1, #player.Name do
-        hash = hash + string.byte(player.Name, i)
-    end
+    for i = 1, #player.Name do hash = hash + string.byte(player.Name, i) end
     local colorIndex = (hash % #colors) + 1
     
     highlight.FillColor = colors[colorIndex]
     highlight.OutlineColor = colors[colorIndex]
     
-    -- Создаем BillboardGui с именем и расстоянием
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "SPIBillboard"
     billboard.Size = UDim2.new(0, 200, 0, 50)
@@ -1444,7 +1342,6 @@ local function CreatePlayerHighlight(player)
     billboard.AlwaysOnTop = true
     billboard.Parent = player.Character
     
-    -- Имя игрока
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Name = "NameLabel"
     nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
@@ -1458,7 +1355,6 @@ local function CreatePlayerHighlight(player)
     nameLabel.TextStrokeTransparency = 0.2
     nameLabel.Parent = billboard
     
-    -- Расстояние до игрока
     local distanceLabel = Instance.new("TextLabel")
     distanceLabel.Name = "DistanceLabel"
     distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
@@ -1475,7 +1371,6 @@ local function CreatePlayerHighlight(player)
     return highlight
 end
 
--- Функция обновления расстояний
 local function UpdateDistances()
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer or not localPlayer.Character then return end
@@ -1494,24 +1389,16 @@ local function UpdateDistances()
                 local distanceText = string.format("%.1f м", distance)
                 
                 local distanceLabel = billboard:FindFirstChild("DistanceLabel")
-                if distanceLabel then
-                    distanceLabel.Text = distanceText
-                end
+                if distanceLabel then distanceLabel.Text = distanceText end
             end
         end
     end
 end
 
--- Функция обновления SPI
 local function UpdateSPI()
-    -- Удаляем старые данные
     for _, playerData in pairs(SPIPlayers) do
-        if playerData.highlight and playerData.highlight.Parent then
-            playerData.highlight:Destroy()
-        end
-        if playerData.billboard and playerData.billboard.Parent then
-            playerData.billboard:Destroy()
-        end
+        if playerData.highlight and playerData.highlight.Parent then playerData.highlight:Destroy() end
+        if playerData.billboard and playerData.billboard.Parent then playerData.billboard:Destroy() end
     end
     SPIPlayers = {}
     
@@ -1523,17 +1410,10 @@ local function UpdateSPI()
     
     for _, player in pairs(players) do
         if player ~= localPlayer and player.Character then
-            -- Создаем Highlight для персонажа
             local highlight = CreatePlayerHighlight(player)
             if highlight then
-                -- Находим BillboardGui
                 local billboard = player.Character:FindFirstChild("SPIBillboard")
-                
-                table.insert(SPIPlayers, {
-                    player = player,
-                    highlight = highlight,
-                    billboard = billboard
-                })
+                table.insert(SPIPlayers, {player = player, highlight = highlight, billboard = billboard})
                 count = count + 1
             end
         end
@@ -1543,125 +1423,59 @@ local function UpdateSPI()
     UpdateDistances()
 end
 
--- Функция переключения SPI
 local function ToggleSPI()
     SPIEnabled = not SPIEnabled
     SPIToggleBtn.Text = SPIEnabled and "🟢 ВКЛ" or "🔴 ВЫКЛ"
-    SPIToggleBtn.BackgroundColor3 = SPIEnabled and Library.Theme.SPI or Library.Theme.Button
+    SPIToggleBtn.BackgroundColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
     SPIIndicator.Text = SPIEnabled and "SPI: Включен" or "SPI: Выключен"
-    SPIIndicator.TextColor3 = SPIEnabled and Library.Theme.SPI or Library.Theme.Text
+    SPIIndicator.TextColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
     
     if SPIEnabled then
         UpdateSPI()
-        print("👾 SPI включен - отображаются скины игроков через стены")
+        if SPIConnection then SPIConnection:Disconnect() end
+        if SPIRenderConnection then SPIRenderConnection:Disconnect() end
         
-        -- Запускаем цикл обновления позиций и расстояний
-        if SPIConnection then
-            SPIConnection:Disconnect()
-        end
-        if SPIRenderConnection then
-            SPIRenderConnection:Disconnect()
-        end
-        
-        -- Проверяем изменения в персонажах
         SPIConnection = game:GetService("RunService").Heartbeat:Connect(function()
             if not SPIEnabled then return end
-            
-            local localPlayer = game.Players.LocalPlayer
-            local players = game.Players:GetPlayers()
-            
-            -- Проверяем, не появились ли новые игроки
-            for _, player in pairs(players) do
-                if player ~= localPlayer and player.Character then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character then
                     local found = false
-                    for _, data in pairs(SPIPlayers) do
-                        if data.player == player then
-                            found = true
-                            break
-                        end
-                    end
-                    if not found then
-                        UpdateSPI()
-                        break
-                    end
-                end
-            end
-            
-            -- Проверяем, не исчезли ли игроки
-            for i = #SPIPlayers, 1, -1 do
-                local data = SPIPlayers[i]
-                if not data.player or not data.player.Parent or not data.player.Character then
-                    if data.highlight and data.highlight.Parent then
-                        data.highlight:Destroy()
-                    end
-                    if data.billboard and data.billboard.Parent then
-                        data.billboard:Destroy()
-                    end
-                    table.remove(SPIPlayers, i)
-                    UpdateSPI()
+                    for _, data in pairs(SPIPlayers) do if data.player == player then found = true; break end end
+                    if not found then UpdateSPI(); break end
                 end
             end
         end)
         
-        -- Обновляем расстояния каждый кадр
         SPIRenderConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if not SPIEnabled then return end
             UpdateDistances()
         end)
     else
-        if SPIConnection then
-            SPIConnection:Disconnect()
-            SPIConnection = nil
-        end
-        if SPIRenderConnection then
-            SPIRenderConnection:Disconnect()
-            SPIRenderConnection = nil
-        end
-        -- Удаляем все данные
+        if SPIConnection then SPIConnection:Disconnect(); SPIConnection = nil end
+        if SPIRenderConnection then SPIRenderConnection:Disconnect(); SPIRenderConnection = nil end
         for _, playerData in pairs(SPIPlayers) do
-            if playerData.highlight and playerData.highlight.Parent then
-                playerData.highlight:Destroy()
-            end
-            if playerData.billboard and playerData.billboard.Parent then
-                playerData.billboard:Destroy()
-            end
+            if playerData.highlight and playerData.highlight.Parent then playerData.highlight:Destroy() end
+            if playerData.billboard and playerData.billboard.Parent then playerData.billboard:Destroy() end
         end
         SPIPlayers = {}
         SPICountLabel.Text = "Игроков на карте: 0"
-        print("👾 SPI выключен")
     end
 end
 
 SPIToggleBtn.MouseButton1Click:Connect(ToggleSPI)
 
--- Хоткей для SPI (Alt+I)
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        ToggleSPI()
-    end
+    if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleSPI() end
 end)
 
--- Отслеживаем вход/выход игроков для обновления SPI
-game.Players.PlayerAdded:Connect(function()
-    if SPIEnabled then
-        task.wait(0.5)
-        UpdateSPI()
-    end
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    if SPIEnabled then
-        task.wait(0.5)
-        UpdateSPI()
-    end
-end)
+game.Players.PlayerAdded:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
+game.Players.PlayerRemoving:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
 
 -- ===== ДАННЫЕ ДЛЯ ПЛАТФОРМ =====
 local Platforms = {}
 local PlatformCount = 0
 
--- ===== ФУНКЦИИ ПЛАТФОРМ =====
 local function CreatePlatform(position, length, width)
     local platform = Instance.new("Part")
     platform.Size = Vector3.new(length, 0.5, width)
@@ -1687,38 +1501,25 @@ local function CreatePlatform(position, length, width)
 end
 
 local function ClearAllPlatforms()
-    if #Platforms == 0 then
-        print("ℹ️ Нет платформ для удаления")
-        return
-    end
+    if #Platforms == 0 then return end
     
     for _, platform in pairs(Platforms) do
-        if platform and platform.Parent then
-            platform:Destroy()
-        end
+        if platform and platform.Parent then platform:Destroy() end
     end
     Platforms = {}
     PlatformCount = 0
     PlatformInfo.Text = "Платформ: 0"
-    print("🗑️ Все платформы удалены!")
 end
 
 local function PlacePlatformUnderPlayer()
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then
-        print("❌ Ошибка: персонаж не найден!")
-        return
-    end
+    if not player or not player.Character then return end
     
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then
-        print("❌ Ошибка: HumanoidRootPart не найден!")
-        return
-    end
+    if not hrp then return end
     
     local pos = hrp.Position
     local platformPos = Vector3.new(pos.X, pos.Y - 1, pos.Z)
-    
     CreatePlatform(platformPos, PlatformLength, PlatformWidth)
 end
 
@@ -1726,7 +1527,6 @@ end
 local PAUSE_AT_END = 5
 local STOP_DURATION = 0.5
 
--- ===== ДАННЫЕ =====
 local PointsData = {}
 local WalkPointsData = {}
 local ClickTeleportEnabled = false
@@ -1760,7 +1560,6 @@ local NoclipConnection = nil
 local WaitForTeleport = false
 local TeleportWaitStart = 0
 
--- Обработчик смерти персонажа
 local function onCharacterDied()
     if WalkEnabled and #WalkPointsData > 0 then
         CurrentWalkIndex = 1
@@ -1769,17 +1568,9 @@ local function onCharacterDied()
         WaitForTeleport = false
         IsStopped = false
         
-        if StopBodyPosition then
-            StopBodyPosition:Destroy()
-            StopBodyPosition = nil
-        end
+        if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
         
-        if not NoclipEnabled then
-            SetNoclip(true)
-            print("🔄 Включаем noclip после смерти")
-        end
-        
-        print("💀 Персонаж умер! Сброс к первой точке")
+        if not NoclipEnabled then SetNoclip(true) end
         
         if #WalkPointsData > 0 then
             local firstData = WalkPointsData[1]
@@ -1791,7 +1582,6 @@ local function onCharacterDied()
     end
 end
 
--- Функция для включения/выключения Noclip
 local function SetNoclip(state)
     if state then
         if not NoclipConnection then
@@ -1799,63 +1589,44 @@ local function SetNoclip(state)
                 local player = game.Players.LocalPlayer
                 if player and player.Character then
                     for _, part in pairs(player.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
+                        if part:IsA("BasePart") then part.CanCollide = false end
                     end
                 end
             end)
         end
         NoclipEnabled = true
         NoclipToggleBtn.Text = "🟢 ВКЛ"
-        NoclipToggleBtn.BackgroundColor3 = Library.Theme.NoclipActive
+        NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
         NoclipIndicator.Text = "Noclip: Включен"
-        NoclipIndicator.TextColor3 = Library.Theme.NoclipActive
-        print("✅ Noclip включен")
+        NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
     else
-        if NoclipConnection then
-            NoclipConnection:Disconnect()
-            NoclipConnection = nil
-        end
+        if NoclipConnection then NoclipConnection:Disconnect(); NoclipConnection = nil end
         NoclipEnabled = false
         NoclipToggleBtn.Text = "🔴 ВЫКЛ"
-        NoclipToggleBtn.BackgroundColor3 = Library.Theme.Button
+        NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         NoclipIndicator.Text = "Noclip: Выключен"
-        NoclipIndicator.TextColor3 = Library.Theme.Text
-        print("❌ Noclip выключен")
+        NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
     end
 end
 
--- Отслеживание смерти персонажа
 local function setupDeathDetection()
     local player = game.Players.LocalPlayer
     if not player then return end
     
     player.CharacterAdded:Connect(function(newCharacter)
         local humanoid = newCharacter:WaitForChild("Humanoid")
-        if humanoid then
-            humanoid.Died:Connect(function()
-                onCharacterDied()
-            end)
-        end
+        if humanoid then humanoid.Died:Connect(function() onCharacterDied() end) end
     end)
     
     if player.Character then
         local humanoid = player.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.Died:Connect(function()
-                onCharacterDied()
-            end)
-        end
+        if humanoid then humanoid.Died:Connect(function() onCharacterDied() end) end
     end
 end
 
--- ===== ФУНКЦИИ ВИЗУАЛИЗАЦИИ =====
 local function ClearWalkVisuals()
     for _, obj in pairs(WalkVisuals) do
-        if obj and obj.Parent then
-            obj:Destroy()
-        end
+        if obj and obj.Parent then obj:Destroy() end
     end
     WalkVisuals = {}
 end
@@ -1863,9 +1634,7 @@ end
 local function UpdateWalkVisuals()
     ClearWalkVisuals()
     
-    if #WalkPointsData < 1 then 
-        return 
-    end
+    if #WalkPointsData < 1 then return end
     
     for i, data in ipairs(WalkPointsData) do
         local sphere = Instance.new("Part")
@@ -1918,7 +1687,6 @@ local function UpdateWalkVisuals()
     end
 end
 
--- ===== ФУНКЦИИ ДЛЯ ТОЧЕК =====
 local function TeleportToPosition(position)
     local player = game.Players.LocalPlayer
     if not player or not player.Character then return end
@@ -1955,9 +1723,7 @@ end
 
 local function UpdatePointsList()
     for _, child in pairs(PointsList:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
+        if child:IsA("Frame") then child:Destroy() end
     end
     
     for i, data in ipairs(PointsData) do
@@ -2003,9 +1769,7 @@ local function UpdatePointsList()
         TeleportPointBtn.Font = Enum.Font.SourceSansBold
         TeleportPointBtn.Parent = ItemFrame
         
-        TeleportPointBtn.MouseButton1Click:Connect(function()
-            TeleportToPosition(pos)
-        end)
+        TeleportPointBtn.MouseButton1Click:Connect(function() TeleportToPosition(pos) end)
         
         local DeleteBtn = Instance.new("TextButton")
         DeleteBtn.Size = UDim2.new(0.1, 0, 0.8, 0)
@@ -2037,21 +1801,12 @@ end
 
 local function SetPoint()
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then 
-        print("❌ Ошибка: персонаж не найден!")
-        return 
-    end
+    if not player or not player.Character then return end
     
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then 
-        print("❌ Ошибка: HumanoidRootPart не найден!")
-        return 
-    end
+    if not hrp then return end
     
-    if #PointsData >= MAX_POINTS then
-        print("❌ Достигнут лимит точек! Максимум: " .. MAX_POINTS)
-        return    
-    end
+    if #PointsData >= MAX_POINTS then return end
     
     local name = NameInput.Text
     if name == "" or name == "Название точки" then
@@ -2062,26 +1817,18 @@ local function SetPoint()
     table.insert(PointsData, {name = name, pos = pos})
     UpdatePointsList()
     UpdatePointInfo()
-    print("✅ Точка '" .. name .. "' добавлена в конец списка! (" .. #PointsData .. "/" .. MAX_POINTS .. ")")
 end
 
 local function TeleportToLastPoint()
-    if #PointsData == 0 then
-        print("❌ Нет точек для телепорта!")
-        return
-    end
+    if #PointsData == 0 then return end
     
     local lastData = PointsData[#PointsData]
     TeleportToPosition(lastData.pos)
-    print("✅ Телепорт к точке '" .. lastData.name .. "' (№" .. #PointsData .. ")")
 end
 
--- ===== ФУНКЦИИ ДЛЯ ХОДЬБЫ =====
 local function UpdateWalkPointsList()
     for _, child in pairs(WalkPointsList:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
+        if child:IsA("Frame") then child:Destroy() end
     end
     
     for i, data in ipairs(WalkPointsData) do
@@ -2143,26 +1890,19 @@ local function UpdateWalkPointsList()
             table.remove(WalkPointsData, i)
             UpdateWalkPointsList()
             UpdateWalkVisuals()
-            print("🗑️ Точка '" .. data.name .. "' удалена из списка ходьбы")
         end)
         
         RenameBtn.MouseButton1Click:Connect(function()
             local newName = NameInput.Text
-            if newName == "" or newName == "Название точки" then
-                newName = data.name
-            end
+            if newName == "" or newName == "Название точки" then newName = data.name end
             
             for j, d in ipairs(WalkPointsData) do
-                if d.name == newName and j ~= i then
-                    print("❌ Имя '" .. newName .. "' уже занято!")
-                    return
-                end
+                if d.name == newName and j ~= i then return end
             end
             
             WalkPointsData[i].name = newName
             UpdateWalkPointsList()
             UpdateWalkVisuals()
-            print("✅ Точка переименована в '" .. newName .. "'")
         end)
     end
     
@@ -2173,21 +1913,12 @@ end
 
 local function SetWalkPoint()
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then 
-        print("❌ Ошибка: персонаж не найден!")
-        return 
-    end
+    if not player or not player.Character then return end
     
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then 
-        print("❌ Ошибка: HumanoidRootPart не найден!")
-        return 
-    end
+    if not hrp then return end
     
-    if #WalkPointsData >= MAX_POINTS then
-        print("❌ Достигнут лимит точек для ходьбы! Максимум: " .. MAX_POINTS)
-        return
-    end
+    if #WalkPointsData >= MAX_POINTS then return end
     
     local name = "Точка " .. (#WalkPointsData + 1)
     
@@ -2202,19 +1933,12 @@ local function SetWalkPoint()
     local pos = hrp.Position
     table.insert(WalkPointsData, {name = name, pos = pos})
     UpdateWalkPointsList()
-    print("✅ Точка '" .. name .. "' добавлена в конец списка ходьбы! (" .. #WalkPointsData .. "/" .. MAX_POINTS .. ")")
 end
 
 local function ClearWalkPoints()
-    if #WalkPointsData == 0 then
-        print("ℹ️ Список точек ходьбы уже пуст!")
-        return
-    end
+    if #WalkPointsData == 0 then return end
     
-    if WalkEnabled then
-        StopWalking()
-        print("⏹️ Авто-ходьба остановлена перед очисткой")
-    end
+    if WalkEnabled then StopWalking() end
     
     WalkPointsData = {}
     UpdateWalkPointsList()
@@ -2222,10 +1946,8 @@ local function ClearWalkPoints()
     
     WalkStatus.Text = "🗑️ Все точки очищены"
     WalkStatus.TextColor3 = Library.Theme.Warning
-    print("🗑️ Все точки ходьбы удалены! (" .. #WalkPointsData .. " осталось)")
 end
 
--- ===== ФУНКЦИИ ПОЛЁТА =====
 local function ToggleFly()
     local player = game.Players.LocalPlayer
     if not player or not player.Character then return end
@@ -2240,9 +1962,9 @@ local function ToggleFly()
     
     if FlyEnabled then
         FlyToggleBtn.Text = "🟢 ВКЛ"
-        FlyToggleBtn.BackgroundColor3 = Library.Theme.FlyActive
+        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
         FlyIndicator.Text = "Полет: Включен 🏃"
-        FlyIndicator.TextColor3 = Library.Theme.FlyActive
+        FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
         
         humanoid.PlatformStand = false
         
@@ -2280,95 +2002,57 @@ local function ToggleFly()
         FlyBodyGyro.Parent = hrp
         
         FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
-            if not FlyEnabled or not hrp or not FlyBodyVelocity then
-                return
-            end
+            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
             
             local moveDirection = Vector3.new()
             local camera = workspace.CurrentCamera
             
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-                moveDirection = moveDirection + camera.CFrame.LookVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-                moveDirection = moveDirection - camera.CFrame.LookVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-                moveDirection = moveDirection - camera.CFrame.RightVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-                moveDirection = moveDirection + camera.CFrame.RightVector
-            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
             
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                moveDirection = moveDirection + Vector3.new(0, 1, 0)
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then
-                moveDirection = moveDirection + Vector3.new(0, -1, 0)
-            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
             
-            if moveDirection.Magnitude > 0 then
-                moveDirection = moveDirection.Unit * FlySpeed
-            end
+            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
             
             FlyBodyVelocity.Velocity = moveDirection
             
             if humanoid and FlyAnimationTrack then
                 local isMoving = moveDirection.Magnitude > 0.5
-                
                 if isMoving then
-                    if not FlyAnimationTrack.IsPlaying then
-                        FlyAnimationTrack:Play()
-                    end
+                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
                     local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
-                    local animSpeed = 0.8 + speedPercent * 1.7
-                    FlyAnimationTrack:AdjustSpeed(animSpeed)
+                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
                 else
-                    if FlyAnimationTrack.IsPlaying then
-                        FlyAnimationTrack:Stop()
-                    end
+                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
                 end
             end
             
             if moveDirection.Magnitude > 0.1 then
                 local lookAt = hrp.Position + moveDirection.Unit
-                local newCFrame = CFrame.new(hrp.Position, lookAt)
-                FlyBodyGyro.CFrame = newCFrame
+                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
             end
         end)
         
     else
         FlyToggleBtn.Text = "🔴 ВЫКЛ"
-        FlyToggleBtn.BackgroundColor3 = Library.Theme.Button
+        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         FlyIndicator.Text = "Полет: Выключен"
-        FlyIndicator.TextColor3 = Library.Theme.Text
+        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
         
-        if FlyAnimationTrack then
-            FlyAnimationTrack:Stop()
-            FlyAnimationTrack = nil
-        end
+        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
         FlyAnimator = nil
         
-        if humanoid then
-            humanoid.PlatformStand = false
-        end
+        if humanoid then humanoid.PlatformStand = false end
         
-        if FlyConnection then
-            FlyConnection:Disconnect()
-            FlyConnection = nil
-        end
-        if FlyBodyVelocity then
-            FlyBodyVelocity:Destroy()
-            FlyBodyVelocity = nil
-        end
-        if FlyBodyGyro then
-            FlyBodyGyro:Destroy()
-            FlyBodyGyro = nil
-        end
+        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
+        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
+        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
     end
 end
 
--- ===== ФУНКЦИИ АВТО-ХОДЬБЫ =====
 local function StopWalking()
     WalkEnabled = false
     WaitingAtEnd = false
@@ -2376,46 +2060,28 @@ local function StopWalking()
     SmoothVelocity = Vector3.new(0, 0, 0)
     IsStopped = false
     
-    if StopBodyPosition then
-        StopBodyPosition:Destroy()
-        StopBodyPosition = nil
-    end
+    if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
     
-    if WalkLoop then
-        task.cancel(WalkLoop)
-        WalkLoop = nil
-    end
+    if WalkLoop then task.cancel(WalkLoop); WalkLoop = nil end
     
     local player = game.Players.LocalPlayer
     if player and player.Character then
         local humanoid = player.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 16
-        end
+        if humanoid then humanoid.WalkSpeed = 16 end
         local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.Velocity = Vector3.new(0, 0, 0)
-        end
+        if hrp then hrp.Velocity = Vector3.new(0, 0, 0) end
     end
     
-    -- Выключаем noclip при остановке
-    if NoclipEnabled then
-        SetNoclip(false)
-        print("🛡️ Noclip выключен при остановке ходьбы")
-    end
+    if NoclipEnabled then SetNoclip(false) end
     
     WalkStatus.Text = "Статус: Остановлен"
     WalkStatus.TextColor3 = Library.Theme.Text
     WalkStartBtn.Text = "▶️ СТАРТ"
     WalkStartBtn.BackgroundColor3 = Library.Theme.WalkActive
-    print("⏹️ Авто-ходьба остановлена")
 end
 
 local function CreateHoldPosition(hrp, position)
-    if StopBodyPosition then
-        StopBodyPosition:Destroy()
-        StopBodyPosition = nil
-    end
+    if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
     
     local bodyPos = Instance.new("BodyPosition")
     bodyPos.MaxForce = Vector3.new(100000, 100000, 100000)
@@ -2435,44 +2101,30 @@ local function CreateHoldPosition(hrp, position)
 end
 
 local function RemoveHold()
-    if StopBodyPosition then
-        StopBodyPosition:Destroy()
-        StopBodyPosition = nil
-    end
+    if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
 end
 
 local function StartWalking()
     if #WalkPointsData < 1 then
         WalkStatus.Text = "❌ Нужна минимум 1 точка!"
         WalkStatus.TextColor3 = Library.Theme.Warning
-        print("❌ Ошибка: нужно минимум 1 точка для ходьбы! Сейчас точек: " .. #WalkPointsData)
         return
     end
     
-    if WalkEnabled then
-        StopWalking()
-        return
-    end
+    if WalkEnabled then StopWalking(); return end
     
     if #WalkPointsData == 1 then
         TeleportToPosition(WalkPointsData[1].pos)
         WalkStatus.Text = "✅ Телепорт к " .. WalkPointsData[1].name
         WalkStatus.TextColor3 = Library.Theme.Success
-        print("✅ Телепорт к единственной точке!")
         return
     end
     
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then
-        print("❌ Ошибка: персонаж не найден!")
-        return
-    end
+    if not player or not player.Character then return end
     
     local humanoid = player.Character:FindFirstChild("Humanoid")
-    if not humanoid then
-        print("❌ Ошибка: Humanoid не найден!")
-        return
-    end
+    if not humanoid then return end
     
     WalkEnabled = true
     WaitingAtEnd = false
@@ -2483,20 +2135,14 @@ local function StartWalking()
     StopPosition = nil
     RemoveHold()
     
-    if not NoclipEnabled then
-        SetNoclip(true)
-        print("🛡️ Noclip автоматически включен для ходьбы")
-    end
+    if not NoclipEnabled then SetNoclip(true) end
     
     WalkStatus.Text = "🚶 Идём к " .. WalkPointsData[1].name
     WalkStatus.TextColor3 = Library.Theme.WalkActive
     WalkStartBtn.Text = "⏸️ ПАУЗА"
     WalkStartBtn.BackgroundColor3 = Library.Theme.Warning
     
-    if FlyEnabled then
-        ToggleFly()
-        print("✈️ Полёт выключен для ходьбы")
-    end
+    if FlyEnabled then ToggleFly() end
     
     WalkLoop = task.spawn(function()
         while WalkEnabled and game.Players.LocalPlayer and game.Players.LocalPlayer.Character do
@@ -2505,10 +2151,7 @@ local function StartWalking()
             local hrp = character:FindFirstChild("HumanoidRootPart")
             local humanoid = character:FindFirstChild("Humanoid")
             
-            if not hrp or not humanoid then
-                task.wait(0.1)
-                continue
-            end
+            if not hrp or not humanoid then task.wait(0.1); continue end
             
             if IsStopped then
                 if StopPosition then
@@ -2527,10 +2170,8 @@ local function StartWalking()
                 if tick() - StopStartTime >= STOP_DURATION then
                     IsStopped = false
                     RemoveHold()
-                    print("▶️ Продолжаем движение к следующей точке")
                     
                     if CurrentWalkIndex == #WalkPointsData then
-                        print("⬇️ Моментальное падение с последней точки!")
                         RemoveHold()
                         WaitingAtEnd = true
                         WaitStartTime = tick()
@@ -2538,9 +2179,7 @@ local function StartWalking()
                         WalkStatus.TextColor3 = Library.Theme.Warning
                     else
                         CurrentWalkIndex = CurrentWalkIndex + 1
-                        if CurrentWalkIndex > #WalkPointsData then
-                            CurrentWalkIndex = 1
-                        end
+                        if CurrentWalkIndex > #WalkPointsData then CurrentWalkIndex = 1 end
                         local nextData = WalkPointsData[CurrentWalkIndex]
                         if nextData then
                             WalkStatus.Text = "🚶 Идём к " .. nextData.name .. " (" .. CurrentWalkIndex .. "/" .. #WalkPointsData .. ")"
@@ -2561,12 +2200,7 @@ local function StartWalking()
                     WaitingAtEnd = false
                     WaitForTeleport = true
                     TeleportWaitStart = tick()
-                    print("⏳ Начинаем отсчет перед телепортом на первую точку (0.5 сек)")
-                    
-                    if NoclipEnabled then
-                        SetNoclip(false)
-                        print("🛡️ Noclip временно выключен для телепорта")
-                    end
+                    if NoclipEnabled then SetNoclip(false) end
                 end
                 task.wait(0.1)
                 continue
@@ -2575,7 +2209,6 @@ local function StartWalking()
             if WaitForTeleport then
                 if tick() - TeleportWaitStart >= 0.5 then
                     WaitForTeleport = false
-                    print("⏳ Телепорт на первую точку!")
                     
                     CurrentWalkIndex = 1
                     local firstData = WalkPointsData[1]
@@ -2583,7 +2216,6 @@ local function StartWalking()
                         TeleportToPosition(firstData.pos)
                         WalkStatus.Text = "🚶 Идём к " .. firstData.name
                         WalkStatus.TextColor3 = Library.Theme.WalkActive
-                        print("🔄 Телепорт на первую точку: " .. firstData.name)
                         
                         IsStopped = true
                         StopStartTime = tick()
@@ -2596,15 +2228,11 @@ local function StartWalking()
                             bodyGyro.Parent = bodyPos
                         end
                         
-                        print("⏸️ Остановка на первой точке на " .. STOP_DURATION .. " сек")
                         WalkStatus.Text = "⏸️ Остановка на " .. firstData.name .. " (" .. STOP_DURATION .. " сек)"
                         WalkStatus.TextColor3 = Library.Theme.Warning
                     end
                     
-                    if not NoclipEnabled then
-                        SetNoclip(true)
-                        print("🛡️ Noclip включен обратно")
-                    end
+                    if not NoclipEnabled then SetNoclip(true) end
                 else
                     WalkStatus.Text = "⏳ Телепорт через " .. string.format("%.1f", 0.5 - (tick() - TeleportWaitStart)) .. " сек..."
                     WalkStatus.TextColor3 = Library.Theme.Warning
@@ -2613,18 +2241,10 @@ local function StartWalking()
                 continue
             end
             
-            if CurrentWalkIndex > #WalkPointsData then
-                CurrentWalkIndex = 1
-            end
+            if CurrentWalkIndex > #WalkPointsData then CurrentWalkIndex = 1 end
             
             local targetData = WalkPointsData[CurrentWalkIndex]
-            if not targetData then
-                CurrentWalkIndex = 1
-                targetData = WalkPointsData[1]
-                if not targetData then
-                    break
-                end
-            end
+            if not targetData then targetData = WalkPointsData[1] end
             
             local targetPos = targetData.pos
             local distance = (targetPos - hrp.Position).Magnitude
@@ -2652,7 +2272,6 @@ local function StartWalking()
             else
                 local isLastPoint = (CurrentWalkIndex == #WalkPointsData)
                 if isLastPoint then
-                    print("🎯 Достигли последней точки '" .. targetData.name .. "'! Моментальное падение!")
                     hrp.Velocity = Vector3.new(0, 0, 0)
                     SmoothVelocity = Vector3.new(0, 0, 0)
                     humanoid.WalkSpeed = 0
@@ -2665,8 +2284,6 @@ local function StartWalking()
                     WalkStatus.Text = "🎯 Достигли последней точки! Ожидание " .. PAUSE_AT_END .. " сек..."
                     WalkStatus.TextColor3 = Library.Theme.Warning
                 else
-                    print("🎯 Достигли точки '" .. targetData.name .. "'! Остановка на " .. STOP_DURATION .. " сек")
-                    
                     hrp.Velocity = Vector3.new(0, 0, 0)
                     SmoothVelocity = Vector3.new(0, 0, 0)
                     humanoid.WalkSpeed = 0
@@ -2695,7 +2312,7 @@ local function StartWalking()
     end)
 end
 
--- ===== ОБРАБОТЧИКИ =====
+-- ===== ОБРАБОТЧИКИ ВКЛАДОК =====
 for i, btn in ipairs(TabButtons) do
     btn.MouseButton1Click:Connect(function()
         for j, tab in ipairs(Tabs) do
@@ -2703,58 +2320,35 @@ for i, btn in ipairs(TabButtons) do
             TabButtons[j].BackgroundColor3 = (j == i) and Library.Theme.Accent or Library.Theme.Button
         end
         CurrentTab = i
-        if i == 4 then
-            UpdateWalkPointsList()
-        end
-        if i == 6 then
-            PlatformInfo.Text = "Платформ: " .. #Platforms
-        end
-        if i == 7 then
-            UpdatePlayersList()
-            lastPlayerUpdate = tick()
-        end
-        if i == 8 then
-            UpdateXRaySlider()
-        end
-        if i == 9 then
-            if SPIEnabled then
-                UpdateSPI()
-            end
-        end
+        if i == 4 then UpdateWalkPointsList() end
+        if i == 6 then PlatformInfo.Text = "Платформ: " .. #Platforms end
+        if i == 7 then UpdatePlayersList(); lastPlayerUpdate = tick() end
+        if i == 8 then UpdateXRaySlider() end
+        if i == 9 then if SPIEnabled then UpdateSPI() end end
     end)
 end
 
+-- ===== ЛОГИКА КНОПОК ВКЛ/ВЫКЛ (Красный/Зеленый) =====
 ClickToggleBtn.MouseButton1Click:Connect(function()
     ClickTeleportEnabled = not ClickTeleportEnabled
-    
-    if ClickTeleportEnabled then
-        ClickToggleBtn.Text = "🟢 ВКЛ"
-        ClickToggleBtn.BackgroundColor3 = Library.Theme.Success
-        ModeIndicator.Text = "Режим: Включен (кликните по объекту для телепорта)"
-        ModeIndicator.TextColor3 = Library.Theme.Success
-        print("✅ Клик-телепорт включен!")
-    else
-        ClickToggleBtn.Text = "🔴 ВЫКЛ"
-        ClickToggleBtn.BackgroundColor3 = Library.Theme.Button
-        ModeIndicator.Text = "Режим: Выключен"
-        ModeIndicator.TextColor3 = Library.Theme.Text
-        print("❌ Клик-телепорт выключен")
-    end
+    ClickToggleBtn.Text = ClickTeleportEnabled and "🟢 ВКЛ" or "🔴 ВЫКЛ"
+    ClickToggleBtn.BackgroundColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
+    ModeIndicator.Text = ClickTeleportEnabled and "Режим: Включен (кликните по объекту для телепорта)" or "Режим: Выключен"
+    ModeIndicator.TextColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
 end)
 
 FlyToggleBtn.MouseButton1Click:Connect(ToggleFly)
 
+NoclipToggleBtn.MouseButton1Click:Connect(function()
+    SetNoclip(not NoclipEnabled)
+end)
+
+-- ===== СЛАЙДЕРЫ =====
 local draggingSlider = false
-SpeedButton.MouseButton1Down:Connect(function()
-    draggingSlider = true
-end)
-
+SpeedButton.MouseButton1Down:Connect(function() draggingSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = false end
 end)
-
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = SpeedSlider.AbsolutePosition
@@ -2770,16 +2364,10 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 end)
 
 local draggingWalkSlider = false
-WalkSpeedButton.MouseButton1Down:Connect(function()
-    draggingWalkSlider = true
-end)
-
+WalkSpeedButton.MouseButton1Down:Connect(function() draggingWalkSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingWalkSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingWalkSlider = false end
 end)
-
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if draggingWalkSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = WalkSpeedSlider.AbsolutePosition
@@ -2795,16 +2383,10 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 end)
 
 local draggingLengthSlider = false
-LengthButton.MouseButton1Down:Connect(function()
-    draggingLengthSlider = true
-end)
-
+LengthButton.MouseButton1Down:Connect(function() draggingLengthSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingLengthSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingLengthSlider = false end
 end)
-
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if draggingLengthSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = LengthSlider.AbsolutePosition
@@ -2820,16 +2402,10 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 end)
 
 local draggingWidthSlider = false
-WidthButton.MouseButton1Down:Connect(function()
-    draggingWidthSlider = true
-end)
-
+WidthButton.MouseButton1Down:Connect(function() draggingWidthSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingWidthSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingWidthSlider = false end
 end)
-
 game:GetService("UserInputService").InputChanged:Connect(function(input)
     if draggingWidthSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = WidthSlider.AbsolutePosition
@@ -2844,327 +2420,88 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     end
 end)
 
-WalkSetBtn.MouseButton1Click:Connect(function()
-    SetWalkPoint()
-end)
-
+-- ===== КНОПКИ ДЕЙСТВИЙ =====
+WalkSetBtn.MouseButton1Click:Connect(SetWalkPoint)
 WalkStartBtn.MouseButton1Click:Connect(StartWalking)
 WalkClearBtn.MouseButton1Click:Connect(ClearWalkPoints)
 
 SetBtn.MouseButton1Click:Connect(SetPoint)
 TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint)
 
-NoclipToggleBtn.MouseButton1Click:Connect(function()
-    SetNoclip(not NoclipEnabled)
-end)
+CreatePlatformBtn.MouseButton1Click:Connect(function() PlacePlatformUnderPlayer() end)
+ClearPlatformsBtn.MouseButton1Click:Connect(ClearAllPlatforms)
 
-CreatePlatformBtn.MouseButton1Click:Connect(function()
-    PlacePlatformUnderPlayer()
-end)
-
-ClearPlatformsBtn.MouseButton1Click:Connect(function()
-    ClearAllPlatforms()
-end)
-
--- ===== ФУНКЦИОНАЛ ИЗМЕНЕНИЯ РАЗМЕРА И СКРОЛЛИНГА ВКЛАДОК =====
-
--- Переменные для изменения размера панели
-local ResizeHandle = Instance.new("Frame")
-ResizeHandle.Size = UDim2.new(0, 15, 0, 15)
-ResizeHandle.Position = UDim2.new(1, -15, 1, -15)
-ResizeHandle.BackgroundColor3 = Library.Theme.Accent
-ResizeHandle.BackgroundTransparency = 0.7
-ResizeHandle.BorderSizePixel = 1
-ResizeHandle.BorderColor3 = Library.Theme.Border
-ResizeHandle.Parent = MenuPanel
-ResizeHandle.ZIndex = 100
-
-local ResizeIcon = Instance.new("TextLabel")
-ResizeIcon.Size = UDim2.new(1, 0, 1, 0)
-ResizeIcon.BackgroundTransparency = 1
-ResizeIcon.Text = "↘"
-ResizeIcon.TextColor3 = Library.Theme.Text
-ResizeIcon.TextScaled = true
-ResizeIcon.Font = Enum.Font.SourceSansBold
-ResizeIcon.Parent = ResizeHandle
-
-local isResizing = false
-local resizeStart = nil
-local resizeStartSize = nil
+-- ===== НЕВИДИМЫЕ ХЕНДЛЫ РАСТЯГИВАНИЯ =====
 local MIN_PANEL_WIDTH = 400
-local MIN_PANEL_HEIGHT = 500
-local MAX_PANEL_WIDTH = 900
+local MIN_PANEL_HEIGHT = 300
+local MAX_PANEL_WIDTH = 1200
 local MAX_PANEL_HEIGHT = 900
 
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isResizing = true
-        resizeStart = input.Position
-        resizeStartSize = MenuPanel.Size
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - resizeStart
-        
-        local newWidth = math.clamp(resizeStartSize.X.Offset + delta.X, MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
-        local newHeight = math.clamp(resizeStartSize.Y.Offset + delta.Y, MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
-        
-        MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
-        MenuPanel.Position = UDim2.new(0.5, -newWidth/2, 0.5, -newHeight/2)
-        
-        TabContainer.Size = UDim2.new(1, -20, 1, -70)
-        UpdateTabSizes()
-    end
-end)
-
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
-        isResizing = false
-        resizeStart = nil
-        resizeStartSize = nil
-    end
-end)
-
--- ===== ПЛАВНАЯ АНИМАЦИЯ ПРОЛИСТЫВАНИЯ ВКЛАДОК =====
-local TabScrollAnimations = {}
-local TabScrollTarget = 1
-local TabScrollCurrent = 1
-local TabScrollSpeed = 0.15 -- Скорость анимации (0-1)
-local TabScrollRunning = false
-local LeftArrowBtn = nil
-local RightArrowBtn = nil
-
--- Функция для плавного обновления позиций вкладок
-local function AnimateTabScroll()
-    if not TabScrollRunning then return end
+local function createResizeHandle(posX, posY, anchorX, anchorY, cursor)
+    local handle = Instance.new("Frame")
+    handle.Size = UDim2.new(0, 15, 0, 15)
+    handle.Position = UDim2.new(posX, -7.5, posY, -7.5)
+    handle.BackgroundTransparency = 1
+    handle.BorderSizePixel = 0
+    handle.Parent = MenuPanel
+    handle.ZIndex = 100
     
-    local panelWidth = MenuPanel.Size.X.Offset
-    local tabBarWidth = TabBar.Size.X.Offset - 10
-    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
-    local totalTabs = #TabButtons
-    local maxScroll = math.max(0, totalTabs - visibleTabs)
+    local isResizing = false
+    local resizeStart = nil
+    local resizeStartSize = nil
+    local resizeStartPos = nil
     
-    -- Интерполяция текущей позиции к целевой
-    TabScrollCurrent = TabScrollCurrent + (TabScrollTarget - TabScrollCurrent) * TabScrollSpeed
-    
-    -- Округляем до ближайшего целого для отображения
-    local currentScroll = math.round(TabScrollCurrent)
-    currentScroll = math.max(1, math.min(maxScroll + 1, currentScroll))
-    
-    -- Обновляем видимые вкладки
-    for i, btn in ipairs(TabButtons) do
-        if i >= currentScroll and i < currentScroll + visibleTabs then
-            btn.Visible = true
-            local posInScroll = i - currentScroll + 1
-            btn.Size = UDim2.new(1/visibleTabs - 0.01, -2, 1, -2)
-            btn.Position = UDim2.new((posInScroll-1) * (1/visibleTabs) + 0.005, 0, 0.005, 0)
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isResizing = true
+            resizeStart = input.Position
+            resizeStartSize = MenuPanel.Size
+            resizeStartPos = MenuPanel.Position
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = Vector2.new(input.Position.X - resizeStart.X, input.Position.Y - resizeStart.Y)
             
-            -- Плавное появление
-            btn.BackgroundTransparency = 0
-            btn.TextTransparency = 0
-        else
-            btn.Visible = false
-        end
-    end
-    
-    -- Обновляем видимость стрелок
-    if LeftArrowBtn and RightArrowBtn then
-        LeftArrowBtn.Visible = (TabScrollCurrent > 1.5)
-        RightArrowBtn.Visible = (TabScrollCurrent < maxScroll + 0.5)
-    end
-    
-    -- Проверяем, достигли ли цели
-    if math.abs(TabScrollCurrent - TabScrollTarget) < 0.01 then
-        TabScrollCurrent = TabScrollTarget
-        TabScrollRunning = false
-    end
-end
+            local newWidth = math.clamp(resizeStartSize.X.Offset + (delta.X * anchorX), MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+            local newHeight = math.clamp(resizeStartSize.Y.Offset + (delta.Y * anchorY), MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
+            
+            MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+            
+            local offsetX = (resizeStartSize.X.Offset - newWidth) * anchorX * 0.5
+            local offsetY = (resizeStartSize.Y.Offset - newHeight) * anchorY * 0.5
+            
+            MenuPanel.Position = UDim2.new(
+                resizeStartPos.X.Scale, resizeStartPos.X.Offset + offsetX,
+                resizeStartPos.Y.Scale, resizeStartPos.Y.Offset + offsetY
+            )
 
--- Функция для скролла вкладок с анимацией
-local function ScrollTabs(direction)
-    local panelWidth = MenuPanel.Size.X.Offset
-    local tabBarWidth = TabBar.Size.X.Offset - 10
-    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
-    local totalTabs = #TabButtons
-    local maxScroll = math.max(0, totalTabs - visibleTabs)
-    
-    -- Рассчитываем новую целевую позицию
-    local newTarget = TabScrollTarget + direction
-    
-    -- Ограничиваем
-    newTarget = math.max(1, math.min(maxScroll + 1, newTarget))
-    
-    if newTarget ~= TabScrollTarget then
-        TabScrollTarget = newTarget
-        TabScrollRunning = true
-    end
-end
+            TabContainer.Size = UDim2.new(1, -20, 1, -70)
+        end
+    end)
 
--- Функция обновления вкладок с анимацией
-local function UpdateTabSizes()
-    local panelWidth = MenuPanel.Size.X.Offset
-    local tabBarWidth = TabBar.Size.X.Offset - 10
-    local visibleTabs = math.max(4, math.min(9, math.floor(tabBarWidth / 55)))
-    local totalTabs = #TabButtons
-    local maxScroll = math.max(0, totalTabs - visibleTabs)
-    
-    if totalTabs <= visibleTabs then
-        -- Все вкладки видны
-        for i, btn in ipairs(TabButtons) do
-            btn.Visible = true
-            btn.Size = UDim2.new(1/totalTabs - 0.01, -2, 1, -2)
-            btn.Position = UDim2.new((i-1) * (1/totalTabs) + 0.005, 0, 0.005, 0)
-        end
-        
-        if LeftArrowBtn and RightArrowBtn then
-            LeftArrowBtn.Visible = false
-            RightArrowBtn.Visible = false
-        end
-        TabScrollCurrent = 1
-        TabScrollTarget = 1
-        TabScrollRunning = false
-    else
-        -- Создаем кнопки навигации если их нет
-        if not LeftArrowBtn then
-            LeftArrowBtn = Instance.new("TextButton")
-            LeftArrowBtn.Size = UDim2.new(0, 25, 1, -2)
-            LeftArrowBtn.Position = UDim2.new(0, 0, 0.005, 0)
-            LeftArrowBtn.BackgroundColor3 = Library.Theme.Panel
-            LeftArrowBtn.BorderColor3 = Library.Theme.Border
-            LeftArrowBtn.BorderSizePixel = 1
-            LeftArrowBtn.Text = "◀"
-            LeftArrowBtn.TextColor3 = Library.Theme.Text
-            LeftArrowBtn.TextScaled = true
-            LeftArrowBtn.Font = Enum.Font.SourceSansBold
-            LeftArrowBtn.Parent = TabBar
-            LeftArrowBtn.ZIndex = 10
-            
-            RightArrowBtn = Instance.new("TextButton")
-            RightArrowBtn.Size = UDim2.new(0, 25, 1, -2)
-            RightArrowBtn.Position = UDim2.new(1, -25, 0.005, 0)
-            RightArrowBtn.BackgroundColor3 = Library.Theme.Panel
-            RightArrowBtn.BorderColor3 = Library.Theme.Border
-            RightArrowBtn.BorderSizePixel = 1
-            RightArrowBtn.Text = "▶"
-            RightArrowBtn.TextColor3 = Library.Theme.Text
-            RightArrowBtn.TextScaled = true
-            RightArrowBtn.Font = Enum.Font.SourceSansBold
-            RightArrowBtn.Parent = TabBar
-            RightArrowBtn.ZIndex = 10
-            
-            LeftArrowBtn.MouseButton1Click:Connect(function()
-                ScrollTabs(-1)
-            end)
-            
-            RightArrowBtn.MouseButton1Click:Connect(function()
-                ScrollTabs(1)
-            end)
-        end
-        
-        -- Инициализируем если еще не инициализировано
-        if TabScrollTarget == 0 then
-            TabScrollTarget = 1
-            TabScrollCurrent = 1
-        end
-        
-        -- Ограничиваем целевое значение
-        if TabScrollTarget > maxScroll + 1 then
-            TabScrollTarget = maxScroll + 1
-        end
-        
-        -- Запускаем анимацию
-        TabScrollRunning = true
-    end
-end
-
--- Обработчик колесика мыши для плавного скролла
-local function SetupSmoothWheelScrolling()
-    local scrollCooldown = false
-    
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        
-        -- Проверяем, наведена ли мышь на панель вкладок
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        local tabBarAbsPos = TabBar.AbsolutePosition
-        local tabBarAbsSize = TabBar.AbsoluteSize
-        
-        local isHoveringTabBar = false
-        if TabBar.Visible and MenuPanel.Visible then
-            local mousePos = mouse.X
-            if mousePos >= tabBarAbsPos.X and mousePos <= tabBarAbsPos.X + tabBarAbsSize.X then
-                local mouseY = mouse.Y
-                if mouseY >= tabBarAbsPos.Y and mouseY <= tabBarAbsPos.Y + tabBarAbsSize.Y then
-                    isHoveringTabBar = true
-                end
-            end
-        end
-        
-        if isHoveringTabBar and input.UserInputType == Enum.UserInputType.MouseWheel then
-            if scrollCooldown then return end
-            
-            local direction = 0
-            if input.Position.Z < 0 then -- Скролл вниз
-                direction = 1
-            elseif input.Position.Z > 0 then -- Скролл вверх
-                direction = -1
-            end
-            
-            if direction ~= 0 then
-                ScrollTabs(direction)
-                scrollCooldown = true
-                task.delay(0.05, function()
-                    scrollCooldown = false
-                end)
-            end
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
+            isResizing = false
+            resizeStart = nil
+            resizeStartSize = nil
+            resizeStartPos = nil
         end
     end)
 end
 
--- Создаем новый цикл анимации
-local function StartTabAnimationLoop()
-    spawn(function()
-        while true do
-            wait(0.03) -- 30 FPS для плавности
-            AnimateTabScroll()
-        end
-    end)
-end
+-- Создаем 8 невидимых точек по бокам и углам
+createResizeHandle(0, 0, -1, -1, "nwse-resize")    -- Top-Left
+createResizeHandle(0.5, 0, 0, -1, "ns-resize")     -- Top-Center
+createResizeHandle(1, 0, 1, -1, "nesw-resize")     -- Top-Right
+createResizeHandle(0, 0.5, -1, 0, "ew-resize")     -- Middle-Left
+createResizeHandle(1, 0.5, 1, 0, "ew-resize")      -- Middle-Right
+createResizeHandle(0, 1, -1, 1, "nesw-resize")     -- Bottom-Left
+createResizeHandle(0.5, 1, 0, 1, "ns-resize")      -- Bottom-Center
+createResizeHandle(1, 1, 1, 1, "nwse-resize")      -- Bottom-Right
 
--- Настройка скроллинга с колесиком
-SetupSmoothWheelScrolling()
-
--- Запуск анимации
-StartTabAnimationLoop()
-
--- Остальной код
-local menuOpen = false
-MainButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    MenuPanel.Visible = menuOpen
-    if menuOpen then
-        UpdatePointsList()
-        UpdateWalkPointsList()
-        UpdatePointInfo()
-        PlatformInfo.Text = "Платформ: " .. #Platforms
-        UpdatePlayersList()
-        lastPlayerUpdate = tick()
-        UpdateXRaySlider()
-        if SPIEnabled then
-            UpdateSPI()
-        end
-        task.wait(0.05)
-        UpdateTabSizes()
-    end
-end)
-
-CloseBtn.MouseButton1Click:Connect(function()
-    menuOpen = false
-    MenuPanel.Visible = false
-end)
-
+-- ===== ПЕРЕТАСКИВАНИЕ ПАНЕЛИ =====
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -3190,6 +2527,28 @@ MenuPanel.InputEnded:Connect(function(input)
     end
 end)
 
+-- ===== ОСНОВНЫЕ ОБРАБОТЧИКИ =====
+local menuOpen = false
+MainButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    MenuPanel.Visible = menuOpen
+    if menuOpen then
+        UpdatePointsList()
+        UpdateWalkPointsList()
+        UpdatePointInfo()
+        PlatformInfo.Text = "Платформ: " .. #Platforms
+        UpdatePlayersList()
+        lastPlayerUpdate = tick()
+        UpdateXRaySlider()
+        if SPIEnabled then UpdateSPI() end
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    menuOpen = false
+    MenuPanel.Visible = false
+end)
+
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
@@ -3201,85 +2560,41 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
             local position = target.Position
             if position then
                 TeleportToPosition(position)
-                print("✅ Телепорт к " .. target.Name)
                 
                 local attachment = Instance.new("Attachment")
                 attachment.Parent = target
-                
                 local beam = Instance.new("Beam")
                 beam.Parent = target
                 beam.Attachment0 = attachment
                 beam.Color = ColorSequence.new(Color3.fromRGB(80, 180, 220))
                 beam.Width0 = 2
                 beam.Width1 = 0
-                
                 game:GetService("Debris"):AddItem(beam, 0.5)
                 game:GetService("Debris"):AddItem(attachment, 0.5)
             end
         end
     end
     
-    if input.KeyCode == Enum.KeyCode.T and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        TeleportToLastPoint()
-    end
-    
-    if input.KeyCode == Enum.KeyCode.S and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        SetPoint()
-    end
-    
-    if input.KeyCode == Enum.KeyCode.C and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        ClickToggleBtn.MouseButton1Click:Fire()
-    end
-    
-    if input.KeyCode == Enum.KeyCode.F and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        FlyToggleBtn.MouseButton1Click:Fire()
-    end
-    
+    if input.KeyCode == Enum.KeyCode.T and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then TeleportToLastPoint() end
+    if input.KeyCode == Enum.KeyCode.S and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then SetPoint() end
+    if input.KeyCode == Enum.KeyCode.C and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ClickToggleBtn.MouseButton1Click:Fire() end
+    if input.KeyCode == Enum.KeyCode.F and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then FlyToggleBtn.MouseButton1Click:Fire() end
     if input.KeyCode == Enum.KeyCode.W and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        if WalkEnabled then
-            StopWalking()
-        else
-            StartWalking()
-        end
+        if WalkEnabled then StopWalking() else StartWalking() end
     end
-    
-    if input.KeyCode == Enum.KeyCode.X and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        SetWalkPoint()
-    end
-    
-    if input.KeyCode == Enum.KeyCode.N and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        SetNoclip(not NoclipEnabled)
-    end
-    
-    if input.KeyCode == Enum.KeyCode.Z and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        ClearWalkPoints()
-    end
-    
-    if input.KeyCode == Enum.KeyCode.P and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        PlacePlatformUnderPlayer()
-        print("🏗️ Платформа поставлена (Alt+P)")
-    end
-    
-    if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        ToggleSPI()
-    end
+    if input.KeyCode == Enum.KeyCode.X and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then SetWalkPoint() end
+    if input.KeyCode == Enum.KeyCode.N and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then SetNoclip(not NoclipEnabled) end
+    if input.KeyCode == Enum.KeyCode.Z and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ClearWalkPoints() end
+    if input.KeyCode == Enum.KeyCode.P and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then PlacePlatformUnderPlayer() end
+    if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleSPI() end
 end)
 
 local function LoadSavedPoints()
     local saveData = getgenv and getgenv().PointsData
-    if saveData then
-        PointsData = saveData
-        UpdatePointsList()
-        UpdatePointInfo()
-        print("✅ Точки загружены! (" .. #PointsData .. "/" .. MAX_POINTS .. ")")
-    end
+    if saveData then PointsData = saveData; UpdatePointsList(); UpdatePointInfo() end
     
     local walkData = getgenv and getgenv().WalkPointsData
-    if walkData then
-        WalkPointsData = walkData
-        UpdateWalkPointsList()
-        print("✅ Точки для ходьбы загружены! (" .. #WalkPointsData .. "/" .. MAX_POINTS .. ")")
-    end
+    if walkData then WalkPointsData = walkData; UpdateWalkPointsList() end
 end
 
 local function SavePoints()
@@ -3290,10 +2605,7 @@ local function SavePoints()
 end
 
 spawn(function()
-    while true do
-        wait(10)
-        SavePoints()
-    end
+    while true do wait(10); SavePoints() end
 end)
 
 LoadSavedPoints()
@@ -3321,38 +2633,277 @@ spawn(function()
 end)
 
 print("⚓ Админ Панель загружена!")
-print("📌 Вкладка 'Точки': Alt+S - установить точку (макс 1000), Alt+T - телепорт к последней")
-print("🚶 Вкладка 'Ходьба': Alt+X - установить точку для ходьбы (макс 1000), Alt+W - старт/пауза")
-print("🗑️ Вкладка 'Ходьба': Alt+Z или кнопка 'ОЧИСТИТЬ' - удалить все точки ходьбы")
-print("🛡️ Noclip автоматически выключается при паузе/остановке ходьбы!")
-print("👥 Вкладка 'Игроки': список всех игроков на сервере с онлайн-статусом")
-print("👥 Двойной клик по имени или кнопка 'ТП' - телепорт к игроку")
-print("🔄 Список игроков обновляется автоматически каждые 30 секунд или по кнопке 'ОБНОВИТЬ'")
+print("📌 Вкладки теперь расположены ВЕРТИКАЛЬНО слева")
+print("📌 Убраны стрелки переключения между вкладками")
+print("📌 Все вкладки: Точки, Клик-ТП, Полёт, Ходьба, Noclip, Платформы, Игроки, X-Ray, SPI")
 print("🖱️ Alt+C - клик-телепорт")
 print("✈️ Alt+F - полёт с анимацией бега (WASD + Пробел/ Ctrl)")
-print("⚡ Скорость полёта по умолчанию: 100")
-print("🛡️ Вкладка 'Noclip': Alt+N - включить/выключить noclip")
-print("🏗️ Вкладка 'Платформы': Alt+P - поставить платформу под ногами")
-print("👁️ Вкладка 'X-Ray': Alt+R - включить/выключить X-Ray")
-print("👁️ X-Ray меняет только прозрачность стен! Хитбоксы остаются!")
-print("👾 Вкладка 'SPI': Alt+I - включить/выключить отображение игроков на карте")
-print("👾 SPI показывает всех игроков в виде цветных сфер с именами")
-print("📐 Длина и Ширина платформы по умолчанию: 25 м (регулируются ОТДЕЛЬНО от 1 до 50 м)")
-print("🛡️ Noclip автоматически включается при старте ходьбы")
-print("🛡️ Noclip автоматически выключается при паузе/остановке ходьбы!")
-print("📊 Точки в разных вкладках НЕ ЗАВИСЯТ друг от друга!")
-print("🔗 Точки соединяются и ходьба идёт СТРОГО ПО ПОРЯДКУ добавления (1→2→3→4...)")
-print("⏱️ На последней точке ожидание " .. PAUSE_AT_END .. " секунд, затем телепорт на первую!")
-print("💡 ВО ВРЕМЯ ОЖИДАНИЯ ВЫ МОЖЕТЕ СВОБОДНО ДВИГАТЬСЯ!")
-print("⚡ Максимальная скорость ходьбы: " .. MAX_WALK_SPEED)
-print("🔄 ДВИЖЕНИЕ СГЛАЖЕНО - НЕТ ДЕРГАНЬЯ при большом количестве точек!")
-print("💀 ПРИ СМЕРТИ ПЕРСОНАЖА - СБРОС К ПЕРВОЙ ТОЧКЕ!")
-print("📈 Максимум 1000 точек в каждой вкладке!")
-print("⏸️ ОСТАНОВКА НА КАЖДОЙ ТОЧКЕ НА " .. STOP_DURATION .. " СЕКУНД!")
-print("🪄 ПРИ ОСТАНОВКЕ ПЕРСОНАЖ ФИКСИРУЕТСЯ НА МЕСТЕ И НЕ ПАДАЕТ!")
-print("⬇️ НА ПОСЛЕДНЕЙ ТОЧКЕ - МГНОВЕННОЕ ПАДЕНИЕ!")
-print("📐 Перетащите угол панели (↘) для изменения размера")
-print("🔄 Используйте колесико мыши на панели вкладок для плавной навигации")
-print("📏 Размер панели регулируется от " .. MIN_PANEL_WIDTH .. "x" .. MIN_PANEL_HEIGHT .. " до " .. MAX_PANEL_WIDTH .. "x" .. MAX_PANEL_HEIGHT)
-print("✅ Плавная анимация пролистывания вкладок активирована!")
-print("⚡ Скорость анимации: " .. TabScrollSpeed * 100 .. "%")
+print("🚶 Alt+W - старт/пауза ходьбы | Alt+X - добавить точку для ходьбы")
+print("🗑️ Alt+Z - очистить все точки ходьбы")
+print("🛡️ Alt+N - noclip")
+print("🏗️ Alt+P - поставить платформу под ногами")
+print("👁️ Alt+R - X-Ray")
+print("👾 Alt+I - SPI (показ игроков через стены)")
+print("📏 Панель можно растягивать за любую невидимую сторону (по краям и углам)")
+-- ===== ВИДИМЫЕ СИНИЕ КНОПКИ РАСТЯГИВАНИЯ (НА ВСЕХ СТЕНКАХ) =====
+local RESIZE_BUTTON_SIZE = 10 -- Уменьшено в 3 раза (было 30, стало 10)
+local CORNER_BUTTON_SIZE = 15 -- Угловые в 2 раза меньше (было 30, стало 15)
+
+-- Создаем видимую синюю кнопку для растягивания
+local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, resizeY, rotation, isCorner)
+    local size = isCorner and CORNER_BUTTON_SIZE or RESIZE_BUTTON_SIZE
+    local halfSize = size / 2
+    
+    local handle = Instance.new("ImageButton")
+    handle.Size = UDim2.new(0, size, 0, size)
+    handle.Position = UDim2.new(posX, -halfSize, posY, -halfSize)
+    handle.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+    handle.BackgroundTransparency = 0
+    handle.BorderSizePixel = 2
+    handle.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    handle.Image = "rbxassetid://0"
+    handle.Parent = MenuPanel
+    handle.ZIndex = 1000
+    handle.Rotation = rotation or 0
+    
+    local arrow = Instance.new("TextLabel")
+    arrow.Size = UDim2.new(1, 0, 1, 0)
+    arrow.BackgroundTransparency = 1
+    arrow.Text = isCorner and "◢" or "↕"
+    arrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+    arrow.TextScaled = true
+    arrow.Font = Enum.Font.SourceSansBold
+    arrow.Parent = handle
+    arrow.Rotation = rotation or 0
+    
+    local isResizing = false
+    local startSize = nil
+    local startPos = nil
+    local startMousePos = nil
+    
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isResizing = true
+            startSize = MenuPanel.Size
+            startPos = MenuPanel.Position
+            startMousePos = input.Position
+            input.StopPropagation = true
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local deltaX = input.Position.X - startMousePos.X
+            local deltaY = input.Position.Y - startMousePos.Y
+            
+            local newWidth = math.clamp(startSize.X.Offset + (deltaX * resizeX), MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+            local newHeight = math.clamp(startSize.Y.Offset + (deltaY * resizeY), MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
+            
+            MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+            
+            local offsetX = startPos.X.Offset
+            local offsetY = startPos.Y.Offset
+            
+            if anchorX == -1 then
+                offsetX = startPos.X.Offset + (startSize.X.Offset - newWidth)
+            end
+            
+            if anchorY == -1 then
+                offsetY = startPos.Y.Offset + (startSize.Y.Offset - newHeight)
+            end
+            
+            MenuPanel.Position = UDim2.new(
+                startPos.X.Scale, offsetX,
+                startPos.Y.Scale, offsetY
+            )
+
+            TabContainer.Size = UDim2.new(1, -20, 1, -70)
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
+            isResizing = false
+            startSize = nil
+            startPos = nil
+            startMousePos = nil
+        end
+    end)
+    
+    return handle
+end
+
+-- БЕЗОПАСНО удаляем старые зоны растягивания
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
+            if child.Size and child.Size.X and child.Size.X.Offset then
+                local offset = child.Size.X.Offset
+                if offset == 15 or offset == 30 or offset == 60 or offset == 90 or offset == 1800 then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+-- БЕЗОПАСНО удаляем старые видимые кнопки
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
+            child:Destroy()
+        end
+    end
+end)
+
+-- Создаем ВИДИМЫЕ синие кнопки на ВСЕХ стенках
+pcall(function()
+    createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
+    createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
+    createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
+    createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
+    createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
+    createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
+    createVisibleResizeHandle(0.5, 1, 0, 1, 0, 1, 0, false)
+    createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
+end)
+
+-- Дополнительные невидимые зоны для удобства
+local function createInvisibleResizeZone(posX, posY, width, height, anchorX, anchorY, resizeX, resizeY)
+    local zone = Instance.new("Frame")
+    zone.Size = UDim2.new(width, 0, height, 0)
+    zone.Position = UDim2.new(posX, 0, posY, 0)
+    zone.BackgroundTransparency = 1
+    zone.BorderSizePixel = 0
+    zone.Parent = MenuPanel
+    zone.ZIndex = 999
+    
+    local isResizing = false
+    local startSize = nil
+    local startPos = nil
+    local startMousePos = nil
+    
+    zone.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isResizing = true
+            startSize = MenuPanel.Size
+            startPos = MenuPanel.Position
+            startMousePos = input.Position
+            input.StopPropagation = true
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local deltaX = input.Position.X - startMousePos.X
+            local deltaY = input.Position.Y - startMousePos.Y
+            
+            local newWidth = math.clamp(startSize.X.Offset + (deltaX * resizeX), MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+            local newHeight = math.clamp(startSize.Y.Offset + (deltaY * resizeY), MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
+            
+            MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+            
+            local offsetX = startPos.X.Offset
+            local offsetY = startPos.Y.Offset
+            
+            if anchorX == -1 then
+                offsetX = startPos.X.Offset + (startSize.X.Offset - newWidth)
+            end
+            
+            if anchorY == -1 then
+                offsetY = startPos.Y.Offset + (startSize.Y.Offset - newHeight)
+            end
+            
+            MenuPanel.Position = UDim2.new(
+                startPos.X.Scale, offsetX,
+                startPos.Y.Scale, offsetY
+            )
+
+            TabContainer.Size = UDim2.new(1, -20, 1, -70)
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
+            isResizing = false
+            startSize = nil
+            startPos = nil
+            startMousePos = nil
+        end
+    end)
+end
+
+-- Создаем невидимые зоны
+pcall(function()
+    createInvisibleResizeZone(0, 0, 0.04, 0.04, -1, -1, -1, -1)
+    createInvisibleResizeZone(0.46, 0, 0.08, 0.04, 0, -1, 0, -1)
+    createInvisibleResizeZone(0.96, 0, 0.04, 0.04, 1, -1, 1, -1)
+    createInvisibleResizeZone(0, 0.46, 0.04, 0.08, -1, 0, -1, 0)
+    createInvisibleResizeZone(0.96, 0.46, 0.04, 0.08, 1, 0, 1, 0)
+    createInvisibleResizeZone(0, 0.96, 0.04, 0.04, -1, 1, -1, 1)
+    createInvisibleResizeZone(0.46, 0.96, 0.08, 0.04, 0, 1, 0, 1)
+    createInvisibleResizeZone(0.96, 0.96, 0.04, 0.04, 1, 1, 1, 1)
+end)
+
+-- ПЕРЕТАСКИВАНИЕ ПАНЕЛИ (только за заголовок)
+local function setupDrag()
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    local dragZone = Instance.new("Frame")
+    dragZone.Size = UDim2.new(1, -60, 0, 50)
+    dragZone.Position = UDim2.new(0, 0, 0, 0)
+    dragZone.BackgroundTransparency = 1
+    dragZone.BorderSizePixel = 0
+    dragZone.Parent = TitleFrame
+    dragZone.ZIndex = 50
+    
+    dragZone.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MenuPanel.Position
+            input.StopPropagation = true
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            MenuPanel.Position = UDim2.new(
+                startPos.X.Scale, 
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale, 
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+pcall(setupDrag)
+
+-- БЕЗОПАСНО удаляем старые зоны перетаскивания
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
+            if child.Size and child.Size.X and child.Size.X.Offset then
+                if child.Size.X.Offset == 0 and child.Size.Y.Offset == 0 then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+print("✅ Синие кнопки растягивания на всех стенках")
+print("📐 Обычные кнопки: 10x10 (уменьшены в 3 раза)")
+print("📐 Угловые кнопки: 15x15 (в 2 раза меньше)")
+print("🔵 Цвет: синий (0, 100, 255)")
+print("🔄 Перетаскивание работает только за заголовок")
