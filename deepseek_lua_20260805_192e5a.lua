@@ -3270,3 +3270,224 @@ do
 end
 
 print("Freecam встроена в панель! При включении панель сворачивается. F9 - вкл/выкл, Alt - курсор, WASD - движение, Пробел - вверх, Ctrl - вниз")
+-- ===== ИСПРАВЛЕНИЕ: ПЕРЕМЕЩАЕМ ЗАГРУЗОЧНЫЙ ЭКРАН В КОНЕЦ =====
+-- Этот блок нужно вставить в САМЫЙ КОНЕЦ скрипта (перед последним print)
+
+-- Удаляем старый загрузочный экран если он есть
+pcall(function()
+    if game.CoreGui:FindFirstChild("LoadingScreen") then
+        game.CoreGui.LoadingScreen:Destroy()
+    end
+end)
+
+-- Создаем новый загрузочный экран ПОВЕРХ всего
+local function CreateFinalLoadingScreen()
+    local loadingGui = Instance.new("ScreenGui")
+    loadingGui.Name = "LoadingScreen"
+    loadingGui.Parent = game.CoreGui
+    loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    loadingGui.ResetOnSpawn = false
+    
+    -- Делаем фон размером 10x (как в оригинале)
+    local background = Instance.new("Frame")
+    background.Size = UDim2.new(10, 0, 10, 0)
+    background.Position = UDim2.new(-4.5, 0, -4.5, 0)
+    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    background.BackgroundTransparency = 0
+    background.Parent = loadingGui
+    background.ZIndex = 999
+    
+    local background2 = Instance.new("Frame")
+    background2.Size = UDim2.new(10, 0, 10, 0)
+    background2.Position = UDim2.new(-4.5, 0, -4.5, 0)
+    background2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    background2.BackgroundTransparency = 0
+    background2.Parent = loadingGui
+    background2.ZIndex = 998
+    
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, 500, 0, 300)
+    container.Position = UDim2.new(0.5, -250, 0.5, -150)
+    container.BackgroundTransparency = 1
+    container.Parent = background
+    container.ZIndex = 1000
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 0, 60)
+    textLabel.Position = UDim2.new(0, 0, 0.05, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = ""
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 150, 255)
+    textLabel.TextStrokeTransparency = 0.3
+    textLabel.Parent = container
+    
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Size = UDim2.new(1, 0, 0, 30)
+    subtitle.Position = UDim2.new(0, 0, 0.3, 0)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Загрузка"
+    subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+    subtitle.TextScaled = true
+    subtitle.Font = Enum.Font.SourceSans
+    subtitle.Parent = container
+    
+    local timeLabel = Instance.new("TextLabel")
+    timeLabel.Size = UDim2.new(1, 0, 0, 30)
+    timeLabel.Position = UDim2.new(0, 0, 0.75, 0)
+    timeLabel.BackgroundTransparency = 1
+    timeLabel.Text = "Осталось: 5 сек"
+    timeLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    timeLabel.TextScaled = true
+    timeLabel.Font = Enum.Font.SourceSans
+    timeLabel.Parent = container
+    
+    local line1Label = Instance.new("TextLabel")
+    line1Label.Size = UDim2.new(1, 0, 0, 30)
+    line1Label.Position = UDim2.new(0, 0, 0.45, 0)
+    line1Label.BackgroundTransparency = 1
+    line1Label.Text = "catnap220564"
+    line1Label.TextColor3 = Color3.fromRGB(100, 200, 255)
+    line1Label.TextScaled = true
+    line1Label.Font = Enum.Font.SourceSans
+    line1Label.TextTransparency = 1
+    line1Label.Parent = container
+    
+    local line2Label = Instance.new("TextLabel")
+    line2Label.Size = UDim2.new(1, 0, 0, 30)
+    line2Label.Position = UDim2.new(0, 0, 0.6, 0)
+    line2Label.BackgroundTransparency = 1
+    line2Label.Text = "GGpoVer220564"
+    line2Label.TextColor3 = Color3.fromRGB(255, 200, 100)
+    line2Label.TextScaled = true
+    line2Label.Font = Enum.Font.SourceSans
+    line2Label.TextTransparency = 1
+    line2Label.Parent = container
+    
+    local progressBar = Instance.new("Frame")
+    progressBar.Size = UDim2.new(0.8, 0, 0, 4)
+    progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = container
+    
+    local progressFill = Instance.new("Frame")
+    progressFill.Size = UDim2.new(0, 0, 1, 0)
+    progressFill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    progressFill.BorderSizePixel = 0
+    progressFill.Parent = progressBar
+    
+    local text = "АДМИН ПАНЕЛЬ"
+    local currentText = ""
+    local charIndex = 1
+    local startTime = tick()
+    local duration = 5
+    local animationComplete = false
+    local line1Shown = false
+    local line2Shown = false
+    local isFading = false
+    
+    local connection
+    
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / duration, 1)
+        
+        progressFill.Size = UDim2.new(progress, 0, 1, 0)
+        
+        local timeLeft = math.max(0, math.ceil(duration - elapsed))
+        timeLabel.Text = "Осталось: " .. timeLeft .. " сек"
+        
+        local targetChars = math.floor(progress * #text * 1.5)
+        targetChars = math.min(targetChars, #text)
+        
+        while charIndex <= targetChars and charIndex <= #text do
+            currentText = currentText .. text:sub(charIndex, charIndex)
+            textLabel.Text = currentText
+            charIndex = charIndex + 1
+        end
+        
+        if charIndex <= #text then
+            local dots = math.floor(elapsed * 2) % 4
+            subtitle.Text = "Загрузка" .. string.rep(".", dots)
+        end
+        
+        if charIndex > #text and not line1Shown then
+            line1Shown = true
+            spawn(function()
+                for i = 0, 1, 0.05 do
+                    line1Label.TextTransparency = 1 - i
+                    task.wait(0.02)
+                end
+            end)
+        end
+        
+        if line1Shown and not line2Shown and line1Label.TextTransparency < 0.1 then
+            line2Shown = true
+            spawn(function()
+                task.wait(0.3)
+                for i = 0, 1, 0.05 do
+                    line2Label.TextTransparency = 1 - i
+                    task.wait(0.02)
+                end
+            end)
+        end
+        
+        if progress >= 1 and not animationComplete then
+            animationComplete = true
+            subtitle.Text = "ГОТОВО!"
+            timeLabel.Text = "Загрузка завершена!"
+            
+            task.wait(0.5)
+            
+            isFading = true
+            local fadeStart = tick()
+            local fadeDuration = 0.8
+            
+            local fadeConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                local fadeProgress = (tick() - fadeStart) / fadeDuration
+                
+                if fadeProgress >= 1 then
+                    loadingGui:Destroy()
+                    fadeConnection:Disconnect()
+                    connection:Disconnect()
+                    print("Финальная загрузка завершена!")
+                else
+                    local transparency = fadeProgress
+                    background.BackgroundTransparency = transparency
+                    background2.BackgroundTransparency = transparency
+                    textLabel.TextTransparency = transparency
+                    subtitle.TextTransparency = transparency
+                    timeLabel.TextTransparency = transparency
+                    
+                    local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
+                    line1Label.TextTransparency = math.min(lineTransparency, 1)
+                    line2Label.TextTransparency = math.min(lineTransparency, 1)
+                    
+                    progressBar.BackgroundTransparency = transparency
+                    progressFill.BackgroundTransparency = transparency
+                end
+            end)
+        end
+    end)
+    
+    task.spawn(function()
+        task.wait(10)
+        if loadingGui and loadingGui.Parent then
+            loadingGui:Destroy()
+            if connection then connection:Disconnect() end
+            print("Финальная загрузка принудительно завершена (таймаут)")
+        end
+    end)
+end
+
+-- Ждем немного чтобы все создалось
+task.wait(0.1)
+
+-- Создаем финальный загрузочный экран поверх всего
+CreateFinalLoadingScreen()
+
+print("Загрузочный экран создан поверх всего интерфейса!")
+print("Кнопка A_D теперь скрыта за загрузочным экраном")
