@@ -157,7 +157,7 @@ local function ShowLoadingAnimation()
         if progress >= 1 and not animationComplete then
             animationComplete = true
             subtitle.Text = "ГОТОВО!"
-            timeLabel.Text = "✅ Загрузка завершена!"
+            timeLabel.Text = "Загрузка завершена!"
             
             task.wait(0.5)
             
@@ -172,7 +172,7 @@ local function ShowLoadingAnimation()
                     loadingGui:Destroy()
                     fadeConnection:Disconnect()
                     connection:Disconnect()
-                    print("✅ Анимация загрузки завершена!")
+                    print("Анимация загрузки завершена!")
                 else
                     local transparency = fadeProgress
                     background.BackgroundTransparency = transparency
@@ -197,7 +197,7 @@ local function ShowLoadingAnimation()
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
-            print("⚠️ Анимация загрузки принудительно завершена (таймаут)")
+            print("Анимация загрузки принудительно завершена (таймаут)")
         end
     end)
 end
@@ -248,7 +248,7 @@ MainButton.Parent = ScreenGui
 local ButtonLabel = Instance.new("TextLabel")
 ButtonLabel.Size = UDim2.new(1, 0, 1, 0)
 ButtonLabel.BackgroundTransparency = 1
-ButtonLabel.Text = "А_Д"
+ButtonLabel.Text = "A_D"
 ButtonLabel.TextColor3 = Library.Theme.Text
 ButtonLabel.TextScaled = true
 ButtonLabel.Font = Enum.Font.SourceSansBold
@@ -285,7 +285,7 @@ TitleFrame.Parent = MenuPanel
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "⚓ АДМИН ПАНЕЛЬ ⚓"
+Title.Text = "АДМИН ПАНЕЛЬ"
 Title.TextColor3 = Library.Theme.Text
 Title.TextScaled = true
 Title.Font = Enum.Font.SourceSansBold
@@ -334,7 +334,7 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
-local TabNames = {"📍 Точки", "🖱️ Клик-ТП", "✈️ Полёт", "🚶 Ходьба", "🛡️ Noclip", "🏗️ Платформы", "👥 Игроки", "👁️ X-Ray", "👾 SPI"}
+local TabNames = {"Точки", "Клик-ТП", "Полёт", "Ходьба", "Noclip", "Платформы", "Игроки", "X-Ray", "SPI"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
@@ -414,7 +414,7 @@ SetBtn.Position = UDim2.new(0, 0, 0.4, 0)
 SetBtn.BackgroundColor3 = Library.Theme.Success
 SetBtn.BorderColor3 = Library.Theme.Border
 SetBtn.BorderSizePixel = 2
-SetBtn.Text = "⛵ УСТАНОВИТЬ ТОЧКУ"
+SetBtn.Text = "УСТАНОВИТЬ ТОЧКУ"
 SetBtn.TextColor3 = Library.Theme.Text
 SetBtn.TextScaled = true
 SetBtn.Font = Enum.Font.SourceSansBold
@@ -426,7 +426,7 @@ TeleportBtn.Position = UDim2.new(0.55, 5, 0.4, 0)
 TeleportBtn.BackgroundColor3 = Library.Theme.Accent
 TeleportBtn.BorderColor3 = Library.Theme.Border
 TeleportBtn.BorderSizePixel = 2
-TeleportBtn.Text = "🧭 ТЕЛЕПОРТ"
+TeleportBtn.Text = "ТЕЛЕПОРТ"
 TeleportBtn.TextColor3 = Library.Theme.Text
 TeleportBtn.TextScaled = true
 TeleportBtn.Font = Enum.Font.SourceSansBold
@@ -456,7 +456,7 @@ ClickTeleportFrame.Parent = ClickTab
 local ClickTitle = Instance.new("TextLabel")
 ClickTitle.Size = UDim2.new(1, 0, 0.3, 0)
 ClickTitle.BackgroundTransparency = 1
-ClickTitle.Text = "🖱️ КЛИК-ТЕЛЕПОРТ"
+ClickTitle.Text = "КЛИК-ТЕЛЕПОРТ"
 ClickTitle.TextColor3 = Library.Theme.Text
 ClickTitle.TextScaled = true
 ClickTitle.Font = Enum.Font.SourceSansBold
@@ -465,10 +465,10 @@ ClickTitle.Parent = ClickTeleportFrame
 local ClickToggleBtn = Instance.new("TextButton")
 ClickToggleBtn.Size = UDim2.new(0.4, -10, 0.4, -5)
 ClickToggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-ClickToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
+ClickToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 ClickToggleBtn.BorderColor3 = Library.Theme.Border
 ClickToggleBtn.BorderSizePixel = 2
-ClickToggleBtn.Text = "🔴 ВЫКЛ"
+ClickToggleBtn.Text = "ВЫКЛ"
 ClickToggleBtn.TextColor3 = Library.Theme.Text
 ClickToggleBtn.TextScaled = true
 ClickToggleBtn.Font = Enum.Font.SourceSansBold
@@ -498,7 +498,7 @@ FlyFrame.Parent = FlyTab
 local FlyTitle = Instance.new("TextLabel")
 FlyTitle.Size = UDim2.new(1, 0, 0.25, 0)
 FlyTitle.BackgroundTransparency = 1
-FlyTitle.Text = "✈️ РЕЖИМ ПОЛЁТА"
+FlyTitle.Text = "РЕЖИМ ПОЛЁТА"
 FlyTitle.TextColor3 = Library.Theme.Text
 FlyTitle.TextScaled = true
 FlyTitle.Font = Enum.Font.SourceSansBold
@@ -507,10 +507,10 @@ FlyTitle.Parent = FlyFrame
 local FlyToggleBtn = Instance.new("TextButton")
 FlyToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
 FlyToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
-FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
+FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 FlyToggleBtn.BorderColor3 = Library.Theme.Border
 FlyToggleBtn.BorderSizePixel = 2
-FlyToggleBtn.Text = "🔴 ВЫКЛ"
+FlyToggleBtn.Text = "ВЫКЛ"
 FlyToggleBtn.TextColor3 = Library.Theme.Text
 FlyToggleBtn.TextScaled = true
 FlyToggleBtn.Font = Enum.Font.SourceSansBold
@@ -574,7 +574,7 @@ WalkFrame.Parent = WalkTab
 local WalkTitle = Instance.new("TextLabel")
 WalkTitle.Size = UDim2.new(1, 0, 0.2, 0)
 WalkTitle.BackgroundTransparency = 1
-WalkTitle.Text = "🚶 АВТО-ХОДЬБА ПО ТОЧКАМ"
+WalkTitle.Text = "АВТО-ХОДЬБА ПО ТОЧКАМ"
 WalkTitle.TextColor3 = Library.Theme.Text
 WalkTitle.TextScaled = true
 WalkTitle.Font = Enum.Font.SourceSansBold
@@ -586,7 +586,7 @@ WalkSetBtn.Position = UDim2.new(0.02, 0, 0.3, 0)
 WalkSetBtn.BackgroundColor3 = Library.Theme.Success
 WalkSetBtn.BorderColor3 = Library.Theme.Border
 WalkSetBtn.BorderSizePixel = 2
-WalkSetBtn.Text = "📍 УСТАНОВИТЬ"
+WalkSetBtn.Text = "УСТАНОВИТЬ"
 WalkSetBtn.TextColor3 = Library.Theme.Text
 WalkSetBtn.TextScaled = true
 WalkSetBtn.Font = Enum.Font.SourceSansBold
@@ -598,7 +598,7 @@ WalkStartBtn.Position = UDim2.new(0.35, 0, 0.3, 0)
 WalkStartBtn.BackgroundColor3 = Library.Theme.WalkActive
 WalkStartBtn.BorderColor3 = Library.Theme.Border
 WalkStartBtn.BorderSizePixel = 2
-WalkStartBtn.Text = "▶️ СТАРТ"
+WalkStartBtn.Text = "СТАРТ"
 WalkStartBtn.TextColor3 = Library.Theme.Text
 WalkStartBtn.TextScaled = true
 WalkStartBtn.Font = Enum.Font.SourceSansBold
@@ -610,7 +610,7 @@ WalkClearBtn.Position = UDim2.new(0.68, 0, 0.3, 0)
 WalkClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 WalkClearBtn.BorderColor3 = Library.Theme.Border
 WalkClearBtn.BorderSizePixel = 2
-WalkClearBtn.Text = "🗑️ ОЧИСТИТЬ"
+WalkClearBtn.Text = "ОЧИСТИТЬ"
 WalkClearBtn.TextColor3 = Library.Theme.Text
 WalkClearBtn.TextScaled = true
 WalkClearBtn.Font = Enum.Font.SourceSansBold
@@ -687,7 +687,7 @@ NoclipFrame.Parent = NoclipTab
 local NoclipTitle = Instance.new("TextLabel")
 NoclipTitle.Size = UDim2.new(1, 0, 0.2, 0)
 NoclipTitle.BackgroundTransparency = 1
-NoclipTitle.Text = "🛡️ РЕЖИМ NOCLIP"
+NoclipTitle.Text = "РЕЖИМ NOCLIP"
 NoclipTitle.TextColor3 = Library.Theme.Text
 NoclipTitle.TextScaled = true
 NoclipTitle.Font = Enum.Font.SourceSansBold
@@ -696,10 +696,10 @@ NoclipTitle.Parent = NoclipFrame
 local NoclipToggleBtn = Instance.new("TextButton")
 NoclipToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
 NoclipToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
-NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
+NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 NoclipToggleBtn.BorderColor3 = Library.Theme.Border
 NoclipToggleBtn.BorderSizePixel = 2
-NoclipToggleBtn.Text = "🔴 ВЫКЛ"
+NoclipToggleBtn.Text = "ВЫКЛ"
 NoclipToggleBtn.TextColor3 = Library.Theme.Text
 NoclipToggleBtn.TextScaled = true
 NoclipToggleBtn.Font = Enum.Font.SourceSansBold
@@ -754,7 +754,7 @@ PlatformFrame.Parent = PlatformTab
 local PlatformTitle = Instance.new("TextLabel")
 PlatformTitle.Size = UDim2.new(1, 0, 0.1, 0)
 PlatformTitle.BackgroundTransparency = 1
-PlatformTitle.Text = "🏗️ СОЗДАТЕЛЬ ПЛАТФОРМ"
+PlatformTitle.Text = "СОЗДАТЕЛЬ ПЛАТФОРМ"
 PlatformTitle.TextColor3 = Library.Theme.Text
 PlatformTitle.TextScaled = true
 PlatformTitle.Font = Enum.Font.SourceSansBold
@@ -837,7 +837,7 @@ CreatePlatformBtn.Position = UDim2.new(0.2, 0, 0.45, 0)
 CreatePlatformBtn.BackgroundColor3 = Library.Theme.Success
 CreatePlatformBtn.BorderColor3 = Library.Theme.Border
 CreatePlatformBtn.BorderSizePixel = 2
-CreatePlatformBtn.Text = "🏗️ ПОСТАВИТЬ ПЛАТФОРМУ"
+CreatePlatformBtn.Text = "ПОСТАВИТЬ ПЛАТФОРМУ"
 CreatePlatformBtn.TextColor3 = Library.Theme.Text
 CreatePlatformBtn.TextScaled = true
 CreatePlatformBtn.Font = Enum.Font.SourceSansBold
@@ -849,7 +849,7 @@ ClearPlatformsBtn.Position = UDim2.new(0.2, 0, 0.65, 0)
 ClearPlatformsBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 ClearPlatformsBtn.BorderColor3 = Library.Theme.Border
 ClearPlatformsBtn.BorderSizePixel = 2
-ClearPlatformsBtn.Text = "🗑️ УДАЛИТЬ ВСЕ ПЛАТФОРМЫ"
+ClearPlatformsBtn.Text = "УДАЛИТЬ ВСЕ ПЛАТФОРМЫ"
 ClearPlatformsBtn.TextColor3 = Library.Theme.Text
 ClearPlatformsBtn.TextScaled = true
 ClearPlatformsBtn.Font = Enum.Font.SourceSansBold
@@ -895,7 +895,7 @@ local PlayersTitle = Instance.new("TextLabel")
 PlayersTitle.Size = UDim2.new(0.5, 0, 1, 0)
 PlayersTitle.Position = UDim2.new(0, 10, 0, 0)
 PlayersTitle.BackgroundTransparency = 1
-PlayersTitle.Text = "👥 ИГРОКИ НА СЕРВЕРЕ"
+PlayersTitle.Text = "ИГРОКИ НА СЕРВЕРЕ"
 PlayersTitle.TextColor3 = Library.Theme.Text
 PlayersTitle.TextScaled = true
 PlayersTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -908,7 +908,7 @@ RefreshPlayersBtn.Position = UDim2.new(0.78, 0, 0.15, 0)
 RefreshPlayersBtn.BackgroundColor3 = Library.Theme.Accent
 RefreshPlayersBtn.BorderColor3 = Library.Theme.Border
 RefreshPlayersBtn.BorderSizePixel = 2
-RefreshPlayersBtn.Text = "🔄 ОБНОВИТЬ"
+RefreshPlayersBtn.Text = "ОБНОВИТЬ"
 RefreshPlayersBtn.TextColor3 = Library.Theme.Text
 RefreshPlayersBtn.TextScaled = true
 RefreshPlayersBtn.Font = Enum.Font.SourceSansBold
@@ -986,7 +986,7 @@ local function UpdatePlayersList()
             StatusLabel.Size = UDim2.new(0.08, 0, 1, 0)
             StatusLabel.Position = UDim2.new(0, 5, 0, 0)
             StatusLabel.BackgroundTransparency = 1
-            StatusLabel.Text = isOnline and "🟢" or "🔴"
+            StatusLabel.Text = isOnline and "online" or "offline"
             StatusLabel.TextColor3 = isOnline and Library.Theme.PlayerOnline or Library.Theme.PlayerOffline
             StatusLabel.TextScaled = true
             StatusLabel.Font = Enum.Font.SourceSansBold
@@ -1020,7 +1020,7 @@ local function UpdatePlayersList()
             TeleportPlayerBtn.BackgroundColor3 = isOnline and Library.Theme.Success or Color3.fromRGB(80, 80, 80)
             TeleportPlayerBtn.BorderColor3 = Library.Theme.Border
             TeleportPlayerBtn.BorderSizePixel = 1
-            TeleportPlayerBtn.Text = isOnline and "🚀 ТП" or "❌ Оффлайн"
+            TeleportPlayerBtn.Text = isOnline and "ТП" or "Оффлайн"
             TeleportPlayerBtn.TextColor3 = Library.Theme.Text
             TeleportPlayerBtn.TextScaled = true
             TeleportPlayerBtn.Font = Enum.Font.SourceSansBold
@@ -1116,7 +1116,7 @@ XRayControlFrame.Parent = XRayTab
 local XRayTitle = Instance.new("TextLabel")
 XRayTitle.Size = UDim2.new(1, 0, 0.2, 0)
 XRayTitle.BackgroundTransparency = 1
-XRayTitle.Text = "👁️ РЕЖИМ X-RAY"
+XRayTitle.Text = "РЕЖИМ X-RAY"
 XRayTitle.TextColor3 = Library.Theme.Text
 XRayTitle.TextScaled = true
 XRayTitle.Font = Enum.Font.SourceSansBold
@@ -1135,10 +1135,10 @@ XRayInfo.Parent = XRayControlFrame
 local XRayToggleBtn = Instance.new("TextButton")
 XRayToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
 XRayToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
-XRayToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
+XRayToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 XRayToggleBtn.BorderColor3 = Library.Theme.Border
 XRayToggleBtn.BorderSizePixel = 2
-XRayToggleBtn.Text = "🔴 ВЫКЛ"
+XRayToggleBtn.Text = "ВЫКЛ"
 XRayToggleBtn.TextColor3 = Library.Theme.Text
 XRayToggleBtn.TextScaled = true
 XRayToggleBtn.Font = Enum.Font.SourceSansBold
@@ -1195,13 +1195,13 @@ end
 
 local function ToggleXRay()
     XRayActive = not XRayActive
-    XRayToggleBtn.Text = XRayActive and "🟢 ВКЛ" or "🔴 ВЫКЛ"
+    XRayToggleBtn.Text = XRayActive and "ВКЛ" or "ВЫКЛ"
     XRayToggleBtn.BackgroundColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     XRayIndicator.Text = XRayActive and "X-Ray: Включен" or "X-Ray: Выключен"
     XRayIndicator.TextColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     
     UpdateXRay()
-    print(XRayActive and "👁️ X-Ray активирован" or "👁️ X-Ray деактивирован")
+    print(XRayActive and "X-Ray активирован" or "X-Ray деактивирован")
 end
 
 XRayToggleBtn.MouseButton1Click:Connect(ToggleXRay)
@@ -1252,7 +1252,7 @@ SPIControlFrame.Parent = SPITab
 local SPITitle = Instance.new("TextLabel")
 SPITitle.Size = UDim2.new(1, 0, 0.2, 0)
 SPITitle.BackgroundTransparency = 1
-SPITitle.Text = "👾 SPI - ИГРОКИ НА КАРТЕ"
+SPITitle.Text = "SPI - ИГРОКИ НА КАРТЕ"
 SPITitle.TextColor3 = Library.Theme.Text
 SPITitle.TextScaled = true
 SPITitle.Font = Enum.Font.SourceSansBold
@@ -1271,10 +1271,10 @@ SPIInfo.Parent = SPIControlFrame
 local SPIToggleBtn = Instance.new("TextButton")
 SPIToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
 SPIToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
-SPIToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) -- Красный (Выкл)
+SPIToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 SPIToggleBtn.BorderColor3 = Library.Theme.Border
 SPIToggleBtn.BorderSizePixel = 2
-SPIToggleBtn.Text = "🔴 ВЫКЛ"
+SPIToggleBtn.Text = "ВЫКЛ"
 SPIToggleBtn.TextColor3 = Library.Theme.Text
 SPIToggleBtn.TextScaled = true
 SPIToggleBtn.Font = Enum.Font.SourceSansBold
@@ -1425,7 +1425,7 @@ end
 
 local function ToggleSPI()
     SPIEnabled = not SPIEnabled
-    SPIToggleBtn.Text = SPIEnabled and "🟢 ВКЛ" or "🔴 ВЫКЛ"
+    SPIToggleBtn.Text = SPIEnabled and "ВКЛ" or "ВЫКЛ"
     SPIToggleBtn.BackgroundColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
     SPIIndicator.Text = SPIEnabled and "SPI: Включен" or "SPI: Выключен"
     SPIIndicator.TextColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
@@ -1575,7 +1575,7 @@ local function onCharacterDied()
         if #WalkPointsData > 0 then
             local firstData = WalkPointsData[1]
             if firstData then
-                WalkStatus.Text = "🚶 Идём к " .. firstData.name .. " (перезапуск после смерти)"
+                WalkStatus.Text = "Идём к " .. firstData.name .. " (перезапуск после смерти)"
                 WalkStatus.TextColor3 = Library.Theme.Warning
             end
         end
@@ -1595,14 +1595,14 @@ local function SetNoclip(state)
             end)
         end
         NoclipEnabled = true
-        NoclipToggleBtn.Text = "🟢 ВКЛ"
+        NoclipToggleBtn.Text = "ВКЛ"
         NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
         NoclipIndicator.Text = "Noclip: Включен"
         NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
     else
         if NoclipConnection then NoclipConnection:Disconnect(); NoclipConnection = nil end
         NoclipEnabled = false
-        NoclipToggleBtn.Text = "🔴 ВЫКЛ"
+        NoclipToggleBtn.Text = "ВЫКЛ"
         NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         NoclipIndicator.Text = "Noclip: Выключен"
         NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
@@ -1763,7 +1763,7 @@ local function UpdatePointsList()
         TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
         TeleportPointBtn.BorderColor3 = Library.Theme.Border
         TeleportPointBtn.BorderSizePixel = 1
-        TeleportPointBtn.Text = "⟳"
+        TeleportPointBtn.Text = "TP"
         TeleportPointBtn.TextColor3 = Library.Theme.Text
         TeleportPointBtn.TextScaled = true
         TeleportPointBtn.Font = Enum.Font.SourceSansBold
@@ -1777,7 +1777,7 @@ local function UpdatePointsList()
         DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         DeleteBtn.BorderColor3 = Library.Theme.Border
         DeleteBtn.BorderSizePixel = 1
-        DeleteBtn.Text = "✕"
+        DeleteBtn.Text = "X"
         DeleteBtn.TextColor3 = Library.Theme.Text
         DeleteBtn.TextScaled = true
         DeleteBtn.Font = Enum.Font.SourceSansBold
@@ -1857,7 +1857,7 @@ local function UpdateWalkPointsList()
         RenameBtn.BackgroundColor3 = Library.Theme.Button
         RenameBtn.BorderColor3 = Library.Theme.Border
         RenameBtn.BorderSizePixel = 1
-        RenameBtn.Text = "✏️"
+        RenameBtn.Text = "R"
         RenameBtn.TextColor3 = Library.Theme.Text
         RenameBtn.TextScaled = true
         RenameBtn.Font = Enum.Font.SourceSansBold
@@ -1880,7 +1880,7 @@ local function UpdateWalkPointsList()
         DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         DeleteBtn.BorderColor3 = Library.Theme.Border
         DeleteBtn.BorderSizePixel = 1
-        DeleteBtn.Text = "✕"
+        DeleteBtn.Text = "X"
         DeleteBtn.TextColor3 = Library.Theme.Text
         DeleteBtn.TextScaled = true
         DeleteBtn.Font = Enum.Font.SourceSansBold
@@ -1944,7 +1944,7 @@ local function ClearWalkPoints()
     UpdateWalkPointsList()
     ClearWalkVisuals()
     
-    WalkStatus.Text = "🗑️ Все точки очищены"
+    WalkStatus.Text = "Все точки очищены"
     WalkStatus.TextColor3 = Library.Theme.Warning
 end
 
@@ -1961,9 +1961,9 @@ local function ToggleFly()
     FlyEnabled = not FlyEnabled
     
     if FlyEnabled then
-        FlyToggleBtn.Text = "🟢 ВКЛ"
+        FlyToggleBtn.Text = "ВКЛ"
         FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        FlyIndicator.Text = "Полет: Включен 🏃"
+        FlyIndicator.Text = "Полет: Включен"
         FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
         
         humanoid.PlatformStand = false
@@ -2037,7 +2037,7 @@ local function ToggleFly()
         end)
         
     else
-        FlyToggleBtn.Text = "🔴 ВЫКЛ"
+        FlyToggleBtn.Text = "ВЫКЛ"
         FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         FlyIndicator.Text = "Полет: Выключен"
         FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
@@ -2076,7 +2076,7 @@ local function StopWalking()
     
     WalkStatus.Text = "Статус: Остановлен"
     WalkStatus.TextColor3 = Library.Theme.Text
-    WalkStartBtn.Text = "▶️ СТАРТ"
+    WalkStartBtn.Text = "СТАРТ"
     WalkStartBtn.BackgroundColor3 = Library.Theme.WalkActive
 end
 
@@ -2106,7 +2106,7 @@ end
 
 local function StartWalking()
     if #WalkPointsData < 1 then
-        WalkStatus.Text = "❌ Нужна минимум 1 точка!"
+        WalkStatus.Text = "Нужна минимум 1 точка!"
         WalkStatus.TextColor3 = Library.Theme.Warning
         return
     end
@@ -2115,7 +2115,7 @@ local function StartWalking()
     
     if #WalkPointsData == 1 then
         TeleportToPosition(WalkPointsData[1].pos)
-        WalkStatus.Text = "✅ Телепорт к " .. WalkPointsData[1].name
+        WalkStatus.Text = "Телепорт к " .. WalkPointsData[1].name
         WalkStatus.TextColor3 = Library.Theme.Success
         return
     end
@@ -2137,9 +2137,9 @@ local function StartWalking()
     
     if not NoclipEnabled then SetNoclip(true) end
     
-    WalkStatus.Text = "🚶 Идём к " .. WalkPointsData[1].name
+    WalkStatus.Text = "Идём к " .. WalkPointsData[1].name
     WalkStatus.TextColor3 = Library.Theme.WalkActive
-    WalkStartBtn.Text = "⏸️ ПАУЗА"
+    WalkStartBtn.Text = "ПАУЗА"
     WalkStartBtn.BackgroundColor3 = Library.Theme.Warning
     
     if FlyEnabled then ToggleFly() end
@@ -2175,14 +2175,14 @@ local function StartWalking()
                         RemoveHold()
                         WaitingAtEnd = true
                         WaitStartTime = tick()
-                        WalkStatus.Text = "🎯 Достигли последней точки! Ожидание " .. PAUSE_AT_END .. " сек..."
+                        WalkStatus.Text = "Достигли последней точки! Ожидание " .. PAUSE_AT_END .. " сек..."
                         WalkStatus.TextColor3 = Library.Theme.Warning
                     else
                         CurrentWalkIndex = CurrentWalkIndex + 1
                         if CurrentWalkIndex > #WalkPointsData then CurrentWalkIndex = 1 end
                         local nextData = WalkPointsData[CurrentWalkIndex]
                         if nextData then
-                            WalkStatus.Text = "🚶 Идём к " .. nextData.name .. " (" .. CurrentWalkIndex .. "/" .. #WalkPointsData .. ")"
+                            WalkStatus.Text = "Идём к " .. nextData.name .. " (" .. CurrentWalkIndex .. "/" .. #WalkPointsData .. ")"
                             WalkStatus.TextColor3 = Library.Theme.WalkActive
                         end
                     end
@@ -2194,7 +2194,7 @@ local function StartWalking()
             if WaitingAtEnd then
                 local timeLeft = math.floor(PAUSE_AT_END - (tick() - WaitStartTime))
                 if timeLeft > 0 then
-                    WalkStatus.Text = "⏳ Ожидание " .. timeLeft .. " сек... (можно двигаться)"
+                    WalkStatus.Text = "Ожидание " .. timeLeft .. " сек... (можно двигаться)"
                     WalkStatus.TextColor3 = Library.Theme.Warning
                 else
                     WaitingAtEnd = false
@@ -2214,7 +2214,7 @@ local function StartWalking()
                     local firstData = WalkPointsData[1]
                     if firstData then
                         TeleportToPosition(firstData.pos)
-                        WalkStatus.Text = "🚶 Идём к " .. firstData.name
+                        WalkStatus.Text = "Идём к " .. firstData.name
                         WalkStatus.TextColor3 = Library.Theme.WalkActive
                         
                         IsStopped = true
@@ -2228,13 +2228,13 @@ local function StartWalking()
                             bodyGyro.Parent = bodyPos
                         end
                         
-                        WalkStatus.Text = "⏸️ Остановка на " .. firstData.name .. " (" .. STOP_DURATION .. " сек)"
+                        WalkStatus.Text = "Остановка на " .. firstData.name .. " (" .. STOP_DURATION .. " сек)"
                         WalkStatus.TextColor3 = Library.Theme.Warning
                     end
                     
                     if not NoclipEnabled then SetNoclip(true) end
                 else
-                    WalkStatus.Text = "⏳ Телепорт через " .. string.format("%.1f", 0.5 - (tick() - TeleportWaitStart)) .. " сек..."
+                    WalkStatus.Text = "Телепорт через " .. string.format("%.1f", 0.5 - (tick() - TeleportWaitStart)) .. " сек..."
                     WalkStatus.TextColor3 = Library.Theme.Warning
                 end
                 task.wait(0.05)
@@ -2267,7 +2267,7 @@ local function StartWalking()
                     hrp.CFrame = hrp.CFrame:Lerp(targetCFrame, 0.3)
                 end
                 
-                WalkStatus.Text = "🚶 Идём к " .. targetData.name .. " (" .. CurrentWalkIndex .. "/" .. #WalkPointsData .. ")"
+                WalkStatus.Text = "Идём к " .. targetData.name .. " (" .. CurrentWalkIndex .. "/" .. #WalkPointsData .. ")"
                 WalkStatus.TextColor3 = Library.Theme.WalkActive
             else
                 local isLastPoint = (CurrentWalkIndex == #WalkPointsData)
@@ -2281,7 +2281,7 @@ local function StartWalking()
                     
                     WaitingAtEnd = true
                     WaitStartTime = tick()
-                    WalkStatus.Text = "🎯 Достигли последней точки! Ожидание " .. PAUSE_AT_END .. " сек..."
+                    WalkStatus.Text = "Достигли последней точки! Ожидание " .. PAUSE_AT_END .. " сек..."
                     WalkStatus.TextColor3 = Library.Theme.Warning
                 else
                     hrp.Velocity = Vector3.new(0, 0, 0)
@@ -2300,7 +2300,7 @@ local function StartWalking()
                     IsStopped = true
                     StopStartTime = tick()
                     
-                    WalkStatus.Text = "⏸️ Остановка на " .. targetData.name .. " (" .. STOP_DURATION .. " сек)"
+                    WalkStatus.Text = "Остановка на " .. targetData.name .. " (" .. STOP_DURATION .. " сек)"
                     WalkStatus.TextColor3 = Library.Theme.Warning
                 end
             end
@@ -2331,7 +2331,7 @@ end
 -- ===== ЛОГИКА КНОПОК ВКЛ/ВЫКЛ (Красный/Зеленый) =====
 ClickToggleBtn.MouseButton1Click:Connect(function()
     ClickTeleportEnabled = not ClickTeleportEnabled
-    ClickToggleBtn.Text = ClickTeleportEnabled and "🟢 ВКЛ" or "🔴 ВЫКЛ"
+    ClickToggleBtn.Text = ClickTeleportEnabled and "ВКЛ" or "ВЫКЛ"
     ClickToggleBtn.BackgroundColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     ModeIndicator.Text = ClickTeleportEnabled and "Режим: Включен (кликните по объекту для телепорта)" or "Режим: Выключен"
     ModeIndicator.TextColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
@@ -2632,24 +2632,24 @@ spawn(function()
     end
 end)
 
-print("⚓ Админ Панель загружена!")
-print("📌 Вкладки теперь расположены ВЕРТИКАЛЬНО слева")
-print("📌 Убраны стрелки переключения между вкладками")
-print("📌 Все вкладки: Точки, Клик-ТП, Полёт, Ходьба, Noclip, Платформы, Игроки, X-Ray, SPI")
-print("🖱️ Alt+C - клик-телепорт")
-print("✈️ Alt+F - полёт с анимацией бега (WASD + Пробел/ Ctrl)")
-print("🚶 Alt+W - старт/пауза ходьбы | Alt+X - добавить точку для ходьбы")
-print("🗑️ Alt+Z - очистить все точки ходьбы")
-print("🛡️ Alt+N - noclip")
-print("🏗️ Alt+P - поставить платформу под ногами")
-print("👁️ Alt+R - X-Ray")
-print("👾 Alt+I - SPI (показ игроков через стены)")
-print("📏 Панель можно растягивать за любую невидимую сторону (по краям и углам)")
--- ===== ВИДИМЫЕ СИНИЕ КНОПКИ РАСТЯГИВАНИЯ (НА ВСЕХ СТЕНКАХ) =====
-local RESIZE_BUTTON_SIZE = 10 -- Уменьшено в 3 раза (было 30, стало 10)
-local CORNER_BUTTON_SIZE = 15 -- Угловые в 2 раза меньше (было 30, стало 15)
+print("Админ Панель загружена!")
+print("Вкладки теперь расположены ВЕРТИКАЛЬНО слева")
+print("Убраны стрелки переключения между вкладками")
+print("Все вкладки: Точки, Клик-ТП, Полёт, Ходьба, Noclip, Платформы, Игроки, X-Ray, SPI")
+print("Alt+C - клик-телепорт")
+print("Alt+F - полёт с анимацией бега (WASD + Пробел/ Ctrl)")
+print("Alt+W - старт/пауза ходьбы | Alt+X - добавить точку для ходьбы")
+print("Alt+Z - очистить все точки ходьбы")
+print("Alt+N - noclip")
+print("Alt+P - поставить платформу под ногами")
+print("Alt+R - X-Ray")
+print("Alt+I - SPI (показ игроков через стены)")
+print("Панель можно растягивать за любую невидимую сторону (по краям и углам)")
 
--- Создаем видимую синюю кнопку для растягивания
+-- ===== ВИДИМЫЕ СИНИЕ КНОПКИ РАСТЯГИВАНИЯ (НА ВСЕХ СТЕНКАХ) =====
+local RESIZE_BUTTON_SIZE = 10
+local CORNER_BUTTON_SIZE = 15
+
 local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, resizeY, rotation, isCorner)
     local size = isCorner and CORNER_BUTTON_SIZE or RESIZE_BUTTON_SIZE
     local halfSize = size / 2
@@ -2669,7 +2669,7 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     local arrow = Instance.new("TextLabel")
     arrow.Size = UDim2.new(1, 0, 1, 0)
     arrow.BackgroundTransparency = 1
-    arrow.Text = isCorner and "◢" or "↕"
+    arrow.Text = isCorner and "↕" or "↔"
     arrow.TextColor3 = Color3.fromRGB(255, 255, 255)
     arrow.TextScaled = true
     arrow.Font = Enum.Font.SourceSansBold
@@ -2902,8 +2902,8 @@ pcall(function()
     end
 end)
 
-print("✅ Синие кнопки растягивания на всех стенках")
-print("📐 Обычные кнопки: 10x10 (уменьшены в 3 раза)")
-print("📐 Угловые кнопки: 15x15 (в 2 раза меньше)")
-print("🔵 Цвет: синий (0, 100, 255)")
-print("🔄 Перетаскивание работает только за заголовок")
+print("Синие кнопки растягивания на всех стенках")
+print("Обычные кнопки: 10x10 (уменьшены в 3 раза)")
+print("Угловые кнопки: 15x15 (в 2 раза меньше)")
+print("Цвет: синий (0, 100, 255)")
+print("Перетаскивание работает только за заголовок")
