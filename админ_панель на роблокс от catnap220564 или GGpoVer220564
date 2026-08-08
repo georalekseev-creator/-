@@ -1070,25 +1070,42 @@ RefreshPlayersBtn.MouseButton1Click:Connect(function()
     lastPlayerUpdate = tick()
 end)
 
--- ===== ВКЛАДКА 8: X-RAY =====
+-- ===== ВКЛАДКА 8: X-RAY (ИСПРАВЛЕННЫЙ - ТОЛЬКО ТЕКСТУРЫ, БЕЗ GUI) =====
 local XRayTab = Tabs[8]
 
 local XRayActive = false
 local XRayTransparency = 50
+
+-- Храним только реальные части мира, НЕ GUI элементы
+local function IsWorldPart(part)
+    if not part or not part.Parent then return false end
+    
+    -- Пропускаем GUI элементы
+    if part:IsDescendantOf(game.CoreGui) then return false end
+    if part:IsDescendantOf(game.StarterGui) then return false end
+    
+    -- Пропускаем части игрока
+    local player = game.Players.LocalPlayer
+    if player and player.Character and part:IsDescendantOf(player.Character) then return false end
+    
+    -- Пропускаем все части, которые являются потомками игроков
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p.Character and part:IsDescendantOf(p.Character) then return false end
+    end
+    
+    return true
+end
+
 local XRayParts = {}
 local XRayOriginalTransparencies = {}
 
 local function UpdateXRay()
-    local player = game.Players.LocalPlayer
-    local character = player and player.Character
-    
     if XRayActive then
         local targetTransparency = XRayTransparency / 100
         
+        -- Собираем только части мира, НЕ GUI
         for _, part in pairs(workspace:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if character and part:IsDescendantOf(character) then continue end
-                
+            if part:IsA("BasePart") and IsWorldPart(part) then
                 if not XRayOriginalTransparencies[part] then
                     XRayOriginalTransparencies[part] = part.Transparency
                     table.insert(XRayParts, part)
@@ -1097,11 +1114,30 @@ local function UpdateXRay()
             end
         end
     else
+        -- Восстанавливаем только те части, которые мы изменили
         for part, origTrans in pairs(XRayOriginalTransparencies) do
-            if part and part.Parent then part.Transparency = origTrans end
+            if part and part.Parent then
+                part.Transparency = origTrans
+            end
         end
         XRayOriginalTransparencies = {}
         XRayParts = {}
+    end
+end
+
+-- Очищаем данные при перезагрузке X-Ray
+local function CleanXRayData()
+    -- Удаляем записи для уничтоженных частей
+    for part in pairs(XRayOriginalTransparencies) do
+        if not part or not part.Parent then
+            XRayOriginalTransparencies[part] = nil
+        end
+    end
+    
+    -- Очищаем список частей
+    XRayParts = {}
+    for part in pairs(XRayOriginalTransparencies) do
+        table.insert(XRayParts, part)
     end
 end
 
@@ -1116,7 +1152,7 @@ XRayControlFrame.Parent = XRayTab
 local XRayTitle = Instance.new("TextLabel")
 XRayTitle.Size = UDim2.new(1, 0, 0.2, 0)
 XRayTitle.BackgroundTransparency = 1
-XRayTitle.Text = "РЕЖИМ X-RAY"
+XRayTitle.Text = "РЕЖИМ X-RAY (ТОЛЬКО МИР)"
 XRayTitle.TextColor3 = Library.Theme.Text
 XRayTitle.TextScaled = true
 XRayTitle.Font = Enum.Font.SourceSansBold
@@ -1126,7 +1162,7 @@ local XRayInfo = Instance.new("TextLabel")
 XRayInfo.Size = UDim2.new(1, 0, 0.15, 0)
 XRayInfo.Position = UDim2.new(0, 0, 0.2, 0)
 XRayInfo.BackgroundTransparency = 1
-XRayInfo.Text = "Изменяет только прозрачность стен, хитбоксы остаются"
+XRayInfo.Text = "Влияет только на текстуры мира, НЕ на GUI и игроков"
 XRayInfo.TextColor3 = Library.Theme.Accent
 XRayInfo.TextScaled = true
 XRayInfo.Font = Enum.Font.SourceSans
@@ -1200,8 +1236,15 @@ local function ToggleXRay()
     XRayIndicator.Text = XRayActive and "X-Ray: Включен" or "X-Ray: Выключен"
     XRayIndicator.TextColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
     
+    if XRayActive then
+        -- Очищаем старые данные перед включением
+        XRayOriginalTransparencies = {}
+        XRayParts = {}
+        CleanXRayData()
+    end
+    
     UpdateXRay()
-    print(XRayActive and "X-Ray активирован" or "X-Ray деактивирован")
+    print(XRayActive and "X-Ray активирован (только мир)" or "X-Ray деактивирован")
 end
 
 XRayToggleBtn.MouseButton1Click:Connect(ToggleXRay)
@@ -1226,12 +1269,25 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     end
 end)
 
+-- Очищаем данные при выходе из игры
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if XRayActive then
+        -- Перезапускаем X-Ray при респавне
+        task.wait(0.5)
+        XRayOriginalTransparencies = {}
+        XRayParts = {}
+        UpdateXRay()
+    end
+end)
+
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.R and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
         ToggleXRay()
     end
 end)
+
+print("✅ X-Ray исправлен: влияет ТОЛЬКО на текстуры мира, НЕ на GUI и игроков")
 
 -- ===== ВКЛАДКА 9: SPI =====
 local SPITab = Tabs[9]
@@ -1339,8 +1395,7 @@ local function CreatePlayerHighlight(player)
     billboard.Name = "SPIBillboard"
     billboard.Size = UDim2.new(0, 200, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 4, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = player.Character
+    billboard.AlwaysOnTop = true    billboard.Parent = player.Character
     
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Name = "NameLabel"
@@ -2642,7 +2697,7 @@ print("Alt+W - старт/пауза ходьбы | Alt+X - добавить т�
 print("Alt+Z - очистить все точки ходьбы")
 print("Alt+N - noclip")
 print("Alt+P - поставить платформу под ногами")
-print("Alt+R - X-Ray")
+print("Alt+R - X-Ray (только мир, НЕ GUI)")
 print("Alt+I - SPI (показ игроков через стены)")
 print("Панель можно растягивать за любую невидимую сторону (по краям и углам)")
 
@@ -2928,8 +2983,7 @@ do
         
         local title = Instance.new("TextLabel")
         title.Size = UDim2.new(1, 0, 0.15, 0)
-        title.BackgroundTransparency = 1
-        title.Text = "РЕЖИМ FREECAM"
+        title.BackgroundTransparency = 1        title.Text = "РЕЖИМ FREECAM (ИСПРАВЛЕННЫЙ)"
         title.TextColor3 = Library.Theme.Text
         title.TextScaled = true
         title.Font = Enum.Font.SourceSansBold
@@ -2939,7 +2993,7 @@ do
         desc.Size = UDim2.new(1, -20, 0.15, 0)
         desc.Position = UDim2.new(0, 10, 0.17, 0)
         desc.BackgroundTransparency = 1
-        desc.Text = "Свободная камера для обзора карты"
+        desc.Text = "Плавное вращение без дерганий, персонаж видим"
         desc.TextColor3 = Library.Theme.Accent
         desc.TextScaled = true
         desc.Font = Enum.Font.SourceSans
@@ -3013,7 +3067,7 @@ do
         controls.Size = UDim2.new(1, -10, 1, -10)
         controls.Position = UDim2.new(0, 5, 0, 5)
         controls.BackgroundTransparency = 1
-        controls.Text = "Управление: Alt - курсор  |  WASD - движение  |  Пробел - вверх  |  Ctrl - вниз"
+        controls.Text = "Управление: F9 - вкл/выкл  |  Alt - курсор  |  WASD - движение  |  Пробел - вверх  |  Ctrl - вниз"
         controls.TextColor3 = Library.Theme.Text
         controls.TextScaled = true
         controls.Font = Enum.Font.SourceSans
@@ -3021,52 +3075,32 @@ do
         controls.TextYAlignment = Enum.TextYAlignment.Center
         controls.Parent = controlsFrame
         
+        -- ==== ИСПРАВЛЕННАЯ ЛОГИКА FREECAM (БЕЗ ПРОЗРАЧНОСТИ) ====
         local isFreecamActive = false
         local isCursorLocked = false
         local savedCameraCFrame = nil
         local savedCameraFocus = nil
         local savedCharacterCFrame = nil
-        local originalTransparencies = {}
         local baseSpeed = 100
         local moveSpeed = 100
         local sensitivity = 0.003
         local freecamPosition = Vector3.new(0, 10, 0)
-        local freecamRotation = Vector2.new(0, 0)
+        
+        -- Используем CFrame для накопления вращения
+        local cameraRotation = CFrame.new()
+        
+        -- Сохраняем оригинальные свойства персонажа
+        local savedWalkSpeed = 16
+        local savedJumpPower = 50
+        local savedAutoRotate = true
+        local savedPlatformStand = false
+        local savedAnchored = false
         
         local function updateSpeedSlider()
             local percent = (baseSpeed - 1) / 199
             speedFill.Size = UDim2.new(percent, 0, 1, 0)
             speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
             speedLabel.Text = "Скорость: " .. math.floor(baseSpeed)
-        end
-        
-        local function setCharacterTransparency(transparency)
-            local player = game.Players.LocalPlayer
-            local char = player and player.Character
-            if not char then return end
-            
-            if transparency == 0.5 then
-                originalTransparencies = {}
-                for _, part in pairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        originalTransparencies[part] = part.Transparency
-                        part.Transparency = transparency
-                    end
-                end
-            end
-        end
-        
-        local function restoreCharacterTransparency()
-            local player = game.Players.LocalPlayer
-            local char = player and player.Character
-            if not char then return end
-            
-            for part, origTrans in pairs(originalTransparencies) do
-                if part and part.Parent then
-                    part.Transparency = origTrans
-                end
-            end
-            originalTransparencies = {}
         end
         
         local function enableFreecam()
@@ -3077,9 +3111,11 @@ do
             local humanoid = char and char:FindFirstChild("Humanoid")
             local camera = workspace.CurrentCamera
             
+            -- Сохраняем состояние камеры
             savedCameraCFrame = camera.CFrame
             savedCameraFocus = camera.Focus
             
+            -- Сохраняем позицию персонажа
             if char and char:FindFirstChild("HumanoidRootPart") then
                 savedCharacterCFrame = char.HumanoidRootPart.CFrame
                 freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
@@ -3087,9 +3123,20 @@ do
                 freecamPosition = Vector3.new(0, 10, 0)
             end
             
-            freecamRotation = Vector2.new(0, 0)
+            -- Сохраняем настройки персонажа
+            if humanoid then
+                savedWalkSpeed = humanoid.WalkSpeed
+                savedJumpPower = humanoid.JumpPower
+                savedAutoRotate = humanoid.AutoRotate
+                savedPlatformStand = humanoid.PlatformStand
+            end
+            
+            -- Инициализируем вращение на основе текущей камеры
+            cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
+            
             moveSpeed = baseSpeed
             
+            -- Отключаем управление персонажем (НО НЕ ДЕЛАЕМ ЕГО ПРОЗРАЧНЫМ)
             if humanoid then
                 humanoid.AutoRotate = false
                 humanoid.PlatformStand = true
@@ -3102,24 +3149,25 @@ do
             
             game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
             
+            -- Анкорим персонаж (НО НЕ МЕНЯЕМ ПРОЗРАЧНОСТЬ)
             if char and char:FindFirstChild("HumanoidRootPart") then
+                savedAnchored = char.HumanoidRootPart.Anchored
                 char.HumanoidRootPart.Anchored = true
             end
-            
-            setCharacterTransparency(0.5)
             
             toggleBtn.Text = "ВКЛ"
             toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
             statusLabel.Text = "Freecam: Включен"
             statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
             
-            -- Сворачиваем панель при включении Freecam
             pcall(function()
                 if MenuPanel then
                     menuOpen = false
                     MenuPanel.Visible = false
                 end
             end)
+            
+            print("✅ Freecam включен. Персонаж остался видимым!")
         end
         
         local function disableFreecam()
@@ -3135,24 +3183,25 @@ do
             
             game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
             
+            -- Восстанавливаем камеру
             if savedCameraCFrame then
                 camera.CFrame = savedCameraCFrame
                 camera.Focus = savedCameraFocus
             end
             
+            -- Восстанавливаем персонажа (БЕЗ ИЗМЕНЕНИЯ ПРОЗРАЧНОСТИ)
             if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Anchored = false
+                char.HumanoidRootPart.Anchored = savedAnchored or false
             end
             
             if humanoid then
-                humanoid.AutoRotate = true
-                humanoid.PlatformStand = false
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
+                humanoid.AutoRotate = savedAutoRotate
+                humanoid.PlatformStand = savedPlatformStand
+                humanoid.WalkSpeed = savedWalkSpeed
+                humanoid.JumpPower = savedJumpPower
             end
             
-            restoreCharacterTransparency()
-            
+            -- Восстанавливаем позицию персонажа
             if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
                 char.HumanoidRootPart.CFrame = savedCharacterCFrame
             end
@@ -3161,6 +3210,8 @@ do
             toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
             statusLabel.Text = "Freecam: Выключен"
             statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+            
+            print("✅ Freecam выключен. Персонаж восстановлен.")
         end
         
         local function toggleFreecam()
@@ -3217,18 +3268,30 @@ do
             end
         end)
         
+        -- Плавное вращение через умножение CFrame
         inputService.InputChanged:Connect(function(input)
             if not isFreecamActive then return end
             if not isCursorLocked then return end
             
             if input.UserInputType == Enum.UserInputType.MouseMovement then
-                freecamRotation = freecamRotation + Vector2.new(
-                    -input.Delta.Y * sensitivity,
-                    -input.Delta.X * sensitivity
-                )
+                local deltaX = -input.Delta.X * sensitivity
+                local deltaY = -input.Delta.Y * sensitivity
+                
+                local rotY = CFrame.Angles(0, deltaX, 0)
+                local rotX = CFrame.Angles(deltaY, 0, 0)
+                
+                cameraRotation = cameraRotation * rotY
+                cameraRotation = cameraRotation * rotX
+                
+                -- Нормализация CFrame
+                local pos = cameraRotation.Position
+                local look = cameraRotation.LookVector
+                local up = cameraRotation.UpVector
+                cameraRotation = CFrame.lookAt(pos, pos + look, up)
             end
         end)
         
+        -- Обновление камеры
         game:GetService("RunService").RenderStepped:Connect(function()
             if not isFreecamActive then return end
             
@@ -3244,43 +3307,40 @@ do
             
             if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
             
-            local rotationY = CFrame.Angles(0, freecamRotation.Y, 0)
-            local rotationX = CFrame.Angles(freecamRotation.X, 0, 0)
-            local totalRotation = rotationY * rotationX
-            
             local deltaTime = 0.016
             local moveAmount = moveSpeed * deltaTime
             
             if moveDirection.Magnitude > 0 then
-                local worldMove = totalRotation * moveDirection
+                local worldMove = cameraRotation * moveDirection
                 freecamPosition = freecamPosition + worldMove * moveAmount
             end
             
-            local lookDirection = (totalRotation * Vector3.new(0, 0, -1)).Unit
-            local newCFrame = CFrame.new(freecamPosition, freecamPosition + lookDirection)
+            local newCFrame = CFrame.new(freecamPosition) * cameraRotation
             
             camera.CFrame = newCFrame
-            camera.Focus = CFrame.new(freecamPosition + lookDirection * 100)
+            camera.Focus = CFrame.new(freecamPosition + cameraRotation.LookVector * 100)
         end)
         
         updateSpeedSlider()
+        
+        print("========================================")
+        print("✅ FREECAM ИСПРАВЛЕНА!")
+        print("📌 Персонаж НЕ становится прозрачным")
+        print("📌 Плавное вращение через CFrame")
+        print("📌 F9 - вкл/выкл | Alt - курсор | WASD - движение")
+        print("========================================")
     end
     
     createFreecamUI()
 end
 
-print("Freecam встроена в панель! При включении панель сворачивается. F9 - вкл/выкл, Alt - курсор, WASD - движение, Пробел - вверх, Ctrl - вниз")
 -- ===== ИСПРАВЛЕНИЕ: ПЕРЕМЕЩАЕМ ЗАГРУЗОЧНЫЙ ЭКРАН В КОНЕЦ =====
--- Этот блок нужно вставить в САМЫЙ КОНЕЦ скрипта (перед последним print)
-
--- Удаляем старый загрузочный экран если он есть
 pcall(function()
     if game.CoreGui:FindFirstChild("LoadingScreen") then
         game.CoreGui.LoadingScreen:Destroy()
     end
 end)
 
--- Создаем новый загрузочный экран ПОВЕРХ всего
 local function CreateFinalLoadingScreen()
     local loadingGui = Instance.new("ScreenGui")
     loadingGui.Name = "LoadingScreen"
@@ -3288,7 +3348,6 @@ local function CreateFinalLoadingScreen()
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
     
-    -- Делаем фон размером 10x (как в оригинале)
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
     background.Position = UDim2.new(-4.5, 0, -4.5, 0)
@@ -3483,777 +3542,382 @@ local function CreateFinalLoadingScreen()
     end)
 end
 
--- Ждем немного чтобы все создалось
 task.wait(0.1)
-
--- Создаем финальный загрузочный экран поверх всего
 CreateFinalLoadingScreen()
 
-print("Загрузочный экран создан поверх всего интерфейса!")
-print("Кнопка A_D теперь скрыта за загрузочным экраном")
--- ===== ИСПРАВЛЕНИЕ FREECAM: ПЛАВНОЕ ВРАЩЕНИЕ БЕЗ ДЕРГАНИЙ =====
--- Вставьте этот код в самый КОНЕЦ вашего скрипта, ПОСЛЕ ВСЕГО остального кода
-
+print("✅ X-Ray исправлен окончательно!")
+print("📌 Теперь X-Ray влияет ТОЛЬКО на текстуры мира")
+print("📌 GUI элементы и персонажи игроков НЕ затрагиваются")
+print("📌 Используйте Alt+R для включения/выключения")
+print("📌 Слайдер регулирует прозрачность стен")
+-- ===== ОЧИСТКА ВКЛАДКИ X-RAY =====
 pcall(function()
-    -- Находим существующую вкладку Freecam
-    local freecamTab = Tabs[10]
-    if not freecamTab then return end
+    -- Удаляем все элементы из вкладки X-Ray
+    local xrayTab = Tabs[8]
+    if xrayTab then
+        for _, child in pairs(xrayTab:GetChildren()) do
+            child:Destroy()
+        end
+        
+        -- Создаем пустую вкладку с сообщением
+        local emptyFrame = Instance.new("Frame")
+        emptyFrame.Size = UDim2.new(1, 0, 1, 0)
+        emptyFrame.BackgroundTransparency = 1
+        emptyFrame.Parent = xrayTab
+        
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Size = UDim2.new(1, 0, 1, 0)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.Text = "Вкладка X-Ray пуста"
+        messageLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+        messageLabel.TextScaled = true
+        messageLabel.Font = Enum.Font.SourceSansBold
+        messageLabel.TextTransparency = 0.5
+        messageLabel.Parent = emptyFrame
+    end
+end)
+
+print("✅ Вкладка X-Ray очищена и пуста")
+-- ===== ДОБАВЛЕНИЕ КНОПКИ ВКЛЮЧЕНИЯ/ВЫКЛЮЧЕНИЯ В ВКЛАДКУ X-RAY (НЕ РАБОТАЕТ) =====
+pcall(function()
+    local xrayTab = Tabs[8]
+    if xrayTab then
+        -- Удаляем старые элементы
+        for _, child in pairs(xrayTab:GetChildren()) do
+            child:Destroy()
+        end
+        
+        -- Создаем фрейм для кнопки
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, 0, 1, 0)
+        container.BackgroundTransparency = 1
+        container.Parent = xrayTab
+        
+        -- Создаем кнопку
+        local fakeXRayBtn = Instance.new("TextButton")
+        fakeXRayBtn.Size = UDim2.new(0.4, 0, 0.15, 0)
+        fakeXRayBtn.Position = UDim2.new(0.3, 0, 0.4, 0)
+        fakeXRayBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        fakeXRayBtn.BorderColor3 = Library.Theme.Border
+        fakeXRayBtn.BorderSizePixel = 2
+        fakeXRayBtn.Text = "ВЫКЛ"
+        fakeXRayBtn.TextColor3 = Library.Theme.Text
+        fakeXRayBtn.TextScaled = true
+        fakeXRayBtn.Font = Enum.Font.SourceSansBold
+        fakeXRayBtn.Parent = container
+        
+        -- Индикатор статуса
+        local fakeStatus = Instance.new("TextLabel")
+        fakeStatus.Size = UDim2.new(1, 0, 0.1, 0)
+        fakeStatus.Position = UDim2.new(0, 0, 0.6, 0)
+        fakeStatus.BackgroundTransparency = 1
+        fakeStatus.Text = "X-Ray: Выключен (НЕ РАБОТАЕТ)"
+        fakeStatus.TextColor3 = Color3.fromRGB(200, 40, 40)
+        fakeStatus.TextScaled = true
+        fakeStatus.Font = Enum.Font.SourceSans
+        fakeStatus.Parent = container
+        
+        -- Подпись что кнопка не работает
+        local infoLabel = Instance.new("TextLabel")
+        infoLabel.Size = UDim2.new(1, 0, 0.1, 0)
+        infoLabel.Position = UDim2.new(0, 0, 0.75, 0)
+        infoLabel.BackgroundTransparency = 1
+        infoLabel.Text = "⚠️ Эта кнопка ничего не делает"
+        infoLabel.TextColor3 = Library.Theme.Warning
+        infoLabel.TextScaled = true
+        infoLabel.Font = Enum.Font.SourceSansBold
+        infoLabel.Parent = container
+        
+        -- Состояние кнопки
+        local isFakeOn = false
+        
+        -- Обработчик нажатия (только меняет внешний вид)
+        fakeXRayBtn.MouseButton1Click:Connect(function()
+            isFakeOn = not isFakeOn
+            fakeXRayBtn.Text = isFakeOn and "ВКЛ" or "ВЫКЛ"
+            fakeXRayBtn.BackgroundColor3 = isFakeOn and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
+            fakeStatus.Text = isFakeOn and "X-Ray: Включен (НЕ РАБОТАЕТ)" or "X-Ray: Выключен (НЕ РАБОТАЕТ)"
+            fakeStatus.TextColor3 = isFakeOn and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
+        end)
+    end
+end)
+
+print("✅ В вкладку X-Ray добавлена кнопка, но она ничего не делает")
+-- ===== ЗАМЕНА ВКЛАДКИ X-RAY НА РАБОЧУЮ ВЕРСИЮ =====
+pcall(function()
+    local xrayTab = Tabs[8]
+    if not xrayTab then return end
     
-    -- Удаляем старую вкладку Freecam
-    for _, child in pairs(freecamTab:GetChildren()) do
+    -- Очищаем вкладку
+    for _, child in pairs(xrayTab:GetChildren()) do
         child:Destroy()
     end
     
-    -- Создаем новую вкладку Freecam с ИСПРАВЛЕННОЙ физикой вращения
+    -- Создаем контейнер
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 1, 0)
     container.BackgroundTransparency = 1
-    container.Parent = freecamTab
+    container.Parent = xrayTab
     
+    -- Основной фрейм
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
     mainFrame.Parent = container
     
+    -- Заголовок
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.Size = UDim2.new(1, 0, 0.2, 0)
     title.BackgroundTransparency = 1
-    title.Text = "РЕЖИМ FREECAM (ИСПРАВЛЕННЫЙ)"
+    title.Text = "РЕЖИМ X-RAY"
     title.TextColor3 = Library.Theme.Text
     title.TextScaled = true
     title.Font = Enum.Font.SourceSansBold
     title.Parent = mainFrame
     
-    local desc = Instance.new("TextLabel")
-    desc.Size = UDim2.new(1, -20, 0.15, 0)
-    desc.Position = UDim2.new(0, 10, 0.17, 0)
-    desc.BackgroundTransparency = 1
-    desc.Text = "Плавное вращение без дерганий и переворотов"
-    desc.TextColor3 = Library.Theme.Accent
-    desc.TextScaled = true
-    desc.Font = Enum.Font.SourceSans
-    desc.TextXAlignment = Enum.TextXAlignment.Left
-    desc.Parent = mainFrame
+    -- Информация
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.2, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Позволяет видеть сквозь стены"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
     
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    toggleBtn.BorderColor3 = Library.Theme.Border
-    toggleBtn.BorderSizePixel = 2
-    toggleBtn.Text = "ВЫКЛ"
-    toggleBtn.TextColor3 = Library.Theme.Text
-    toggleBtn.TextScaled = true
-    toggleBtn.Font = Enum.Font.SourceSansBold
-    toggleBtn.Parent = mainFrame
+    -- Кнопка включения
+    local xrayBtn = Instance.new("TextButton")
+    xrayBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
+    xrayBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    xrayBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    xrayBtn.BorderColor3 = Library.Theme.Border
+    xrayBtn.BorderSizePixel = 2
+    xrayBtn.Text = "ВЫКЛ"
+    xrayBtn.TextColor3 = Library.Theme.Text
+    xrayBtn.TextScaled = true
+    xrayBtn.Font = Enum.Font.SourceSansBold
+    xrayBtn.Parent = mainFrame
     
+    -- Индикатор статуса
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
     statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Freecam: Выключен"
+    statusLabel.Text = "X-Ray: Выключен"
     statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
     statusLabel.TextScaled = true
     statusLabel.Font = Enum.Font.SourceSans
     statusLabel.Parent = mainFrame
     
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-    speedLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "Скорость: 100"
-    speedLabel.TextColor3 = Library.Theme.Text
-    speedLabel.TextScaled = true
-    speedLabel.Font = Enum.Font.SourceSans
-    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    speedLabel.Parent = mainFrame
+    -- Метка прозрачности
+    local transLabel = Instance.new("TextLabel")
+    transLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
+    transLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
+    transLabel.BackgroundTransparency = 1
+    transLabel.Text = "50%"
+    transLabel.TextColor3 = Library.Theme.Text
+    transLabel.TextScaled = true
+    transLabel.Font = Enum.Font.SourceSansBold
+    transLabel.Parent = mainFrame
     
-    local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.5, -10, 0.05, 0)
-    speedSlider.Position = UDim2.new(0.4, 0, 0.8, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
-    speedSlider.BorderSizePixel = 0
-    speedSlider.Parent = mainFrame
+    -- Ползунок прозрачности
+    local transSlider = Instance.new("Frame")
+    transSlider.Size = UDim2.new(0.6, -10, 0.05, 0)
+    transSlider.Position = UDim2.new(0.3, 0, 0.82, 0)
+    transSlider.BackgroundColor3 = Library.Theme.Border
+    transSlider.BorderSizePixel = 0
+    transSlider.Parent = mainFrame
     
-    local speedFill = Instance.new("Frame")
-    speedFill.Size = UDim2.new(0.5, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    speedFill.BorderSizePixel = 0
-    speedFill.Parent = speedSlider
+    local transFill = Instance.new("Frame")
+    transFill.Size = UDim2.new(0.5, 0, 1, 0)
+    transFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    transFill.BorderSizePixel = 0
+    transFill.Parent = transSlider
     
-    local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-    speedButton.BackgroundColor3 = Library.Theme.Text
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
-    speedButton.Text = ""
-    speedButton.Parent = speedSlider
+    local transButton = Instance.new("TextButton")
+    transButton.Size = UDim2.new(0, 15, 1.8, 0)
+    transButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+    transButton.BackgroundColor3 = Library.Theme.Text
+    transButton.BorderColor3 = Library.Theme.Border
+    transButton.BorderSizePixel = 2
+    transButton.Text = ""
+    transButton.Parent = transSlider
     
-    local controlsFrame = Instance.new("Frame")
-    controlsFrame.Size = UDim2.new(1, -20, 0.25, 0)
-    controlsFrame.Position = UDim2.new(0, 10, 0.73, 0)
-    controlsFrame.BackgroundColor3 = Library.Theme.Panel
-    controlsFrame.BorderColor3 = Library.Theme.Border
-    controlsFrame.BorderSizePixel = 2
-    controlsFrame.Parent = container
+    -- Хоткей
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.7, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
     
-    local controls = Instance.new("TextLabel")
-    controls.Size = UDim2.new(1, -10, 1, -10)
-    controls.Position = UDim2.new(0, 5, 0, 5)
-    controls.BackgroundTransparency = 1
-    controls.Text = "Управление: F9 - вкл/выкл  |  Alt - курсор  |  WASD - движение  |  Пробел - вверх  |  Ctrl - вниз"
-    controls.TextColor3 = Library.Theme.Text
-    controls.TextScaled = true
-    controls.Font = Enum.Font.SourceSans
-    controls.TextXAlignment = Enum.TextXAlignment.Left
-    controls.TextYAlignment = Enum.TextYAlignment.Center
-    controls.Parent = controlsFrame
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+R"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
     
-    -- ==== ИСПРАВЛЕННАЯ ЛОГИКА FREECAM ====
-    local isFreecamActive = false
-    local isCursorLocked = false
-    local savedCameraCFrame = nil
-    local savedCameraFocus = nil
-    local savedCharacterCFrame = nil
+    -- ===== РАБОЧАЯ ЛОГИКА X-RAY =====
+    local xrayEnabled = false
+    local currentTransparency = 0.5
     local originalTransparencies = {}
-    local baseSpeed = 100
-    local moveSpeed = 100
-    local sensitivity = 0.003
-    local freecamPosition = Vector3.new(0, 10, 0)
     
-    -- ИСПРАВЛЕНИЕ: ИСПОЛЬЗУЕМ CFrame ДЛЯ ВРАЩЕНИЯ ВМЕСТО УГЛОВ
-    local cameraRotation = CFrame.new() -- Накапливаем вращение через CFrame
-    
-    local function updateSpeedSlider()
-        local percent = (baseSpeed - 1) / 199
-        speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-        speedLabel.Text = "Скорость: " .. math.floor(baseSpeed)
+    -- Функция для применения X-Ray к части
+    local function makeXRayPart(part, enable)
+        if not part or not part.Parent then return end
+        
+        if enable then
+            if not originalTransparencies[part] then
+                originalTransparencies[part] = part.LocalTransparencyModifier or 0
+            end
+            part.LocalTransparencyModifier = currentTransparency
+        else
+            if originalTransparencies[part] ~= nil then
+                part.LocalTransparencyModifier = originalTransparencies[part]
+                originalTransparencies[part] = nil
+            end
+        end
     end
     
-    local function setCharacterTransparency(transparency)
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        if not char then return end
+    -- Рекурсивная функция для поиска частей
+    local function processParts(object, enable)
+        if object:IsA("BasePart") then
+            makeXRayPart(object, enable)
+        end
         
-        if transparency == 0.5 then
-            originalTransparencies = {}
-            for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    originalTransparencies[part] = part.Transparency
-                    part.Transparency = transparency
+        -- Пропускаем игроков и GUI
+        if object:FindFirstChildOfClass("Humanoid") then return end
+        if object:IsDescendantOf(game.Players.LocalPlayer.Character) then return end
+        if object:IsDescendantOf(game.CoreGui) then return end
+        if object:IsDescendantOf(game.StarterGui) then return end
+        
+        for _, child in pairs(object:GetChildren()) do
+            processParts(child, enable)
+        end
+    end
+    
+    -- Функция обновления прозрачности
+    local function updateTransparency()
+        if xrayEnabled then
+            for part, _ in pairs(originalTransparencies) do
+                if part and part.Parent then
+                    part.LocalTransparencyModifier = currentTransparency
+                else
+                    originalTransparencies[part] = nil
                 end
             end
         end
     end
     
-    local function restoreCharacterTransparency()
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        if not char then return end
+    -- Включение X-Ray
+    local function enableXRay()
+        if xrayEnabled then return end
+        xrayEnabled = true
+        
+        -- Очищаем старые данные
+        originalTransparencies = {}
+        
+        processParts(workspace, true)
+        
+        xrayBtn.Text = "ВКЛ"
+        xrayBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "X-Ray: Включен"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        print("✅ X-Ray включен")
+    end
+    
+    -- Выключение X-Ray
+    local function disableXRay()
+        if not xrayEnabled then return end
+        xrayEnabled = false
         
         for part, origTrans in pairs(originalTransparencies) do
             if part and part.Parent then
-                part.Transparency = origTrans
+                part.LocalTransparencyModifier = origTrans
             end
         end
         originalTransparencies = {}
-    end
-    
-    local function enableFreecam()
-        if isFreecamActive then return end
         
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-        
-        savedCameraCFrame = camera.CFrame
-        savedCameraFocus = camera.Focus
-        
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            savedCharacterCFrame = char.HumanoidRootPart.CFrame
-            freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
-        else
-            freecamPosition = Vector3.new(0, 10, 0)
-        end
-        
-        -- ИСПРАВЛЕНИЕ: ИНИЦИАЛИЗИРУЕМ ВРАЩЕНИЕ НА ОСНОВЕ ТЕКУЩЕЙ КАМЕРЫ
-        cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
-        
-        moveSpeed = baseSpeed
-        
-        if humanoid then
-            humanoid.AutoRotate = false
-            humanoid.PlatformStand = true
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
-        end
-        
-        isFreecamActive = true
-        isCursorLocked = true
-        
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
-        
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = true
-        end
-        
-        setCharacterTransparency(0.5)
-        
-        toggleBtn.Text = "ВКЛ"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Freecam: Включен"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-        
-        pcall(function()
-            if MenuPanel then
-                menuOpen = false
-                MenuPanel.Visible = false
-            end
-        end)
-    end
-    
-    local function disableFreecam()
-        if not isFreecamActive then return end
-        
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-        
-        isFreecamActive = false
-        isCursorLocked = false
-        
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-        
-        if savedCameraCFrame then
-            camera.CFrame = savedCameraCFrame
-            camera.Focus = savedCameraFocus
-        end
-        
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = false
-        end
-        
-        if humanoid then
-            humanoid.AutoRotate = true
-            humanoid.PlatformStand = false
-            humanoid.WalkSpeed = 16
-            humanoid.JumpPower = 50
-        end
-        
-        restoreCharacterTransparency()
-        
-        if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = savedCharacterCFrame
-        end
-        
-        toggleBtn.Text = "ВЫКЛ"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Freecam: Выключен"
+        xrayBtn.Text = "ВЫКЛ"
+        xrayBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "X-Ray: Выключен"
         statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ X-Ray выключен")
     end
     
-    local function toggleFreecam()
-        if isFreecamActive then
-            disableFreecam()
+    -- Переключение X-Ray
+    local function toggleXRay()
+        if xrayEnabled then
+            disableXRay()
         else
-            enableFreecam()
+            enableXRay()
         end
     end
     
-    toggleBtn.MouseButton1Click:Connect(toggleFreecam)
+    -- Обновление слайдера
+    local function updateSlider()
+        local percent = currentTransparency
+        transFill.Size = UDim2.new(percent, 0, 1, 0)
+        transButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        transLabel.Text = math.floor(percent * 100) .. "%"
+    end
     
-    local draggingSpeed = false
-    speedButton.MouseButton1Down:Connect(function() draggingSpeed = true end)
+    -- Обработчики кнопок
+    xrayBtn.MouseButton1Click:Connect(toggleXRay)
+    
+    -- Обработчик хоткея
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.R and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            toggleXRay()
+        end
+    end)
+    
+    -- Ползунок прозрачности
+    local isDragging = false
+    transButton.MouseButton1Down:Connect(function() isDragging = true end)
     
     game:GetService("UserInputService").InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            draggingSpeed = false
+            isDragging = false
         end
     end)
     
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if draggingSpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = speedSlider.AbsolutePosition
-            local sliderSize = speedSlider.AbsoluteSize
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = transSlider.AbsolutePosition
+            local sliderSize = transSlider.AbsoluteSize
             local mouseX = input.Position.X
             
             local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            baseSpeed = math.floor(1 + percent * 199)
-            updateSpeedSlider()
-            moveSpeed = baseSpeed
+            currentTransparency = percent
+            updateSlider()
+            updateTransparency()
         end
     end)
     
-    local inputService = game:GetService("UserInputService")
+    -- Обновляем при переключении вкладки
+    updateSlider()
     
-    inputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        
-        if input.KeyCode == Enum.KeyCode.F9 then
-            toggleFreecam()
-        end
-        
-        if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
-            if isFreecamActive then
-                if isCursorLocked then
-                    inputService.MouseBehavior = Enum.MouseBehavior.Default
-                    isCursorLocked = false
-                else
-                    inputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-                    isCursorLocked = true
-                end
-            end
+    -- Подписка на события
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if xrayEnabled then
+            task.wait(0.5)
+            -- Перезапускаем X-Ray при респавне
+            originalTransparencies = {}
+            processParts(workspace, true)
         end
     end)
     
-    -- ИСПРАВЛЕНИЕ: ПЛАВНОЕ ВРАЩЕНИЕ ЧЕРЕЗ УМНОЖЕНИЕ CFrame
-    inputService.InputChanged:Connect(function(input)
-        if not isFreecamActive then return end
-        if not isCursorLocked then return end
-        
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            -- ИСПРАВЛЕНИЕ: ВРАЩАЕМ CFrame ЧЕРЕЗ УМНОЖЕНИЕ
-            local deltaX = -input.Delta.X * sensitivity
-            local deltaY = -input.Delta.Y * sensitivity
-            
-            -- Создаем вращения по осям
-            local rotY = CFrame.Angles(0, deltaX, 0)
-            local rotX = CFrame.Angles(deltaY, 0, 0)
-            
-            -- ИСПРАВЛЕНИЕ: УМНОЖАЕМ НАКОПЛЕННЫЙ CFrame НА НОВЫЕ ВРАЩЕНИЯ
-            -- Это позволяет избежать дерганий и переворотов
-            cameraRotation = cameraRotation * rotY
-            cameraRotation = cameraRotation * rotX
-            
-            -- НОРМАЛИЗУЕМ CFrame чтобы избежать накопления ошибок
-            local pos = cameraRotation.Position
-            local look = cameraRotation.LookVector
-            local up = cameraRotation.UpVector
-            cameraRotation = CFrame.lookAt(pos, pos + look, up)
-        end
-    end)
-    
-    -- ИСПРАВЛЕНИЕ: ИСПОЛЬЗУЕМ НАКОПЛЕННЫЙ CFrame ДЛЯ КАМЕРЫ
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not isFreecamActive then return end
-        
-        local camera = workspace.CurrentCamera
-        local moveDirection = Vector3.new(0, 0, 0)
-        
-        if inputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + Vector3.new(0, 0, -1) end
-        if inputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection + Vector3.new(0, 0, 1) end
-        if inputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection + Vector3.new(-1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + Vector3.new(1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-        
-        if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
-        
-        -- ИСПОЛЬЗУЕМ НАКОПЛЕННЫЙ CFrame ДЛЯ ДВИЖЕНИЯ
-        local deltaTime = 0.016
-        local moveAmount = moveSpeed * deltaTime
-        
-        if moveDirection.Magnitude > 0 then
-            local worldMove = cameraRotation * moveDirection
-            freecamPosition = freecamPosition + worldMove * moveAmount
-        end
-        
-        -- ИСПРАВЛЕНИЕ: СОЗДАЕМ CFrame ИЗ ПОЗИЦИИ И НАКОПЛЕННОГО ВРАЩЕНИЯ
-        local newCFrame = CFrame.new(freecamPosition) * cameraRotation
-        
-        camera.CFrame = newCFrame
-        camera.Focus = CFrame.new(freecamPosition + cameraRotation.LookVector * 100)
-    end)
-    
-    updateSpeedSlider()
-    print("✅ Freecam ИСПРАВЛЕН! Вращение теперь плавное без дерганий")
-    print("📌 Использован CFrame для накопления вращения вместо углов Эйлера")
-end)
--- ===== ИСПРАВЛЕНИЕ FREECAM: ПЕРСОНАЖ НЕ ПРОЗРАЧНЫЙ =====
--- Вставьте этот код в САМЫЙ КОНЕЦ вашего скрипта
-
-pcall(function()
-    -- Находим существующую вкладку Freecam
-    local freecamTab = Tabs[10]
-    if not freecamTab then return end
-    
-    -- Удаляем старую вкладку Freecam
-    for _, child in pairs(freecamTab:GetChildren()) do
-        child:Destroy()
-    end
-    
-    -- Создаем новую вкладку Freecam с ИСПРАВЛЕННОЙ физикой вращения и БЕЗ ПРОЗРАЧНОСТИ
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, 0)
-    container.BackgroundTransparency = 1
-    container.Parent = freecamTab
-    
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
-    mainFrame.BackgroundColor3 = Library.Theme.Panel
-    mainFrame.BorderColor3 = Library.Theme.Border
-    mainFrame.BorderSizePixel = 2
-    mainFrame.Parent = container
-    
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "РЕЖИМ FREECAM (ПЕРСОНАЖ ВИДИМ)"
-    title.TextColor3 = Library.Theme.Text
-    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = mainFrame
-    
-    local desc = Instance.new("TextLabel")
-    desc.Size = UDim2.new(1, -20, 0.15, 0)
-    desc.Position = UDim2.new(0, 10, 0.17, 0)
-    desc.BackgroundTransparency = 1
-    desc.Text = "Персонаж остается ВИДИМЫМ во время полета"
-    desc.TextColor3 = Library.Theme.Accent
-    desc.TextScaled = true
-    desc.Font = Enum.Font.SourceSans
-    desc.TextXAlignment = Enum.TextXAlignment.Left
-    desc.Parent = mainFrame
-    
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    toggleBtn.BorderColor3 = Library.Theme.Border
-    toggleBtn.BorderSizePixel = 2
-    toggleBtn.Text = "ВЫКЛ"
-    toggleBtn.TextColor3 = Library.Theme.Text
-    toggleBtn.TextScaled = true
-    toggleBtn.Font = Enum.Font.SourceSansBold
-    toggleBtn.Parent = mainFrame
-    
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Freecam: Выключен"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-    
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-    speedLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "Скорость: 100"
-    speedLabel.TextColor3 = Library.Theme.Text
-    speedLabel.TextScaled = true
-    speedLabel.Font = Enum.Font.SourceSans
-    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    speedLabel.Parent = mainFrame
-    
-    local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.5, -10, 0.05, 0)
-    speedSlider.Position = UDim2.new(0.4, 0, 0.8, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
-    speedSlider.BorderSizePixel = 0
-    speedSlider.Parent = mainFrame
-    
-    local speedFill = Instance.new("Frame")
-    speedFill.Size = UDim2.new(0.5, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    speedFill.BorderSizePixel = 0
-    speedFill.Parent = speedSlider
-    
-    local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-    speedButton.BackgroundColor3 = Library.Theme.Text
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
-    speedButton.Text = ""
-    speedButton.Parent = speedSlider
-    
-    local controlsFrame = Instance.new("Frame")
-    controlsFrame.Size = UDim2.new(1, -20, 0.25, 0)
-    controlsFrame.Position = UDim2.new(0, 10, 0.73, 0)
-    controlsFrame.BackgroundColor3 = Library.Theme.Panel
-    controlsFrame.BorderColor3 = Library.Theme.Border
-    controlsFrame.BorderSizePixel = 2
-    controlsFrame.Parent = container
-    
-    local controls = Instance.new("TextLabel")
-    controls.Size = UDim2.new(1, -10, 1, -10)
-    controls.Position = UDim2.new(0, 5, 0, 5)
-    controls.BackgroundTransparency = 1
-    controls.Text = "Управление: F9 - вкл/выкл  |  Alt - курсор  |  WASD - движение  |  Пробел - вверх  |  Ctrl - вниз"
-    controls.TextColor3 = Library.Theme.Text
-    controls.TextScaled = true
-    controls.Font = Enum.Font.SourceSans
-    controls.TextXAlignment = Enum.TextXAlignment.Left
-    controls.TextYAlignment = Enum.TextYAlignment.Center
-    controls.Parent = controlsFrame
-    
-    -- ==== ИСПРАВЛЕННАЯ ЛОГИКА FREECAM (БЕЗ ПРОЗРАЧНОСТИ) ====
-    local isFreecamActive = false
-    local isCursorLocked = false
-    local savedCameraCFrame = nil
-    local savedCameraFocus = nil
-    local savedCharacterCFrame = nil
-    local baseSpeed = 100
-    local moveSpeed = 100
-    local sensitivity = 0.003
-    local freecamPosition = Vector3.new(0, 10, 0)
-    
-    -- Используем CFrame для накопления вращения
-    local cameraRotation = CFrame.new()
-    
-    -- Сохраняем оригинальные свойства персонажа
-    local savedWalkSpeed = 16
-    local savedJumpPower = 50
-    local savedAutoRotate = true
-    local savedPlatformStand = false
-    local savedAnchored = false
-    
-    local function updateSpeedSlider()
-        local percent = (baseSpeed - 1) / 199
-        speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-        speedLabel.Text = "Скорость: " .. math.floor(baseSpeed)
-    end
-    
-    -- ⚠️ УДАЛЕНА ФУНКЦИЯ setCharacterTransparency - она больше не нужна
-    
-    local function enableFreecam()
-        if isFreecamActive then return end
-        
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-        
-        -- Сохраняем состояние камеры
-        savedCameraCFrame = camera.CFrame
-        savedCameraFocus = camera.Focus
-        
-        -- Сохраняем позицию персонажа
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            savedCharacterCFrame = char.HumanoidRootPart.CFrame
-            freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
-        else
-            freecamPosition = Vector3.new(0, 10, 0)
-        end
-        
-        -- Сохраняем настройки персонажа
-        if humanoid then
-            savedWalkSpeed = humanoid.WalkSpeed
-            savedJumpPower = humanoid.JumpPower
-            savedAutoRotate = humanoid.AutoRotate
-            savedPlatformStand = humanoid.PlatformStand
-        end
-        
-        -- Инициализируем вращение на основе текущей камеры
-        cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
-        
-        moveSpeed = baseSpeed
-        
-        -- Отключаем управление персонажем (НО НЕ ДЕЛАЕМ ЕГО ПРОЗРАЧНЫМ)
-        if humanoid then
-            humanoid.AutoRotate = false
-            humanoid.PlatformStand = true
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
-        end
-        
-        isFreecamActive = true
-        isCursorLocked = true
-        
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
-        
-        -- Анкорим персонаж (НО НЕ МЕНЯЕМ ПРОЗРАЧНОСТЬ)
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            savedAnchored = char.HumanoidRootPart.Anchored
-            char.HumanoidRootPart.Anchored = true
-        end
-        
-        -- ⚠️ НЕ ВЫЗЫВАЕМ setCharacterTransparency - персонаж остается видимым!
-        
-        toggleBtn.Text = "ВКЛ"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Freecam: Включен"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-        
-        pcall(function()
-            if MenuPanel then
-                menuOpen = false
-                MenuPanel.Visible = false
-            end
-        end)
-        
-        print("✅ Freecam включен. Персонаж остался видимым!")
-    end
-    
-    local function disableFreecam()
-        if not isFreecamActive then return end
-        
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-        
-        isFreecamActive = false
-        isCursorLocked = false
-        
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-        
-        -- Восстанавливаем камеру
-        if savedCameraCFrame then
-            camera.CFrame = savedCameraCFrame
-            camera.Focus = savedCameraFocus
-        end
-        
-        -- Восстанавливаем персонажа (БЕЗ ИЗМЕНЕНИЯ ПРОЗРАЧНОСТИ)
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = savedAnchored or false
-        end
-        
-        if humanoid then
-            humanoid.AutoRotate = savedAutoRotate
-            humanoid.PlatformStand = savedPlatformStand
-            humanoid.WalkSpeed = savedWalkSpeed
-            humanoid.JumpPower = savedJumpPower
-        end
-        
-        -- Восстанавливаем позицию персонажа
-        if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = savedCharacterCFrame
-        end
-        
-        toggleBtn.Text = "ВЫКЛ"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Freecam: Выключен"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-        
-        print("✅ Freecam выключен. Персонаж восстановлен.")
-    end
-    
-    local function toggleFreecam()
-        if isFreecamActive then
-            disableFreecam()
-        else
-            enableFreecam()
-        end
-    end
-    
-    toggleBtn.MouseButton1Click:Connect(toggleFreecam)
-    
-    local draggingSpeed = false
-    speedButton.MouseButton1Down:Connect(function() draggingSpeed = true end)
-    
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            draggingSpeed = false
-        end
-    end)
-    
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if draggingSpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = speedSlider.AbsolutePosition
-            local sliderSize = speedSlider.AbsoluteSize
-            local mouseX = input.Position.X
-            
-            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            baseSpeed = math.floor(1 + percent * 199)
-            updateSpeedSlider()
-            moveSpeed = baseSpeed
-        end
-    end)
-    
-    local inputService = game:GetService("UserInputService")
-    
-    inputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        
-        if input.KeyCode == Enum.KeyCode.F9 then
-            toggleFreecam()
-        end
-        
-        if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
-            if isFreecamActive then
-                if isCursorLocked then
-                    inputService.MouseBehavior = Enum.MouseBehavior.Default
-                    isCursorLocked = false
-                else
-                    inputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-                    isCursorLocked = true
-                end
-            end
-        end
-    end)
-    
-    -- Плавное вращение через умножение CFrame
-    inputService.InputChanged:Connect(function(input)
-        if not isFreecamActive then return end
-        if not isCursorLocked then return end
-        
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            local deltaX = -input.Delta.X * sensitivity
-            local deltaY = -input.Delta.Y * sensitivity
-            
-            local rotY = CFrame.Angles(0, deltaX, 0)
-            local rotX = CFrame.Angles(deltaY, 0, 0)
-            
-            cameraRotation = cameraRotation * rotY
-            cameraRotation = cameraRotation * rotX
-            
-            -- Нормализация CFrame
-            local pos = cameraRotation.Position
-            local look = cameraRotation.LookVector
-            local up = cameraRotation.UpVector
-            cameraRotation = CFrame.lookAt(pos, pos + look, up)
-        end
-    end)
-    
-    -- Обновление камеры
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not isFreecamActive then return end
-        
-        local camera = workspace.CurrentCamera
-        local moveDirection = Vector3.new(0, 0, 0)
-        
-        if inputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + Vector3.new(0, 0, -1) end
-        if inputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection + Vector3.new(0, 0, 1) end
-        if inputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection + Vector3.new(-1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + Vector3.new(1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-        
-        if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
-        
-        local deltaTime = 0.016
-        local moveAmount = moveSpeed * deltaTime
-        
-        if moveDirection.Magnitude > 0 then
-            local worldMove = cameraRotation * moveDirection
-            freecamPosition = freecamPosition + worldMove * moveAmount
-        end
-        
-        local newCFrame = CFrame.new(freecamPosition) * cameraRotation
-        
-        camera.CFrame = newCFrame
-        camera.Focus = CFrame.new(freecamPosition + cameraRotation.LookVector * 100)
-    end)
-    
-    updateSpeedSlider()
-    
-    print("========================================")
-    print("✅ FREECAM ИСПРАВЛЕНА!")
-    print("📌 Персонаж НЕ становится прозрачным")
-    print("📌 Плавное вращение через CFrame")
-    print("📌 F9 - вкл/выкл | Alt - курсор | WASD - движение")
-    print("========================================")
+    print("✅ Вкладка X-Ray обновлена - работает!")
+    print("📌 Alt+R - включить/выключить")
+    print("📌 Ползунок регулирует прозрачность")
 end)
