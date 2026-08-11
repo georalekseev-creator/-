@@ -3921,3 +3921,804 @@ pcall(function()
     print("📌 Alt+R - включить/выключить")
     print("📌 Ползунок регулирует прозрачность")
 end)
+-- ===== ДОБАВЛЕНИЕ ПРОЗРАЧНОСТИ ФОНА =====
+pcall(function()
+    -- Основной фон меню - 50% прозрачности
+    if MenuPanel then
+        MenuPanel.BackgroundTransparency = 0.5
+    end
+    
+    -- Заголовок - 50% прозрачности
+    if TitleFrame then
+        TitleFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Боковая панель вкладок - 50% прозрачности
+    if TabBar then
+        TabBar.BackgroundTransparency = 0.5
+    end
+    
+    -- Панели во всех вкладках
+    for _, tab in pairs(Tabs) do
+        for _, child in pairs(tab:GetChildren()) do
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+                child.BackgroundTransparency = 0.5
+            end
+        end
+    end
+    
+    -- Список точек
+    if PointsList then
+        PointsList.BackgroundTransparency = 0.5
+    end
+    
+    -- Список точек ходьбы
+    if WalkPointsList then
+        WalkPointsList.BackgroundTransparency = 0.5
+    end
+    
+    -- Список игроков
+    if PlayersList then
+        PlayersList.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм управления игроками
+    if PlayersControlPanel then
+        PlayersControlPanel.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Noclip
+    if NoclipFrame then
+        NoclipFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм X-Ray
+    if XRayControlFrame then
+        XRayControlFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм SPI
+    if SPIControlFrame then
+        SPIControlFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Платформ
+    if PlatformFrame then
+        PlatformFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Полёта
+    if FlyFrame then
+        FlyFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Ходьбы
+    if WalkFrame then
+        WalkFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Клик-Телепорта
+    if ClickTeleportFrame then
+        ClickTeleportFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- Фрейм Freecam
+    for _, child in pairs(Tabs[10]:GetChildren()) do
+        if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            child.BackgroundTransparency = 0.5
+        end
+    end
+    
+    print("✅ Прозрачность фона установлена на 50%")
+end)
+-- ===== ДОПОЛНИТЕЛЬНАЯ ПРОЗРАЧНОСТЬ ДЛЯ FREECAM И ПОЛЯ ВВОДА =====
+pcall(function()
+    -- === ВКЛАДКА FREECAM (10-я вкладка) ===
+    local freecamTab = Tabs[10]
+    if freecamTab then
+        for _, child in pairs(freecamTab:GetChildren()) do
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+                child.BackgroundTransparency = 0.5
+            end
+            
+            -- Рекурсивно проходим по всем дочерним элементам
+            for _, subChild in pairs(child:GetChildren()) do
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                    subChild.BackgroundTransparency = 0.5
+                end
+            end
+        end
+    end
+    
+    -- === ПОЛЕ ВВОДА НАЗВАНИЯ ТОЧКИ (вкладка 1) ===
+    if NameInput then
+        NameInput.BackgroundTransparency = 0.5
+    end
+    
+    -- === ДОПОЛНИТЕЛЬНО: ПОЛЯ ВВОДА В ДРУГИХ МЕСТАХ ===
+    -- Если есть другие TextBox, тоже делаем прозрачными
+    for _, tab in pairs(Tabs) do
+        for _, child in pairs(tab:GetChildren()) do
+            if child:IsA("TextBox") then
+                child.BackgroundTransparency = 0.5
+            end
+        end
+    end
+    
+    -- === ВСЕ ТЕКСТОВЫЕ ПОЛЯ ВО ВСЕМ GUI ===
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj:IsA("TextBox") then
+            obj.BackgroundTransparency = 0.5
+        end
+    end
+    
+    print("✅ Дополнительная прозрачность применена: Freecam и поле ввода")
+end)
+-- ===== ПРОЗРАЧНОСТЬ ДЛЯ ВКЛАДОК ИГРОКИ И X-RAY =====
+pcall(function()
+    -- === ВКЛАДКА ИГРОКИ (7-я вкладка) ===
+    local playersTab = Tabs[7]
+    if playersTab then
+        for _, child in pairs(playersTab:GetChildren()) do
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+                child.BackgroundTransparency = 0.5
+            end
+            
+            -- Рекурсивно проходим по всем дочерним элементам
+            for _, subChild in pairs(child:GetChildren()) do
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                    subChild.BackgroundTransparency = 0.5
+                end
+            end
+        end
+    end
+    
+    -- === ВКЛАДКА X-RAY (8-я вкладка) ===
+    local xrayTab = Tabs[8]
+    if xrayTab then
+        for _, child in pairs(xrayTab:GetChildren()) do
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+                child.BackgroundTransparency = 0.5
+            end
+            
+            -- Рекурсивно проходим по всем дочерним элементам
+            for _, subChild in pairs(child:GetChildren()) do
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                    subChild.BackgroundTransparency = 0.5
+                end
+            end
+        end
+    end
+    
+    -- === ДОПОЛНИТЕЛЬНО: ФРЕЙМ СПИСКА ИГРОКОВ ===
+    if PlayersList then
+        PlayersList.BackgroundTransparency = 0.5
+    end
+    
+    -- === ДОПОЛНИТЕЛЬНО: ФРЕЙМ УПРАВЛЕНИЯ ИГРОКАМИ ===
+    if PlayersControlPanel then
+        PlayersControlPanel.BackgroundTransparency = 0.5
+    end
+    
+    -- === ДОПОЛНИТЕЛЬНО: ФРЕЙМ X-RAY ===
+    if XRayControlFrame then
+        XRayControlFrame.BackgroundTransparency = 0.5
+    end
+    
+    -- === ВСЕ ФРЕЙМЫ ВНУТРИ X-RAY ===
+    if xrayTab then
+        for _, obj in pairs(xrayTab:GetDescendants()) do
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+                obj.BackgroundTransparency = 0.5
+            end
+        end
+    end
+    
+    -- === ВСЕ ФРЕЙМЫ ВНУТРИ ИГРОКОВ ===
+    if playersTab then
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+                obj.BackgroundTransparency = 0.5
+            end
+        end
+    end
+    
+    print("✅ Прозрачность применена для вкладок Игроки и X-Ray")
+end)
+-- ===== ПРОЗРАЧНОСТЬ ДЛЯ СПИСКА ИГРОКОВ (НИКИ) =====
+pcall(function()
+    local playersTab = Tabs[7]
+    if playersTab then
+        -- Делаем прозрачным сам список игроков
+        if PlayersList then
+            PlayersList.BackgroundTransparency = 0.5
+        end
+        
+        -- Делаем прозрачной панель управления (верхнюю)
+        if PlayersControlPanel then
+            PlayersControlPanel.BackgroundTransparency = 0.5
+        end
+        
+        -- Делаем прозрачными ВСЕ фреймы с никами игроков
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("Frame") and obj.Parent == PlayersList then
+                obj.BackgroundTransparency = 0.5
+            end
+        end
+        
+        -- Также обрабатываем уже существующие элементы в списке
+        if PlayersList then
+            for _, child in pairs(PlayersList:GetChildren()) do
+                if child:IsA("Frame") then
+                    child.BackgroundTransparency = 0.5
+                end
+            end
+        end
+    end
+    
+    print("✅ Список игроков и ники стали прозрачными (50%)")
+end)
+-- ===== ПРОЗРАЧНОСТЬ ДЛЯ СТРОК С ИГРОКАМИ (ONLINE/OFFLINE, ИМЯ, ID, ТП) =====
+pcall(function()
+    -- Делаем прозрачными все строки с игроками
+    if PlayersList then
+        for _, child in pairs(PlayersList:GetChildren()) do
+            if child:IsA("Frame") then
+                child.BackgroundTransparency = 0.5
+            end
+        end
+    end
+    
+    -- Подключаемся к событию обновления списка игроков
+    local oldUpdate = UpdatePlayersList
+    UpdatePlayersList = function(...)
+        oldUpdate(...)
+        
+        -- После обновления делаем все строки прозрачными
+        task.wait(0.05)
+        if PlayersList then
+            for _, child in pairs(PlayersList:GetChildren()) do
+                if child:IsA("Frame") then
+                    child.BackgroundTransparency = 0.5
+                end
+            end
+        end
+    end
+    
+    print("✅ Строки с игроками (online/offline, имя, ID, ТП) стали прозрачными (50%)")
+end)
+-- ===== ПРОЗРАЧНОСТЬ КНОПОК И ИЗМЕНЕНИЕ ФОРМЫ =====
+pcall(function()
+    -- === КНОПКА A_D (ГЛАВНАЯ) ===
+    if MainButton then
+        MainButton.BackgroundTransparency = 0.5
+        MainButton.BackgroundColor3 = Color3.fromRGB(30, 55, 80)
+        MainButton.BorderSizePixel = 0
+        -- Делаем круглой
+        MainButton.Image = "rbxassetid://0"
+        
+        -- Создаём круглую форму через UIGradient или CornerRadius
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(1, 0) -- Полная круглость
+        corner.Parent = MainButton
+        
+        -- Делаем прозрачной тень
+        if MainButton:FindFirstChild("Shadow") then
+            MainButton.Shadow.BackgroundTransparency = 1
+        end
+    end
+    
+    -- === КНОПКИ РАСТЯГИВАНИЯ ===
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            -- Делаем прозрачными все кнопки растягивания
+            child.BackgroundTransparency = 0.5
+            
+            -- Проверяем, находится ли кнопка на стенке (не по углам)
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            -- Если кнопка на стенке (центр стороны) - делаем круглой
+            local isOnWall = false
+            
+            -- Верхняя стенка (y=0)
+            if posY < 0.05 and posX > 0.05 and posX < 0.95 then
+                isOnWall = true
+            end
+            -- Нижняя стенка (y=1)
+            if posY > 0.95 and posX > 0.05 and posX < 0.95 then
+                isOnWall = true
+            end
+            -- Левая стенка (x=0)
+            if posX < 0.05 and posY > 0.05 and posY < 0.95 then
+                isOnWall = true
+            end
+            -- Правая стенка (x=1)
+            if posX > 0.95 and posY > 0.05 and posY < 0.95 then
+                isOnWall = true
+            end
+            
+            -- Если на стенке - делаем круглой
+            if isOnWall then
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(1, 0)
+                corner.Parent = child
+                
+                -- Меняем иконку на круглую точку
+                child.Image = "rbxassetid://0"
+                
+                -- Увеличиваем немного размер для удобства
+                child.Size = UDim2.new(0, 12, 0, 12)
+                
+                -- Меняем цвет на более заметный
+                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+                child.BackgroundTransparency = 0.4
+                child.BorderSizePixel = 1
+                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            else
+                -- Угловые кнопки - делаем прозрачными но оставляем квадратными
+                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+                child.BackgroundTransparency = 0.4
+                child.BorderSizePixel = 1
+                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+                
+                -- Угловые делаем чуть больше
+                child.Size = UDim2.new(0, 14, 0, 14)
+            end
+        end
+    end
+    
+    -- === УДАЛЯЕМ СТАРЫЕ КНОПКИ РАСТЯГИВАНИЯ (ЕСЛИ ЕСТЬ) ===
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
+            child:Destroy()
+        end
+    end
+    
+    print("✅ Кнопка A_D прозрачная и круглая")
+    print("✅ Кнопки растягивания на стенках - прозрачные и круглые")
+    print("✅ Угловые кнопки - прозрачные")
+end)
+-- ===== УДАЛЕНИЕ СТРЕЛОК И УВЕЛИЧЕНИЕ КНОПОК РАСТЯГИВАНИЯ =====
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            -- Удаляем все дочерние элементы (стрелочки)
+            for _, subChild in pairs(child:GetChildren()) do
+                subChild:Destroy()
+            end
+            
+            -- Убираем изображение (стрелку)
+            child.Image = "rbxassetid://0"
+            
+            -- Увеличиваем размер в 2 раза
+            local currentSize = child.Size
+            if currentSize.X.Offset == 12 then
+                child.Size = UDim2.new(0, 24, 0, 24)
+            elseif currentSize.X.Offset == 14 then
+                child.Size = UDim2.new(0, 28, 0, 28)
+            else
+                -- Если размер другой, увеличиваем в 2 раза
+                child.Size = UDim2.new(0, currentSize.X.Offset * 2, 0, currentSize.Y.Offset * 2)
+            end
+            
+            -- Корректируем позицию (центрируем)
+            child.Position = UDim2.new(
+                child.Position.X.Scale,
+                -child.Size.X.Offset / 2,
+                child.Position.Y.Scale,
+                -child.Size.Y.Offset / 2
+            )
+            
+            -- Делаем более заметными
+            child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            child.BackgroundTransparency = 0.3
+            child.BorderSizePixel = 2
+            child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            
+            -- Делаем круглыми (кроме угловых)
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            local isCorner = false
+            if (posX < 0.05 and posY < 0.05) or -- верхний левый
+               (posX > 0.95 and posY < 0.05) or -- верхний правый
+               (posX < 0.05 and posY > 0.95) or -- нижний левый
+               (posX > 0.95 and posY > 0.95) then -- нижний правый
+                isCorner = true
+            end
+            
+            if not isCorner then
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(1, 0)
+                corner.Parent = child
+            end
+        end
+    end
+    
+    print("✅ Стрелочки удалены со всех кнопок растягивания")
+    print("✅ Кнопки растягивания увеличены в 2 раза")
+    print("✅ Кнопки на стенках - круглые, угловые - квадратные")
+end)
+-- ===== УМЕНЬШЕНИЕ КНОПОК РАСТЯГИВАНИЯ В 2 РАЗА =====
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            -- Удаляем все дочерние элементы (стрелочки)
+            for _, subChild in pairs(child:GetChildren()) do
+                subChild:Destroy()
+            end
+            
+            -- Убираем изображение (стрелку)
+            child.Image = "rbxassetid://0"
+            
+            -- Уменьшаем размер в 2 раза
+            local currentSize = child.Size
+            if currentSize.X.Offset == 24 then
+                child.Size = UDim2.new(0, 12, 0, 12)
+            elseif currentSize.X.Offset == 28 then
+                child.Size = UDim2.new(0, 14, 0, 14)
+            elseif currentSize.X.Offset == 12 then
+                child.Size = UDim2.new(0, 6, 0, 6)
+            elseif currentSize.X.Offset == 14 then
+                child.Size = UDim2.new(0, 7, 0, 7)
+            else
+                -- Если размер другой, уменьшаем в 2 раза
+                child.Size = UDim2.new(0, currentSize.X.Offset / 2, 0, currentSize.Y.Offset / 2)
+            end
+            
+            -- Корректируем позицию (центрируем)
+            child.Position = UDim2.new(
+                child.Position.X.Scale,
+                -child.Size.X.Offset / 2,
+                child.Position.Y.Scale,
+                -child.Size.Y.Offset / 2
+            )
+            
+            -- Делаем более заметными
+            child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            child.BackgroundTransparency = 0.3
+            child.BorderSizePixel = 2
+            child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            
+            -- Делаем круглыми (кроме угловых)
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            local isCorner = false
+            if (posX < 0.05 and posY < 0.05) or -- верхний левый
+               (posX > 0.95 and posY < 0.05) or -- верхний правый
+               (posX < 0.05 and posY > 0.95) or -- нижний левый
+               (posX > 0.95 and posY > 0.95) then -- нижний правый
+                isCorner = true
+            end
+            
+            if not isCorner then
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(1, 0)
+                corner.Parent = child
+            end
+        end
+    end
+    
+    print("✅ Кнопки растягивания уменьшены в 2 раза")
+    print("✅ Стрелочки удалены")
+    print("✅ Кнопки на стенках - круглые, угловые - квадратные")
+end)
+-- ===== ВСЕ КНОПКИ: ПРОЗРАЧНОСТЬ 30% И ЗАКРУГЛЕНИЕ В 3 РАЗА =====
+pcall(function()
+    -- Функция для обработки кнопок
+    local function processButtons(container)
+        for _, obj in pairs(container:GetDescendants()) do
+            if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                -- Делаем прозрачными на 30%
+                if obj.BackgroundTransparency < 0.3 then
+                    obj.BackgroundTransparency = 0.3
+                end
+                
+                -- Закругляем края в 3 раза
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                
+                -- Увеличиваем скругление в 3 раза
+                local currentRadius = corner.CornerRadius
+                if currentRadius.Offset == 0 then
+                    corner.CornerRadius = UDim.new(0, 12)
+                elseif currentRadius.Offset > 0 then
+                    corner.CornerRadius = UDim.new(0, currentRadius.Offset * 3)
+                else
+                    corner.CornerRadius = UDim.new(0.3, 0)
+                end
+            end
+        end
+    end
+    
+    -- Обрабатываем все элементы в GUI
+    if ScreenGui then
+        processButtons(ScreenGui)
+    end
+    
+    -- Обрабатываем панель меню
+    if MenuPanel then
+        processButtons(MenuPanel)
+    end
+    
+    -- Обрабатываем все вкладки
+    for _, tab in pairs(Tabs) do
+        if tab then
+            processButtons(tab)
+        end
+    end
+    
+    -- Обрабатываем главную кнопку A_D отдельно
+    if MainButton then
+        MainButton.BackgroundTransparency = 0.3
+        
+        local corner = MainButton:FindFirstChild("UICorner")
+        if not corner then
+            corner = Instance.new("UICorner")
+            corner.Parent = MainButton
+        end
+        corner.CornerRadius = UDim.new(1, 0) -- Полностью круглая
+    end
+    
+    -- Обрабатываем кнопки растягивания
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            child.BackgroundTransparency = 0.3
+            
+            local corner = child:FindFirstChild("UICorner")
+            if not corner then
+                corner = Instance.new("UICorner")
+                corner.Parent = child
+            end
+            
+            -- Проверяем, на стенке или в углу
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            local isCorner = false
+            if (posX < 0.05 and posY < 0.05) or
+               (posX > 0.95 and posY < 0.05) or
+               (posX < 0.05 and posY > 0.95) or
+               (posX > 0.95 and posY > 0.95) then
+                isCorner = true
+            end
+            
+            if isCorner then
+                corner.CornerRadius = UDim.new(0, 8) -- Угловые - скругление 8
+            else
+                corner.CornerRadius = UDim.new(1, 0) -- На стенках - круглые
+            end
+        end
+    end
+    
+    -- Обрабатываем кнопку закрытия (X)
+    if CloseBtn then
+        CloseBtn.BackgroundTransparency = 0.3
+        
+        local corner = CloseBtn:FindFirstChild("UICorner")
+        if not corner then
+            corner = Instance.new("UICorner")
+            corner.Parent = CloseBtn
+        end
+        corner.CornerRadius = UDim.new(0, 10)
+    end
+    
+    print("✅ Все кнопки стали прозрачными на 30%")
+    print("✅ Все кнопки имеют закругленные края (скругление увеличено в 3 раза)")
+    print("✅ Главная кнопка A_D - круглая")
+    print("✅ Кнопки растягивания на стенках - круглые, в углах - скругленные")
+end)
+-- ===== ИСПРАВЛЕНИЕ КНОПОК: ТП В ИГРОКАХ И УГЛОВЫЕ КНОПКИ =====
+pcall(function()
+    -- === КНОПКИ ТП ВО ВКЛАДКЕ ИГРОКИ ===
+    local playersTab = Tabs[7]
+    if playersTab then
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("TextButton") and obj.Text == "ТП" then
+                -- Делаем прозрачными на 30%
+                obj.BackgroundTransparency = 0.3
+                
+                -- Делаем квадратными (убираем скругление)
+                local corner = obj:FindFirstChild("UICorner")
+                if corner then
+                    corner:Destroy()
+                end
+                
+                -- Делаем немного меньше
+                obj.Size = UDim2.new(0.2, -5, 0.7, 0)
+                
+                -- Меняем цвет на более заметный
+                obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+                obj.BorderSizePixel = 2
+                obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
+            end
+        end
+    end
+    
+    -- === КНОПКИ РАСТЯГИВАНИЯ В УГЛАХ - ДЕЛАЕМ КВАДРАТНЫМИ ===
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            -- Проверяем, находится ли кнопка в углу
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            local isCorner = false
+            if (posX < 0.05 and posY < 0.05) or -- верхний левый
+               (posX > 0.95 and posY < 0.05) or -- верхний правый
+               (posX < 0.05 and posY > 0.95) or -- нижний левый
+               (posX > 0.95 and posY > 0.95) then -- нижний правый
+                isCorner = true
+            end
+            
+            if isCorner then
+                -- Убираем скругление (делаем квадратными)
+                local corner = child:FindFirstChild("UICorner")
+                if corner then
+                    corner:Destroy()
+                end
+                
+                -- Делаем прозрачными на 30%
+                child.BackgroundTransparency = 0.3
+                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+                child.BorderSizePixel = 2
+                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+                
+                -- Убираем изображение
+                child.Image = "rbxassetid://0"
+            end
+        end
+    end
+    
+    -- === КНОПКИ РАСТЯГИВАНИЯ НА СТЕНКАХ - ОСТАВЛЯЕМ КРУГЛЫМИ ===
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+            
+            local isOnWall = false
+            if (posY < 0.05 and posX > 0.05 and posX < 0.95) or -- верхняя
+               (posY > 0.95 and posX > 0.05 and posX < 0.95) or -- нижняя
+               (posX < 0.05 and posY > 0.05 and posY < 0.95) or -- левая
+               (posX > 0.95 and posY > 0.05 and posY < 0.95) then -- правая
+                isOnWall = true
+            end
+            
+            if isOnWall then
+                -- Делаем круглыми
+                local corner = child:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = child
+                end
+                corner.CornerRadius = UDim.new(1, 0)
+                
+                -- Делаем прозрачными на 30%
+                child.BackgroundTransparency = 0.3
+                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+                child.BorderSizePixel = 2
+                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+                
+                -- Убираем изображение
+                child.Image = "rbxassetid://0"
+            end
+        end
+    end
+    
+    print("✅ Кнопки ТП во вкладке Игроки стали квадратными")
+    print("✅ Угловые кнопки растягивания стали квадратными")
+    print("✅ Кнопки на стенках остались круглыми")
+end)
+-- ===== КНОПКА ТП ВО ВКЛАДКЕ ИГРОКИ - КРУГЛАЯ =====
+pcall(function()
+    local playersTab = Tabs[7]
+    if playersTab then
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("TextButton") and obj.Text == "ТП" then
+                -- Делаем прозрачными на 30%
+                obj.BackgroundTransparency = 0.3
+                
+                -- Делаем круглыми
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(1, 0) -- Полностью круглая
+                
+                -- Делаем размер квадратным чтобы стать круглой
+                obj.Size = UDim2.new(0.15, 0, 0.7, 0)
+                
+                -- Меняем цвет на зеленый
+                obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+                obj.BorderSizePixel = 2
+                obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
+                
+                -- Убираем текст
+                obj.Text = ""
+                
+                -- Добавляем иконку "▶" вместо текста
+                local icon = Instance.new("TextLabel")
+                icon.Size = UDim2.new(1, 0, 1, 0)
+                icon.BackgroundTransparency = 1
+                icon.Text = "▶"
+                icon.TextColor3 = Color3.fromRGB(255, 255, 255)
+                icon.TextScaled = true
+                icon.Font = Enum.Font.SourceSansBold
+                icon.Parent = obj
+            end
+        end
+    end
+    
+    print("✅ Кнопки ТП во вкладке Игроки теперь круглые")
+    print("✅ На кнопках ТП вместо текста иконка ▶")
+end)
+-- ===== КНОПКА ТП ВО ВКЛАДКЕ ИГРОКИ - ПРОЗРАЧНАЯ И КРУГЛАЯ =====
+pcall(function()
+    local playersTab = Tabs[7]
+    if playersTab then
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("TextButton") and obj.Text == "ТП" then
+                -- Делаем прозрачной на 30%
+                obj.BackgroundTransparency = 0.3
+                
+                -- Делаем круглой
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(1, 0) -- Полностью круглая
+                
+                -- Делаем размер квадратным
+                obj.Size = UDim2.new(0.15, 0, 0.7, 0)
+                
+                -- Цвет как у других кнопок (зеленый, но прозрачный)
+                obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+                obj.BorderSizePixel = 2
+                obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
+                
+                -- Убираем старые дочерние элементы
+                for _, child in pairs(obj:GetChildren()) do
+                    if child:IsA("TextLabel") then
+                        child:Destroy()
+                    end
+                end
+                
+                -- Оставляем текст "ТП"
+                obj.Text = "ТП"
+                obj.TextColor3 = Color3.fromRGB(255, 255, 255)
+                obj.TextScaled = true
+                obj.Font = Enum.Font.SourceSansBold
+            end
+        end
+    end
+    
+    print("✅ Кнопки ТП во вкладке Игроки теперь прозрачные (30%) и круглые")
+end)
+-- ===== СДЕЛАТЬ КНОПКИ ВКЛАДОК КВАДРАТНЫМИ =====
+pcall(function()
+    -- Проходим по всем кнопкам вкладок
+    for i, btn in ipairs(TabButtons) do
+        if btn then
+            -- Удаляем скругление, если оно есть
+            local corner = btn:FindFirstChild("UICorner")
+            if corner then
+                corner:Destroy()
+            end
+            
+            -- Делаем кнопку квадратной (без скругления)
+            btn.BorderSizePixel = 2
+            btn.BorderColor3 = Library.Theme.Border
+            
+            -- Убеждаемся, что размер не меняется
+            btn.Size = UDim2.new(1, -5, 0, 35)
+        end
+    end
+    
+    print("✅ Кнопки вкладок стали квадратными (без скругления)")
+end)
