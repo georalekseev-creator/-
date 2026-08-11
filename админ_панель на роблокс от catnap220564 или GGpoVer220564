@@ -4722,3 +4722,848 @@ pcall(function()
     
     print("✅ Кнопки вкладок стали квадратными (без скругления)")
 end)
+-- ===== ВКЛАДКА "КЛИКИР" (ПУСТАЯ) =====
+pcall(function()
+    -- Проверяем, существует ли уже вкладка "Кликир"
+    local existingTab = nil
+    for i, name in ipairs(TabNames) do
+        if name == "Кликир" then
+            existingTab = i
+            break
+        end
+    end
+    
+    if not existingTab then
+        -- Добавляем название вкладки в список
+        table.insert(TabNames, "Кликир")
+        
+        -- Создаём новую вкладку
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        
+        -- Создаём кнопку для новой вкладки
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Кликир"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        -- Обновляем CanvasSize
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        -- Добавляем обработчик для новой кнопки
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+        
+        -- Делаем вкладку пустой
+        local emptyFrame = Instance.new("Frame")
+        emptyFrame.Size = UDim2.new(1, 0, 1, 0)
+        emptyFrame.BackgroundTransparency = 1
+        emptyFrame.Parent = newTab
+        
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Size = UDim2.new(1, 0, 1, 0)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.Text = "Вкладка Кликир\n(пусто)"
+        messageLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+        messageLabel.TextScaled = true
+        messageLabel.Font = Enum.Font.SourceSansBold
+        messageLabel.TextTransparency = 0.5
+        messageLabel.Parent = emptyFrame
+        
+        -- Делаем кнопку квадратной (без скругления)
+        local corner = newBtn:FindFirstChild("UICorner")
+        if corner then corner:Destroy() end
+        newBtn.BorderSizePixel = 2
+        newBtn.BorderColor3 = Library.Theme.Border
+        
+        print("✅ Добавлена пустая вкладка 'Кликир'")
+    end
+end)
+-- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР =====
+pcall(function()
+    -- Находим вкладку "Кликир"
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if not clickerTab then
+        print("❌ Вкладка 'Кликир' не найдена")
+        return
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(clickerTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем контейнер
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = clickerTab
+    
+    -- Основной фрейм
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "АВТОКЛИКЕР"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    -- Информация
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.12, 0)
+    info.Position = UDim2.new(0, 0, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Автоматический кликер по левой кнопке мыши"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+    
+    -- Кнопка включения/выключения
+    local clickerBtn = Instance.new("TextButton")
+    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    clickerBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    clickerBtn.BorderColor3 = Library.Theme.Border
+    clickerBtn.BorderSizePixel = 2
+    clickerBtn.Text = "ВЫКЛ"
+    clickerBtn.TextColor3 = Library.Theme.Text
+    clickerBtn.TextScaled = true
+    clickerBtn.Font = Enum.Font.SourceSansBold
+    clickerBtn.BackgroundTransparency = 0.3
+    clickerBtn.Parent = mainFrame
+    
+    -- Статус
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Автокликер: Выключен"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    -- Метка задержки
+    local delayLabel = Instance.new("TextLabel")
+    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    delayLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
+    delayLabel.BackgroundTransparency = 1
+    delayLabel.Text = "Задержка: 100 мс"
+    delayLabel.TextColor3 = Library.Theme.Text
+    delayLabel.TextScaled = true
+    delayLabel.Font = Enum.Font.SourceSans
+    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    delayLabel.Parent = mainFrame
+    
+    -- Слайдер задержки
+    local delaySlider = Instance.new("Frame")
+    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
+    delaySlider.Position = UDim2.new(0.4, 0, 0.8, 0)
+    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BorderSizePixel = 0
+    delaySlider.Parent = mainFrame
+    
+    local delayFill = Instance.new("Frame")
+    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
+    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BorderSizePixel = 0
+    delayFill.Parent = delaySlider
+    
+    local delayButton = Instance.new("TextButton")
+    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
+    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
+    delayButton.BackgroundColor3 = Library.Theme.Text
+    delayButton.BorderColor3 = Library.Theme.Border
+    delayButton.BorderSizePixel = 2
+    delayButton.Text = ""
+    delayButton.Parent = delaySlider
+    
+    -- Хоткей
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+K"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА АВТОКЛИКЕРА =====
+    local isClicking = false
+    local clickDelay = 100 -- мс
+    local clickConnection = nil
+    local mouse = game.Players.LocalPlayer:GetMouse()
+    
+    -- Функция для клика
+    local function DoClick()
+        if not isClicking then return end
+        mouse1click()
+    end
+    
+    -- Включение автокликера
+    local function EnableClicker()
+        if isClicking then return end
+        isClicking = true
+        
+        clickerBtn.Text = "ВКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Автокликер: Включен"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        -- Запускаем цикл кликов
+        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not isClicking then return end
+            DoClick()
+            task.wait(clickDelay / 1000)
+        end)
+        
+        print("✅ Автокликер включен")
+    end
+    
+    -- Выключение автокликера
+    local function DisableClicker()
+        if not isClicking then return end
+        isClicking = false
+        
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+        
+        clickerBtn.Text = "ВЫКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Автокликер: Выключен"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Автокликер выключен")
+    end
+    
+    -- Переключение
+    local function ToggleClicker()
+        if isClicking then
+            DisableClicker()
+        else
+            EnableClicker()
+        end
+    end
+    
+    -- Обработчик кнопки
+    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
+    
+    -- Хоткей Alt+K
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleClicker()
+        end
+    end)
+    
+    -- Слайдер задержки
+    local isDragging = false
+    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
+    
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = delaySlider.AbsolutePosition
+            local sliderSize = delaySlider.AbsoluteSize
+            local mouseX = input.Position.X
+            
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            clickDelay = math.floor(50 + percent * 950) -- от 50 мс до 1000 мс
+            delayFill.Size = UDim2.new(percent, 0, 1, 0)
+            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+            delayLabel.Text = "Задержка: " .. clickDelay .. " мс"
+        end
+    end)
+    
+    print("✅ Вкладка 'Кликир' обновлена - добавлен автокликер")
+    print("📌 Alt+K - включить/выключить автокликер")
+    print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
+end)
+-- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР (НЕ РАБОТАЕТ ПРИ НАВЕДЕНИИ НА СКРИПТ) =====
+pcall(function()
+    -- Находим вкладку "Кликир"
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if not clickerTab then
+        print("❌ Вкладка 'Кликир' не найдена")
+        return
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(clickerTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем контейнер
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = clickerTab
+    
+    -- Основной фрейм
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "АВТОКЛИКЕР"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    -- Информация
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Автокликер НЕ работает при наведении на GUI панель"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+    
+    -- Кнопка включения/выключения
+    local clickerBtn = Instance.new("TextButton")
+    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    clickerBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    clickerBtn.BorderColor3 = Library.Theme.Border
+    clickerBtn.BorderSizePixel = 2
+    clickerBtn.Text = "ВЫКЛ"
+    clickerBtn.TextColor3 = Library.Theme.Text
+    clickerBtn.TextScaled = true
+    clickerBtn.Font = Enum.Font.SourceSansBold
+    clickerBtn.BackgroundTransparency = 0.3
+    clickerBtn.Parent = mainFrame
+    
+    -- Статус
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Автокликер: Выключен"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    -- Метка задержки
+    local delayLabel = Instance.new("TextLabel")
+    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
+    delayLabel.BackgroundTransparency = 1
+    delayLabel.Text = "Задержка: 100 мс"
+    delayLabel.TextColor3 = Library.Theme.Text
+    delayLabel.TextScaled = true
+    delayLabel.Font = Enum.Font.SourceSans
+    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    delayLabel.Parent = mainFrame
+    
+    -- Слайдер задержки
+    local delaySlider = Instance.new("Frame")
+    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
+    delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
+    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BorderSizePixel = 0
+    delaySlider.Parent = mainFrame
+    
+    local delayFill = Instance.new("Frame")
+    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
+    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BorderSizePixel = 0
+    delayFill.Parent = delaySlider
+    
+    local delayButton = Instance.new("TextButton")
+    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
+    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
+    delayButton.BackgroundColor3 = Library.Theme.Text
+    delayButton.BorderColor3 = Library.Theme.Border
+    delayButton.BorderSizePixel = 2
+    delayButton.Text = ""
+    delayButton.Parent = delaySlider
+    
+    -- Хоткей
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+K"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА АВТОКЛИКЕРА (С ПРОВЕРКОЙ НАВЕДЕНИЯ) =====
+    local isClicking = false
+    local clickDelay = 100 -- мс
+    local clickConnection = nil
+    local mouse = game.Players.LocalPlayer:GetMouse()
+    
+    -- Функция проверки - наведен ли курсор на GUI
+    local function IsMouseOverGui()
+        local mousePos = mouse.X, mouse.Y
+        local guiObjects = {}
+        
+        -- Проверяем все элементы ScreenGui
+        for _, gui in pairs(game.CoreGui:GetChildren()) do
+            if gui:IsA("ScreenGui") then
+                for _, obj in pairs(gui:GetDescendants()) do
+                    if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
+                        local absPos = obj.AbsolutePosition
+                        local absSize = obj.AbsoluteSize
+                        if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+                           mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+        return false
+    end
+    
+    -- Функция для клика (только если не наведены на GUI)
+    local function DoClick()
+        if not isClicking then return end
+        
+        -- Проверяем, не наведены ли на GUI
+        if IsMouseOverGui() then
+            return -- Не кликаем, если курсор на GUI
+        end
+        
+        mouse1click()
+    end
+    
+    -- Включение автокликера
+    local function EnableClicker()
+        if isClicking then return end
+        isClicking = true
+        
+        clickerBtn.Text = "ВКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Автокликер: Включен"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        -- Запускаем цикл кликов
+        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not isClicking then return end
+            DoClick()
+            task.wait(clickDelay / 1000)
+        end)
+        
+        print("✅ Автокликер включен (не работает при наведении на GUI)")
+    end
+    
+    -- Выключение автокликера
+    local function DisableClicker()
+        if not isClicking then return end
+        isClicking = false
+        
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+        
+        clickerBtn.Text = "ВЫКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Автокликер: Выключен"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Автокликер выключен")
+    end
+    
+    -- Переключение
+    local function ToggleClicker()
+        if isClicking then
+            DisableClicker()
+        else
+            EnableClicker()
+        end
+    end
+    
+    -- Обработчик кнопки
+    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
+    
+    -- Хоткей Alt+K
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleClicker()
+        end
+    end)
+    
+    -- Слайдер задержки
+    local isDragging = false
+    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
+    
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = delaySlider.AbsolutePosition
+            local sliderSize = delaySlider.AbsoluteSize
+            local mouseX = input.Position.X
+            
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            clickDelay = math.floor(50 + percent * 950) -- от 50 мс до 1000 мс
+            delayFill.Size = UDim2.new(percent, 0, 1, 0)
+            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+            delayLabel.Text = "Задержка: " .. clickDelay .. " мс"
+        end
+    end)
+    
+    print("✅ Вкладка 'Кликир' обновлена - автокликер с защитой от наведения на GUI")
+    print("📌 Alt+K - включить/выключить автокликер")
+    print("📌 Автокликер НЕ работает когда курсор наведен на GUI панель")
+    print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
+end)
+-- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР (РАБОЧАЯ ВЕРСИЯ) =====
+pcall(function()
+    -- Находим вкладку "Кликир"
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if not clickerTab then
+        print("❌ Вкладка 'Кликир' не найдена")
+        return
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(clickerTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем контейнер
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = clickerTab
+    
+    -- Основной фрейм
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "АВТОКЛИКЕР"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    -- Информация
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Автокликер НЕ работает при наведении на GUI панель"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+    
+    -- Кнопка включения/выключения
+    local clickerBtn = Instance.new("TextButton")
+    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    clickerBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    clickerBtn.BorderColor3 = Library.Theme.Border
+    clickerBtn.BorderSizePixel = 2
+    clickerBtn.Text = "ВЫКЛ"
+    clickerBtn.TextColor3 = Library.Theme.Text
+    clickerBtn.TextScaled = true
+    clickerBtn.Font = Enum.Font.SourceSansBold
+    clickerBtn.BackgroundTransparency = 0.3
+    clickerBtn.Parent = mainFrame
+    
+    -- Статус
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Автокликер: Выключен"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    -- Метка задержки
+    local delayLabel = Instance.new("TextLabel")
+    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
+    delayLabel.BackgroundTransparency = 1
+    delayLabel.Text = "Задержка: 100 мс"
+    delayLabel.TextColor3 = Library.Theme.Text
+    delayLabel.TextScaled = true
+    delayLabel.Font = Enum.Font.SourceSans
+    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    delayLabel.Parent = mainFrame
+    
+    -- Слайдер задержки
+    local delaySlider = Instance.new("Frame")
+    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
+    delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
+    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BorderSizePixel = 0
+    delaySlider.Parent = mainFrame
+    
+    local delayFill = Instance.new("Frame")
+    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
+    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BorderSizePixel = 0
+    delayFill.Parent = delaySlider
+    
+    local delayButton = Instance.new("TextButton")
+    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
+    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
+    delayButton.BackgroundColor3 = Library.Theme.Text
+    delayButton.BorderColor3 = Library.Theme.Border
+    delayButton.BorderSizePixel = 2
+    delayButton.Text = ""
+    delayButton.Parent = delaySlider
+    
+    -- Хоткей
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+K"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА АВТОКЛИКЕРА (РАБОЧАЯ) =====
+    local isClicking = false
+    local clickDelay = 100 -- мс
+    local clickConnection = nil
+    local mouse = game.Players.LocalPlayer:GetMouse()
+    
+    -- Функция проверки - наведен ли курсор на GUI
+    local function IsMouseOverGui()
+        -- Проверяем только главную панель и все дочерние элементы
+        if MenuPanel and MenuPanel.Visible then
+            local absPos = MenuPanel.AbsolutePosition
+            local absSize = MenuPanel.AbsoluteSize
+            
+            -- Проверяем, находится ли курсор внутри панели
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+            
+            -- Проверяем все дочерние элементы панели
+            for _, obj in pairs(MenuPanel:GetDescendants()) do
+                if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
+                    local objAbsPos = obj.AbsolutePosition
+                    local objAbsSize = obj.AbsoluteSize
+                    if mouse.X >= objAbsPos.X and mouse.X <= objAbsPos.X + objAbsSize.X and
+                       mouse.Y >= objAbsPos.Y and mouse.Y <= objAbsPos.Y + objAbsSize.Y then
+                        return true
+                    end
+                end
+            end
+        end
+        
+        -- Проверяем главную кнопку A_D
+        if MainButton and MainButton.Visible then
+            local absPos = MainButton.AbsolutePosition
+            local absSize = MainButton.AbsoluteSize
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+        end
+        
+        return false
+    end
+    
+    -- Функция для клика
+    local function DoClick()
+        if not isClicking then return end
+        
+        -- Проверяем, не наведены ли на GUI
+        if IsMouseOverGui() then
+            return -- Не кликаем
+        end
+        
+        -- Эмулируем клик левой кнопкой мыши
+        mouse1click()
+    end
+    
+    -- Включение автокликера
+    local function EnableClicker()
+        if isClicking then return end
+        isClicking = true
+        
+        clickerBtn.Text = "ВКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Автокликер: Включен"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        -- Запускаем цикл кликов
+        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not isClicking then return end
+            DoClick()
+            task.wait(clickDelay / 1000)
+        end)
+        
+        print("✅ Автокликер включен")
+    end
+    
+    -- Выключение автокликера
+    local function DisableClicker()
+        if not isClicking then return end
+        isClicking = false
+        
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+        
+        clickerBtn.Text = "ВЫКЛ"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Автокликер: Выключен"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Автокликер выключен")
+    end
+    
+    -- Переключение
+    local function ToggleClicker()
+        if isClicking then
+            DisableClicker()
+        else
+            EnableClicker()
+        end
+    end
+    
+    -- Обработчик кнопки
+    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
+    
+    -- Хоткей Alt+K
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleClicker()
+        end
+    end)
+    
+    -- Слайдер задержки
+    local isDragging = false
+    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
+    
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = delaySlider.AbsolutePosition
+            local sliderSize = delaySlider.AbsoluteSize
+            local mouseX = input.Position.X
+            
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            clickDelay = math.floor(50 + percent * 950)
+            delayFill.Size = UDim2.new(percent, 0, 1, 0)
+            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+            delayLabel.Text = "Задержка: " .. clickDelay .. " мс"
+        end
+    end)
+    
+    print("✅ Вкладка 'Кликир' обновлена - автокликер РАБОТАЕТ")
+    print("📌 Alt+K - включить/выключить автокликер")
+    print("📌 Автокликер НЕ работает когда курсор наведен на GUI панель")
+    print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
+end)
