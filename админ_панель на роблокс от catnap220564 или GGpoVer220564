@@ -5567,3 +5567,1607 @@ pcall(function()
     print("📌 Автокликер НЕ работает когда курсор наведен на GUI панель")
     print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
 end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - ЗАКРУГЛЕНИЕ =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                -- Добавляем скругление как у других кнопок
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 12) -- Такое же скругление как у других кнопок
+                
+                -- Делаем прозрачность как у других кнопок
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК С ЦИФРАМИ В КРУЖКЕ (ВКЛАДКА ТОЧКИ) =====
+pcall(function()
+    -- Переопределяем функцию UpdatePointsList для отображения цифр в кружках
+    local originalUpdatePointsList = UpdatePointsList
+    
+    UpdatePointsList = function()
+        -- Очищаем список
+        for _, child in pairs(PointsList:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+        
+        -- Пересчитываем точки с новой нумерацией (всегда по порядку)
+        local newPointsData = {}
+        for i, data in ipairs(PointsData) do
+            table.insert(newPointsData, {name = data.name, pos = data.pos})
+        end
+        PointsData = newPointsData
+        
+        -- Отображаем точки
+        for i, data in ipairs(PointsData) do
+            local name = data.name
+            local pos = data.pos
+            
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 1
+            ItemFrame.BackgroundTransparency = 0.5
+            ItemFrame.Parent = PointsList
+            
+            -- Кружок с цифрой
+            local circleFrame = Instance.new("Frame")
+            circleFrame.Size = UDim2.new(0, 30, 0, 30)
+            circleFrame.Position = UDim2.new(0, 5, 0.5, -15)
+            circleFrame.BackgroundColor3 = Library.Theme.Accent
+            circleFrame.BorderColor3 = Library.Theme.Border
+            circleFrame.BorderSizePixel = 2
+            circleFrame.Parent = ItemFrame
+            
+            -- Делаем кружок круглым
+            local circleCorner = Instance.new("UICorner")
+            circleCorner.CornerRadius = UDim.new(1, 0)
+            circleCorner.Parent = circleFrame
+            
+            -- Цифра в кружке
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.Parent = circleFrame
+            
+            -- Имя точки с координатами
+            local NameLabel = Instance.new("TextLabel")
+            NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
+            NameLabel.Position = UDim2.new(0.12, 0, 0, 0)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Text = name .. "  (X: " .. math.floor(pos.X) .. ", Y: " .. math.floor(pos.Y) .. ", Z: " .. math.floor(pos.Z) .. ")"
+            NameLabel.TextColor3 = Library.Theme.Text
+            NameLabel.TextScaled = true
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            NameLabel.Font = Enum.Font.SourceSans
+            NameLabel.Parent = ItemFrame
+            
+            -- Кнопка телепорта
+            local TeleportPointBtn = Instance.new("TextButton")
+            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
+            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
+            TeleportPointBtn.BorderColor3 = Library.Theme.Border
+            TeleportPointBtn.BorderSizePixel = 1
+            TeleportPointBtn.Text = "TP"
+            TeleportPointBtn.TextColor3 = Library.Theme.Text
+            TeleportPointBtn.TextScaled = true
+            TeleportPointBtn.Font = Enum.Font.SourceSansBold
+            TeleportPointBtn.BackgroundTransparency = 0.3
+            TeleportPointBtn.Parent = ItemFrame
+            
+            -- Скругление кнопки ТР
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(0, 8)
+            tpCorner.Parent = TeleportPointBtn
+            
+            TeleportPointBtn.MouseButton1Click:Connect(function() TeleportToPosition(pos) end)
+            
+            -- Кнопка удаления
+            local DeleteBtn = Instance.new("TextButton")
+            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
+            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
+            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            DeleteBtn.BorderColor3 = Library.Theme.Border
+            DeleteBtn.BorderSizePixel = 1
+            DeleteBtn.Text = "X"
+            DeleteBtn.TextColor3 = Library.Theme.Text
+            DeleteBtn.TextScaled = true
+            DeleteBtn.Font = Enum.Font.SourceSansBold
+            DeleteBtn.BackgroundTransparency = 0.3
+            DeleteBtn.Parent = ItemFrame
+            
+            -- Скругление кнопки удаления
+            local delCorner = Instance.new("UICorner")
+            delCorner.CornerRadius = UDim.new(0, 8)
+            delCorner.Parent = DeleteBtn
+            
+            DeleteBtn.MouseButton1Click:Connect(function()
+                table.remove(PointsData, i)
+                UpdatePointsList() -- Перерисовываем с новой нумерацией
+                UpdatePointInfo()
+            end)
+        end
+        
+        local count = #PointsData
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
+    end
+    
+    -- Обновляем список точек с новой нумерацией
+    UpdatePointsList()
+    print("✅ Точки теперь отображаются с цифрами в кружках")
+    print("✅ При удалении точки нумерация автоматически обновляется")
+end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                -- Добавляем скругление ×3
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 24) -- Скругление ×3 (было 8, стало 24)
+                
+                -- Делаем прозрачность как у других кнопок
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (СФЕРЫ С ЦИФРАМИ) =====
+pcall(function()
+    -- Хранилище для визуальных объектов точек
+    local PointVisuals = {}
+    
+    -- Функция очистки визуальных объектов
+    local function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+    
+    -- Функция обновления визуализации точек в мире
+    local function UpdatePointVisuals()
+        ClearPointVisuals()
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            -- Создаём сферу
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+            
+            -- Создаём подсветку (Highlight)
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+            
+            -- Создаём BillboardGui с цифрой
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 60, 0, 60)
+            billboard.StudsOffset = Vector3.new(0, 3, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+            
+            -- Круглый фон для цифры
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 2
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+            
+            -- Делаем фон круглым
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+            
+            -- Цифра
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+            
+            -- Имя точки под цифрой
+            local nameBillboard = Instance.new("BillboardGui")
+            nameBillboard.Name = "PointName"
+            nameBillboard.Size = UDim2.new(0, 200, 0, 40)
+            nameBillboard.StudsOffset = Vector3.new(0, -1, 0)
+            nameBillboard.AlwaysOnTop = true
+            nameBillboard.Parent = sphere
+            table.insert(PointVisuals, nameBillboard)
+            
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 1, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = data.name
+            nameLabel.TextColor3 = Color3.fromRGB(200, 230, 255)
+            nameLabel.TextScaled = true
+            nameLabel.Font = Enum.Font.SourceSansBold
+            nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            nameLabel.TextStrokeTransparency = 0.3
+            nameLabel.Parent = nameBillboard
+            table.insert(PointVisuals, nameLabel)
+        end
+    end
+    
+    -- Переопределяем UpdatePointsList для обновления визуализации
+    local originalUpdatePointsList = UpdatePointsList
+    
+    UpdatePointsList = function()
+        -- Вызываем оригинальную функцию для обновления списка
+        originalUpdatePointsList()
+        
+        -- Обновляем визуализацию в мире
+        UpdatePointVisuals()
+    end
+    
+    -- При удалении точки - обновляем визуализацию
+    -- Переопределяем функцию удаления точки
+    local originalSetPoint = SetPoint
+    SetPoint = function()
+        originalSetPoint()
+        UpdatePointVisuals()
+    end
+    
+    -- При загрузке точек - показываем их в мире
+    task.wait(0.5)
+    UpdatePointVisuals()
+    
+    -- Очищаем визуализацию при выходе из игры
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+    
+    print("✅ Точки теперь видны в мире как светящиеся сферы с номерами")
+    print("✅ Нумерация обновляется автоматически при удалении/добавлении точек")
+end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                -- Добавляем скругление ×3
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 24) -- Скругление ×3 (было 8, стало 24)
+                
+                -- Делаем прозрачность как у других кнопок
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО СФЕРЫ С ЦИФРАМИ, БЕЗ НАЗВАНИЙ) =====
+pcall(function()
+    -- Хранилище для визуальных объектов точек
+    local PointVisuals = {}
+    
+    -- Функция очистки визуальных объектов
+    local function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+    
+    -- Функция обновления визуализации точек в мире (только сферы с цифрами)
+    local function UpdatePointVisuals()
+        ClearPointVisuals()
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            -- Создаём сферу
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+            
+            -- Создаём подсветку (Highlight)
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+            
+            -- Создаём BillboardGui с цифрой сверху
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 60, 0, 60)
+            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+            
+            -- Круглый фон для цифры
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 2
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+            
+            -- Делаем фон круглым
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+            
+            -- Цифра
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+            
+            -- Добавляем линию от сферы к земле (для наглядности)
+            local line = Instance.new("Part")
+            local groundPos = Vector3.new(pos.X, pos.Y - 3, pos.Z)
+            local distance = (pos - groundPos).Magnitude
+            
+            line.Size = Vector3.new(0.1, 0.1, distance)
+            line.Position = (pos + groundPos) / 2
+            line.Anchored = true
+            line.CanCollide = false
+            line.Material = Enum.Material.Neon
+            line.BrickColor = BrickColor.new("Bright blue")
+            line.Transparency = 0.5
+            line.Parent = workspace
+            
+            -- Поворачиваем линию вертикально
+            local direction = (groundPos - pos).Unit
+            line.CFrame = CFrame.lookAt((pos + groundPos) / 2, (pos + groundPos) / 2 + direction)
+            table.insert(PointVisuals, line)
+        end
+    end
+    
+    -- Переопределяем UpdatePointsList для обновления визуализации
+    local originalUpdatePointsList = UpdatePointsList
+    
+    UpdatePointsList = function()
+        -- Вызываем оригинальную функцию для обновления списка
+        originalUpdatePointsList()
+        
+        -- Обновляем визуализацию в мире
+        UpdatePointVisuals()
+    end
+    
+    -- Переопределяем SetPoint для обновления визуализации
+    local originalSetPoint = SetPoint
+    SetPoint = function()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        if #PointsData >= MAX_POINTS then return end
+        
+        local name = NameInput.Text
+        if name == "" or name == "Название точки" then
+            name = "Точка " .. (#PointsData + 1)
+        end
+        
+        local pos = hrp.Position
+        table.insert(PointsData, {name = name, pos = pos})
+        UpdatePointsList() -- Обновляет и список, и визуализацию
+        UpdatePointInfo()
+    end
+    
+    -- При загрузке точек - показываем их в мире
+    task.wait(0.5)
+    UpdatePointVisuals()
+    
+    -- При переключении вкладки "Точки" обновляем визуализацию
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then -- Вкладка "Точки"
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+    
+    -- Обновляем при респавне игрока
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+    
+    print("✅ Точки теперь видны в мире как светящиеся сферы с цифрами")
+    print("✅ Названия точек НЕ отображаются в мире")
+    print("✅ При добавлении/удалении точки все обновляется автоматически")
+end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                -- Добавляем скругление ×3
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 24) -- Скругление ×3
+                
+                -- Делаем прозрачность как у других кнопок
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
+end)
+
+-- ===== УДАЛЯЕМ ПОЛЕ ВВОДА ИМЕНИ ТОЧКИ И ДЕЛАЕМ АВТО-НУМЕРАЦИЮ =====
+pcall(function()
+    -- Удаляем поле ввода названия
+    if NameInput then
+        NameInput:Destroy()
+    end
+    
+    -- Создаём новый интерфейс без поля ввода
+    local pointsTab = Tabs[1]
+    if pointsTab then
+        -- Удаляем старую панель управления
+        local oldControl = pointsTab:FindFirstChild("PointControl")
+        if oldControl then
+            oldControl:Destroy()
+        end
+        
+        -- Создаём новую панель управления без поля ввода
+        local PointControl = Instance.new("Frame")
+        PointControl.Name = "PointControl"
+        PointControl.Size = UDim2.new(1, 0, 0.35, 0)
+        PointControl.Position = UDim2.new(0, 0, 0.62, 0)
+        PointControl.BackgroundTransparency = 1
+        PointControl.Parent = pointsTab
+        
+        -- Кнопка установки точки
+        local SetBtn = Instance.new("TextButton")
+        SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+        SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+        SetBtn.BackgroundColor3 = Library.Theme.Success
+        SetBtn.BorderColor3 = Library.Theme.Border
+        SetBtn.BorderSizePixel = 2
+        SetBtn.Text = "УСТАНОВИТЬ ТОЧКУ"
+        SetBtn.TextColor3 = Library.Theme.Text
+        SetBtn.TextScaled = true
+        SetBtn.Font = Enum.Font.SourceSansBold
+        SetBtn.BackgroundTransparency = 0.3
+        SetBtn.Parent = PointControl
+        
+        -- Скругление кнопки
+        local setCorner = Instance.new("UICorner")
+        setCorner.CornerRadius = UDim.new(0, 12)
+        setCorner.Parent = SetBtn
+        
+        -- Кнопка телепорта к последней точке
+        local TeleportBtn = Instance.new("TextButton")
+        TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+        TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
+        TeleportBtn.BackgroundColor3 = Library.Theme.Accent
+        TeleportBtn.BorderColor3 = Library.Theme.Border
+        TeleportBtn.BorderSizePixel = 2
+        TeleportBtn.Text = "ТЕЛЕПОРТ"
+        TeleportBtn.TextColor3 = Library.Theme.Text
+        TeleportBtn.TextScaled = true
+        TeleportBtn.Font = Enum.Font.SourceSansBold
+        TeleportBtn.BackgroundTransparency = 0.3
+        TeleportBtn.Parent = PointControl
+        
+        -- Скругление кнопки
+        local tpCorner = Instance.new("UICorner")
+        tpCorner.CornerRadius = UDim.new(0, 12)
+        tpCorner.Parent = TeleportBtn
+        
+        -- Кнопка очистки всех точек
+        local ClearBtn = Instance.new("TextButton")
+        ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
+        ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
+        ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        ClearBtn.BorderColor3 = Library.Theme.Border
+        ClearBtn.BorderSizePixel = 2
+        ClearBtn.Text = "ОЧИСТИТЬ ВСЕ"
+        ClearBtn.TextColor3 = Library.Theme.Text
+        ClearBtn.TextScaled = true
+        ClearBtn.Font = Enum.Font.SourceSansBold
+        ClearBtn.BackgroundTransparency = 0.3
+        ClearBtn.Parent = PointControl
+        
+        -- Скругление кнопки
+        local clearCorner = Instance.new("UICorner")
+        clearCorner.CornerRadius = UDim.new(0, 12)
+        clearCorner.Parent = ClearBtn
+        
+        -- Информация о количестве точек
+        local PointInfo = Instance.new("TextLabel")
+        PointInfo.Name = "PointInfo"
+        PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
+        PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
+        PointInfo.BackgroundTransparency = 1
+        PointInfo.Text = "Точек: 0 / 1000"
+        PointInfo.TextColor3 = Library.Theme.Text
+        PointInfo.TextScaled = true
+        PointInfo.Font = Enum.Font.SourceSans
+        PointInfo.Parent = PointControl
+        
+        -- Обновляем ссылки
+        local oldSetBtn = SetBtn
+        local oldTeleportBtn = TeleportBtn
+        local oldClearBtn = ClearBtn
+        
+        -- Переопределяем функции
+        SetPoint = function()
+            local player = game.Players.LocalPlayer
+            if not player or not player.Character then return end
+            
+            local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            
+            if #PointsData >= MAX_POINTS then return end
+            
+            -- Автоматическое имя
+            local name = "Точка " .. (#PointsData + 1)
+            
+            local pos = hrp.Position
+            table.insert(PointsData, {name = name, pos = pos})
+            UpdatePointsList()
+            UpdatePointInfo()
+        end
+        
+        ClearAllPoints = function()
+            PointsData = {}
+            UpdatePointsList()
+            UpdatePointInfo()
+            ClearPointVisuals()
+        end
+        
+        -- Назначаем обработчики
+        SetBtn.MouseButton1Click:Connect(SetPoint)
+        TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint)
+        ClearBtn.MouseButton1Click:Connect(ClearAllPoints)
+    end
+    
+    print("✅ Поле ввода названия точки удалено")
+    print("✅ Точки теперь автоматически нумеруются")
+    print("✅ Добавлена кнопка 'ОЧИСТИТЬ ВСЕ'")
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО СФЕРЫ С ЦИФРАМИ, БЕЗ НАЗВАНИЙ) =====
+pcall(function()
+    -- Хранилище для визуальных объектов точек
+    local PointVisuals = {}
+    
+    -- Функция очистки визуальных объектов
+    local function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+    
+    -- Делаем функцию глобальной для доступа из других мест
+    _G.ClearPointVisuals = ClearPointVisuals
+    
+    -- Функция обновления визуализации точек в мире (только сферы с цифрами)
+    local function UpdatePointVisuals()
+        ClearPointVisuals()
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            -- Создаём сферу
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+            
+            -- Создаём подсветку (Highlight)
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+            
+            -- Создаём BillboardGui с цифрой сверху
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 60, 0, 60)
+            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+            
+            -- Круглый фон для цифры
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 2
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+            
+            -- Делаем фон круглым
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+            
+            -- Цифра
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+        end
+    end
+    
+    -- Переопределяем UpdatePointsList для обновления визуализации
+    local originalUpdatePointsList = UpdatePointsList
+    
+    UpdatePointsList = function()
+        -- Вызываем оригинальную функцию для обновления списка
+        originalUpdatePointsList()
+        
+        -- Обновляем визуализацию в мире
+        UpdatePointVisuals()
+    end
+    
+    -- Переопределяем UpdatePointInfo
+    local originalUpdatePointInfo = UpdatePointInfo
+    UpdatePointInfo = function()
+        originalUpdatePointInfo()
+        -- Обновляем визуализацию
+        UpdatePointVisuals()
+    end
+    
+    -- При загрузке точек - показываем их в мире
+    task.wait(0.5)
+    UpdatePointVisuals()
+    
+    -- При переключении вкладки "Точки" обновляем визуализацию
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then -- Вкладка "Точки"
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+    
+    -- Обновляем при респавне игрока
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+    
+    print("✅ Точки теперь видны в мире как светящиеся сферы с цифрами")
+    print("✅ Названия точек НЕ отображаются в мире")
+    print("✅ При добавлении/удалении точки все обновляется автоматически")
+end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 24)
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
+end)
+
+-- ===== ИСПРАВЛЕНИЕ: УДАЛЯЕМ СТАРЫЕ КНОПКИ И ПЕРЕСОЗДАЕМ ИНТЕРФЕЙС ВКЛАДКИ ТОЧКИ =====
+pcall(function()
+    local pointsTab = Tabs[1]
+    if not pointsTab then return end
+    
+    -- ПОЛНОСТЬЮ ОЧИЩАЕМ ВКЛАДКУ ТОЧКИ
+    for _, child in pairs(pointsTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаём список точек
+    local PointsList = Instance.new("ScrollingFrame")
+    PointsList.Name = "PointsList"
+    PointsList.Size = UDim2.new(1, 0, 0.6, 0)
+    PointsList.BackgroundColor3 = Library.Theme.Panel
+    PointsList.BorderColor3 = Library.Theme.Border
+    PointsList.BorderSizePixel = 2
+    PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PointsList.ScrollBarThickness = 8
+    PointsList.BackgroundTransparency = 0.5
+    PointsList.Parent = pointsTab
+    
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 5)
+    ListLayout.Parent = PointsList
+    
+    -- Панель управления
+    local PointControl = Instance.new("Frame")
+    PointControl.Name = "PointControl"
+    PointControl.Size = UDim2.new(1, 0, 0.35, 0)
+    PointControl.Position = UDim2.new(0, 0, 0.62, 0)
+    PointControl.BackgroundTransparency = 1
+    PointControl.Parent = pointsTab
+    
+    -- Кнопка установки точки
+    local SetBtn = Instance.new("TextButton")
+    SetBtn.Name = "SetBtn"
+    SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+    SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+    SetBtn.BackgroundColor3 = Library.Theme.Success
+    SetBtn.BorderColor3 = Library.Theme.Border
+    SetBtn.BorderSizePixel = 2
+    SetBtn.Text = "УСТАНОВИТЬ ТОЧКУ"
+    SetBtn.TextColor3 = Library.Theme.Text
+    SetBtn.TextScaled = true
+    SetBtn.Font = Enum.Font.SourceSansBold
+    SetBtn.BackgroundTransparency = 0.3
+    SetBtn.Parent = PointControl
+    
+    local setCorner = Instance.new("UICorner")
+    setCorner.CornerRadius = UDim.new(0, 12)
+    setCorner.Parent = SetBtn
+    
+    -- Кнопка телепорта
+    local TeleportBtn = Instance.new("TextButton")
+    TeleportBtn.Name = "TeleportBtn"
+    TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+    TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
+    TeleportBtn.BackgroundColor3 = Library.Theme.Accent
+    TeleportBtn.BorderColor3 = Library.Theme.Border
+    TeleportBtn.BorderSizePixel = 2
+    TeleportBtn.Text = "ТЕЛЕПОРТ"
+    TeleportBtn.TextColor3 = Library.Theme.Text
+    TeleportBtn.TextScaled = true
+    TeleportBtn.Font = Enum.Font.SourceSansBold
+    TeleportBtn.BackgroundTransparency = 0.3
+    TeleportBtn.Parent = PointControl
+    
+    local tpCorner = Instance.new("UICorner")
+    tpCorner.CornerRadius = UDim.new(0, 12)
+    tpCorner.Parent = TeleportBtn
+    
+    -- Кнопка очистки
+    local ClearBtn = Instance.new("TextButton")
+    ClearBtn.Name = "ClearBtn"
+    ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
+    ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
+    ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    ClearBtn.BorderColor3 = Library.Theme.Border
+    ClearBtn.BorderSizePixel = 2
+    ClearBtn.Text = "ОЧИСТИТЬ ВСЕ"
+    ClearBtn.TextColor3 = Library.Theme.Text
+    ClearBtn.TextScaled = true
+    ClearBtn.Font = Enum.Font.SourceSansBold
+    ClearBtn.BackgroundTransparency = 0.3
+    ClearBtn.Parent = PointControl
+    
+    local clearCorner = Instance.new("UICorner")
+    clearCorner.CornerRadius = UDim.new(0, 12)
+    clearCorner.Parent = ClearBtn
+    
+    -- Информация о точках
+    local PointInfo = Instance.new("TextLabel")
+    PointInfo.Name = "PointInfo"
+    PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
+    PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
+    PointInfo.BackgroundTransparency = 1
+    PointInfo.Text = "Точек: 0 / 1000"
+    PointInfo.TextColor3 = Library.Theme.Text
+    PointInfo.TextScaled = true
+    PointInfo.Font = Enum.Font.SourceSans
+    PointInfo.Parent = PointControl
+    
+    -- Сохраняем ссылки
+    _G.PointsList = PointsList
+    _G.PointInfo = PointInfo
+    
+    print("✅ Вкладка Точки полностью пересоздана, дублирование кнопок устранено")
+end)
+
+-- ===== ПЕРЕОПРЕДЕЛЯЕМ ФУНКЦИИ ДЛЯ РАБОТЫ С ТОЧКАМИ =====
+pcall(function()
+    -- Функция обновления списка точек
+    function UpdatePointsList()
+        local PointsList = _G.PointsList
+        if not PointsList then return end
+        
+        -- Очищаем список
+        for _, child in pairs(PointsList:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+        
+        -- Отображаем точки
+        for i, data in ipairs(PointsData) do
+            local name = data.name
+            local pos = data.pos
+            
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 1
+            ItemFrame.BackgroundTransparency = 0.5
+            ItemFrame.Parent = PointsList
+            
+            -- Кружок с цифрой
+            local circleFrame = Instance.new("Frame")
+            circleFrame.Size = UDim2.new(0, 30, 0, 30)
+            circleFrame.Position = UDim2.new(0, 5, 0.5, -15)
+            circleFrame.BackgroundColor3 = Library.Theme.Accent
+            circleFrame.BorderColor3 = Library.Theme.Border
+            circleFrame.BorderSizePixel = 2
+            circleFrame.Parent = ItemFrame
+            
+            local circleCorner = Instance.new("UICorner")
+            circleCorner.CornerRadius = UDim.new(1, 0)
+            circleCorner.Parent = circleFrame
+            
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.Parent = circleFrame
+            
+            -- Имя точки
+            local NameLabel = Instance.new("TextLabel")
+            NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
+            NameLabel.Position = UDim2.new(0.12, 0, 0, 0)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Text = name
+            NameLabel.TextColor3 = Library.Theme.Text
+            NameLabel.TextScaled = true
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            NameLabel.Font = Enum.Font.SourceSans
+            NameLabel.Parent = ItemFrame
+            
+            -- Кнопка телепорта
+            local TeleportPointBtn = Instance.new("TextButton")
+            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
+            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
+            TeleportPointBtn.BorderColor3 = Library.Theme.Border
+            TeleportPointBtn.BorderSizePixel = 1
+            TeleportPointBtn.Text = "TP"
+            TeleportPointBtn.TextColor3 = Library.Theme.Text
+            TeleportPointBtn.TextScaled = true
+            TeleportPointBtn.Font = Enum.Font.SourceSansBold
+            TeleportPointBtn.BackgroundTransparency = 0.3
+            TeleportPointBtn.Parent = ItemFrame
+            
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(0, 8)
+            tpCorner.Parent = TeleportPointBtn
+            
+            TeleportPointBtn.MouseButton1Click:Connect(function() 
+                TeleportToPosition(pos) 
+            end)
+            
+            -- Кнопка удаления
+            local DeleteBtn = Instance.new("TextButton")
+            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
+            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
+            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            DeleteBtn.BorderColor3 = Library.Theme.Border
+            DeleteBtn.BorderSizePixel = 1
+            DeleteBtn.Text = "X"
+            DeleteBtn.TextColor3 = Library.Theme.Text
+            DeleteBtn.TextScaled = true
+            DeleteBtn.Font = Enum.Font.SourceSansBold
+            DeleteBtn.BackgroundTransparency = 0.3
+            DeleteBtn.Parent = ItemFrame
+            
+            local delCorner = Instance.new("UICorner")
+            delCorner.CornerRadius = UDim.new(0, 8)
+            delCorner.Parent = DeleteBtn
+            
+            DeleteBtn.MouseButton1Click:Connect(function()
+                table.remove(PointsData, i)
+                UpdatePointsList()
+                UpdatePointInfo()
+                UpdatePointVisuals()
+            end)
+        end
+        
+        local count = #PointsData
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
+    end
+    
+    -- Функция обновления информации о точках
+    function UpdatePointInfo()
+        local PointInfo = _G.PointInfo
+        if PointInfo then
+            local count = #PointsData
+            PointInfo.Text = "Точек: " .. count .. " / " .. MAX_POINTS
+        end
+    end
+    
+    -- Функция установки точки
+    function SetPoint()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        if #PointsData >= MAX_POINTS then return end
+        
+        local name = "Точка " .. (#PointsData + 1)
+        local pos = hrp.Position
+        table.insert(PointsData, {name = name, pos = pos})
+        UpdatePointsList()
+        UpdatePointInfo()
+        UpdatePointVisuals()
+    end
+    
+    -- Функция очистки всех точек
+    function ClearAllPoints()
+        PointsData = {}
+        UpdatePointsList()
+        UpdatePointInfo()
+        ClearPointVisuals()
+    end
+    
+    -- Назначаем обработчики кнопкам
+    local pointsTab = Tabs[1]
+    if pointsTab then
+        local SetBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("SetBtn")
+        local TeleportBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("TeleportBtn")
+        local ClearBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("ClearBtn")
+        
+        if SetBtn then SetBtn.MouseButton1Click:Connect(SetPoint) end
+        if TeleportBtn then TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint) end
+        if ClearBtn then ClearBtn.MouseButton1Click:Connect(ClearAllPoints) end
+    end
+    
+    print("✅ Функции точек переопределены, дублирование устранено")
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО СФЕРЫ С ЦИФРАМИ) =====
+pcall(function()
+    local PointVisuals = {}
+    
+    function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+    
+    function UpdatePointVisuals()
+        ClearPointVisuals()
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+            
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+            
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 60, 0, 60)
+            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+            
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 2
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+            
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+            
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+        end
+    end
+    
+    -- Обновляем визуализацию
+    task.wait(0.5)
+    UpdatePointVisuals()
+    
+    -- Обновляем при переключении вкладки
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+    
+    -- Обновляем при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+    
+    print("✅ Визуализация точек обновлена, дублирование цифр устранено")
+end)
+-- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
+
+-- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
+pcall(function()
+    local clickerTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Кликир" then
+            clickerTab = tab
+            break
+        end
+    end
+    
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(0, 24)
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
+end)
+
+-- ===== ПЕРЕСОЗДАЕМ ВКЛАДКУ ТОЧКИ БЕЗ НАЗВАНИЙ =====
+pcall(function()
+    local pointsTab = Tabs[1]
+    if not pointsTab then return end
+    
+    -- ОЧИЩАЕМ ВКЛАДКУ
+    for _, child in pairs(pointsTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Список точек
+    local PointsList = Instance.new("ScrollingFrame")
+    PointsList.Name = "PointsList"
+    PointsList.Size = UDim2.new(1, 0, 0.6, 0)
+    PointsList.BackgroundColor3 = Library.Theme.Panel
+    PointsList.BorderColor3 = Library.Theme.Border
+    PointsList.BorderSizePixel = 2
+    PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PointsList.ScrollBarThickness = 8
+    PointsList.BackgroundTransparency = 0.5
+    PointsList.Parent = pointsTab
+    
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 5)
+    ListLayout.Parent = PointsList
+    
+    -- Панель управления
+    local PointControl = Instance.new("Frame")
+    PointControl.Name = "PointControl"
+    PointControl.Size = UDim2.new(1, 0, 0.35, 0)
+    PointControl.Position = UDim2.new(0, 0, 0.62, 0)
+    PointControl.BackgroundTransparency = 1
+    PointControl.Parent = pointsTab
+    
+    -- Кнопка установки
+    local SetBtn = Instance.new("TextButton")
+    SetBtn.Name = "SetBtn"
+    SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+    SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+    SetBtn.BackgroundColor3 = Library.Theme.Success
+    SetBtn.BorderColor3 = Library.Theme.Border
+    SetBtn.BorderSizePixel = 2
+    SetBtn.Text = "УСТАНОВИТЬ ТОЧКУ"
+    SetBtn.TextColor3 = Library.Theme.Text
+    SetBtn.TextScaled = true
+    SetBtn.Font = Enum.Font.SourceSansBold
+    SetBtn.BackgroundTransparency = 0.3
+    SetBtn.Parent = PointControl
+    
+    local setCorner = Instance.new("UICorner")
+    setCorner.CornerRadius = UDim.new(0, 12)
+    setCorner.Parent = SetBtn
+    
+    -- Кнопка телепорта
+    local TeleportBtn = Instance.new("TextButton")
+    TeleportBtn.Name = "TeleportBtn"
+    TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
+    TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
+    TeleportBtn.BackgroundColor3 = Library.Theme.Accent
+    TeleportBtn.BorderColor3 = Library.Theme.Border
+    TeleportBtn.BorderSizePixel = 2
+    TeleportBtn.Text = "ТЕЛЕПОРТ"
+    TeleportBtn.TextColor3 = Library.Theme.Text
+    TeleportBtn.TextScaled = true
+    TeleportBtn.Font = Enum.Font.SourceSansBold
+    TeleportBtn.BackgroundTransparency = 0.3
+    TeleportBtn.Parent = PointControl
+    
+    local tpCorner = Instance.new("UICorner")
+    tpCorner.CornerRadius = UDim.new(0, 12)
+    tpCorner.Parent = TeleportBtn
+    
+    -- Кнопка очистки
+    local ClearBtn = Instance.new("TextButton")
+    ClearBtn.Name = "ClearBtn"
+    ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
+    ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
+    ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    ClearBtn.BorderColor3 = Library.Theme.Border
+    ClearBtn.BorderSizePixel = 2
+    ClearBtn.Text = "ОЧИСТИТЬ ВСЕ"
+    ClearBtn.TextColor3 = Library.Theme.Text
+    ClearBtn.TextScaled = true
+    ClearBtn.Font = Enum.Font.SourceSansBold
+    ClearBtn.BackgroundTransparency = 0.3
+    ClearBtn.Parent = PointControl
+    
+    local clearCorner = Instance.new("UICorner")
+    clearCorner.CornerRadius = UDim.new(0, 12)
+    clearCorner.Parent = ClearBtn
+    
+    -- Информация
+    local PointInfo = Instance.new("TextLabel")
+    PointInfo.Name = "PointInfo"
+    PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
+    PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
+    PointInfo.BackgroundTransparency = 1
+    PointInfo.Text = "Точек: 0"
+    PointInfo.TextColor3 = Library.Theme.Text
+    PointInfo.TextScaled = true
+    PointInfo.Font = Enum.Font.SourceSans
+    PointInfo.Parent = PointControl
+    
+    -- Сохраняем ссылки
+    _G.PointsList = PointsList
+    _G.PointInfo = PointInfo
+    
+    print("✅ Вкладка Точки пересоздана без названий")
+end)
+
+-- ===== ФУНКЦИИ ДЛЯ ТОЧЕК (ТОЛЬКО ЦИФРЫ, БЕЗ НАЗВАНИЙ) =====
+pcall(function()
+    -- Обновление списка точек (только цифры)
+    function UpdatePointsList()
+        local PointsList = _G.PointsList
+        if not PointsList then return end
+        
+        for _, child in pairs(PointsList:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 1
+            ItemFrame.BackgroundTransparency = 0.5
+            ItemFrame.Parent = PointsList
+            
+            -- Кружок с цифрой (увеличенный)
+            local circleFrame = Instance.new("Frame")
+            circleFrame.Size = UDim2.new(0, 40, 0, 40)
+            circleFrame.Position = UDim2.new(0, 5, 0.5, -20)
+            circleFrame.BackgroundColor3 = Library.Theme.Accent
+            circleFrame.BorderColor3 = Library.Theme.Border
+            circleFrame.BorderSizePixel = 2
+            circleFrame.Parent = ItemFrame
+            
+            local circleCorner = Instance.new("UICorner")
+            circleCorner.CornerRadius = UDim.new(1, 0)
+            circleCorner.Parent = circleFrame
+            
+            -- Цифра
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.Parent = circleFrame
+            
+            -- Координаты (вместо названия)
+            local coordsLabel = Instance.new("TextLabel")
+            coordsLabel.Size = UDim2.new(0.6, 0, 1, 0)
+            coordsLabel.Position = UDim2.new(0.12, 0, 0, 0)
+            coordsLabel.BackgroundTransparency = 1
+            coordsLabel.Text = "X:" .. math.floor(pos.X) .. " Y:" .. math.floor(pos.Y) .. " Z:" .. math.floor(pos.Z)
+            coordsLabel.TextColor3 = Library.Theme.Text
+            coordsLabel.TextScaled = true
+            coordsLabel.TextXAlignment = Enum.TextXAlignment.Left
+            coordsLabel.Font = Enum.Font.SourceSans
+            coordsLabel.Parent = ItemFrame
+            
+            -- Кнопка телепорта
+            local TeleportPointBtn = Instance.new("TextButton")
+            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
+            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
+            TeleportPointBtn.BorderColor3 = Library.Theme.Border
+            TeleportPointBtn.BorderSizePixel = 1
+            TeleportPointBtn.Text = "TP"
+            TeleportPointBtn.TextColor3 = Library.Theme.Text
+            TeleportPointBtn.TextScaled = true
+            TeleportPointBtn.Font = Enum.Font.SourceSansBold
+            TeleportPointBtn.BackgroundTransparency = 0.3
+            TeleportPointBtn.Parent = ItemFrame
+            
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(0, 8)
+            tpCorner.Parent = TeleportPointBtn
+            
+            TeleportPointBtn.MouseButton1Click:Connect(function() 
+                TeleportToPosition(pos) 
+            end)
+            
+            -- Кнопка удаления
+            local DeleteBtn = Instance.new("TextButton")
+            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
+            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
+            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            DeleteBtn.BorderColor3 = Library.Theme.Border
+            DeleteBtn.BorderSizePixel = 1
+            DeleteBtn.Text = "X"
+            DeleteBtn.TextColor3 = Library.Theme.Text
+            DeleteBtn.TextScaled = true
+            DeleteBtn.Font = Enum.Font.SourceSansBold
+            DeleteBtn.BackgroundTransparency = 0.3
+            DeleteBtn.Parent = ItemFrame
+            
+            local delCorner = Instance.new("UICorner")
+            delCorner.CornerRadius = UDim.new(0, 8)
+            delCorner.Parent = DeleteBtn
+            
+            DeleteBtn.MouseButton1Click:Connect(function()
+                table.remove(PointsData, i)
+                UpdatePointsList()
+                UpdatePointInfo()
+                UpdatePointVisuals()
+            end)
+        end
+        
+        local count = #PointsData
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
+    end
+    
+    -- Информация
+    function UpdatePointInfo()
+        local PointInfo = _G.PointInfo
+        if PointInfo then
+            PointInfo.Text = "Точек: " .. #PointsData
+        end
+    end
+    
+    -- Установка точки (без названия)
+    function SetPoint()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        if #PointsData >= MAX_POINTS then return end
+        
+        -- Сохраняем только координаты, без названия
+        local pos = hrp.Position
+        table.insert(PointsData, {pos = pos})
+        UpdatePointsList()
+        UpdatePointInfo()
+        UpdatePointVisuals()
+    end
+    
+    -- Очистка
+    function ClearAllPoints()
+        PointsData = {}
+        UpdatePointsList()
+        UpdatePointInfo()
+        ClearPointVisuals()
+    end
+    
+    -- Назначаем обработчики
+    local pointsTab = Tabs[1]
+    if pointsTab then
+        local control = pointsTab:FindFirstChild("PointControl")
+        if control then
+            local SetBtn = control:FindFirstChild("SetBtn")
+            local TeleportBtn = control:FindFirstChild("TeleportBtn")
+            local ClearBtn = control:FindFirstChild("ClearBtn")
+            
+            if SetBtn then SetBtn.MouseButton1Click:Connect(SetPoint) end
+            if TeleportBtn then TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint) end
+            if ClearBtn then ClearBtn.MouseButton1Click:Connect(ClearAllPoints) end
+        end
+    end
+    
+    print("✅ Точки теперь сохраняются БЕЗ названий")
+    print("✅ В списке отображается только номер в кружке и координаты")
+end)
+
+-- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО ЦИФРЫ В КРУЖКЕ) =====
+pcall(function()
+    local PointVisuals = {}
+    
+    function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+    
+    function UpdatePointVisuals()
+        ClearPointVisuals()
+        
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+            
+            -- Сфера
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+            
+            -- Подсветка
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+            
+            -- Billboard с цифрой
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 60, 0, 60)
+            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+            
+            -- Круглый фон
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 2
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+            
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+            
+            -- Цифра
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+        end
+    end
+    
+    -- Первоначальное обновление
+    task.wait(0.5)
+    UpdatePointVisuals()
+    
+    -- Обновление при переключении вкладки
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+    
+    -- Обновление при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+    
+    print("✅ В мире отображаются только цифры в кружках")
+    print("✅ Названия точек полностью удалены")
+end)
