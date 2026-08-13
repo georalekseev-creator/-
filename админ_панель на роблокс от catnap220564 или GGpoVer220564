@@ -267,8 +267,8 @@ Shadow.Parent = MainButton
 -- Панель меню
 local MenuPanel = Instance.new("Frame")
 MenuPanel.Name = "MenuPanel"
-MenuPanel.Size = UDim2.new(0, 750, 0, 600)
-MenuPanel.Position = UDim2.new(0.5, -375, 0.5, -300)
+MenuPanel.Size = UDim2.new(0, 750, 0, 650)
+MenuPanel.Position = UDim2.new(0.5, -375, 0.5, -325)
 MenuPanel.BackgroundColor3 = Library.Theme.Background
 MenuPanel.BorderColor3 = Library.Theme.Border
 MenuPanel.BorderSizePixel = 3
@@ -334,7 +334,8 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
-local TabNames = {"Точки", "Клик-ТП", "Полёт", "Ходьба", "Noclip", "Платформы", "Игроки", "X-Ray", "SPI", "Freecam"}
+-- Список названий вкладок (добавлена вкладка Хидбоксы)
+local TabNames = {"Точки", "Клик-ТП", "Полёт", "Ходьба", "Noclip", "Платформы", "Игроки", "X-Ray", "SPI", "Freecam", "Кликир", "Хидбоксы"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
@@ -2380,6 +2381,7 @@ for i, btn in ipairs(TabButtons) do
         if i == 7 then UpdatePlayersList(); lastPlayerUpdate = tick() end
         if i == 8 then UpdateXRaySlider() end
         if i == 9 then if SPIEnabled then UpdateSPI() end end
+        if i == 12 then if HitboxEnabled then UpdateHitboxes() end end
     end)
 end
 
@@ -2596,6 +2598,7 @@ MainButton.MouseButton1Click:Connect(function()
         lastPlayerUpdate = tick()
         UpdateXRaySlider()
         if SPIEnabled then UpdateSPI() end
+        if HitboxEnabled then UpdateHitboxes() end
     end
 end)
 
@@ -2642,6 +2645,7 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if input.KeyCode == Enum.KeyCode.Z and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ClearWalkPoints() end
     if input.KeyCode == Enum.KeyCode.P and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then PlacePlatformUnderPlayer() end
     if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleSPI() end
+    if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleHitboxes() end
 end)
 
 local function LoadSavedPoints()
@@ -2690,7 +2694,7 @@ end)
 print("Админ Панель загружена!")
 print("Вкладки теперь расположены ВЕРТИКАЛЬНО слева")
 print("Убраны стрелки переключения между вкладками")
-print("Все вкладки: Точки, Клик-ТП, Полёт, Ходьба, Noclip, Платформы, Игроки, X-Ray, SPI, Freecam")
+print("Все вкладки: Точки, Клик-ТП, Полёт, Ходьба, Noclip, Платформы, Игроки, X-Ray, SPI, Freecam, Кликир, Хидбоксы")
 print("Alt+C - клик-телепорт")
 print("Alt+F - полёт с анимацией бега (WASD + Пробел/ Ctrl)")
 print("Alt+W - старт/пауза ходьбы | Alt+X - добавить точку для ходьбы")
@@ -2699,7 +2703,7 @@ print("Alt+N - noclip")
 print("Alt+P - поставить платформу под ногами")
 print("Alt+R - X-Ray (только мир, НЕ GUI)")
 print("Alt+I - SPI (показ игроков через стены)")
-print("Панель можно растягивать за любую невидимую сторону (по краям и углам)")
+print("Alt+H - Хидбоксы (показ хитбоксов персонажей)")
 
 -- ===== ВИДИМЫЕ СИНИЕ КНОПКИ РАСТЯГИВАНИЯ (НА ВСЕХ СТЕНКАХ) =====
 local RESIZE_BUTTON_SIZE = 10
@@ -3550,6 +3554,7 @@ print("📌 Теперь X-Ray влияет ТОЛЬКО на текстуры �
 print("📌 GUI элементы и персонажи игроков НЕ затрагиваются")
 print("📌 Используйте Alt+R для включения/выключения")
 print("📌 Слайдер регулирует прозрачность стен")
+
 -- ===== ОЧИСТКА ВКЛАДКИ X-RAY =====
 pcall(function()
     -- Удаляем все элементы из вкладки X-Ray
@@ -3578,6 +3583,7 @@ pcall(function()
 end)
 
 print("✅ Вкладка X-Ray очищена и пуста")
+
 -- ===== ДОБАВЛЕНИЕ КНОПКИ ВКЛЮЧЕНИЯ/ВЫКЛЮЧЕНИЯ В ВКЛАДКУ X-RAY (НЕ РАБОТАЕТ) =====
 pcall(function()
     local xrayTab = Tabs[8]
@@ -3643,6 +3649,7 @@ pcall(function()
 end)
 
 print("✅ В вкладку X-Ray добавлена кнопка, но она ничего не делает")
+
 -- ===== ЗАМЕНА ВКЛАДКИ X-RAY НА РАБОЧУЮ ВЕРСИЮ =====
 pcall(function()
     local xrayTab = Tabs[8]
@@ -3921,6 +3928,7 @@ pcall(function()
     print("📌 Alt+R - включить/выключить")
     print("📌 Ползунок регулирует прозрачность")
 end)
+
 -- ===== ДОБАВЛЕНИЕ ПРОЗРАЧНОСТИ ФОНА =====
 pcall(function()
     -- Основной фон меню - 50% прозрачности
@@ -4011,6 +4019,7 @@ pcall(function()
     
     print("✅ Прозрачность фона установлена на 50%")
 end)
+
 -- ===== ДОПОЛНИТЕЛЬНАЯ ПРОЗРАЧНОСТЬ ДЛЯ FREECAM И ПОЛЯ ВВОДА =====
 pcall(function()
     -- === ВКЛАДКА FREECAM (10-я вкладка) ===
@@ -4054,6 +4063,7 @@ pcall(function()
     
     print("✅ Дополнительная прозрачность применена: Freecam и поле ввода")
 end)
+
 -- ===== ПРОЗРАЧНОСТЬ ДЛЯ ВКЛАДОК ИГРОКИ И X-RAY =====
 pcall(function()
     -- === ВКЛАДКА ИГРОКИ (7-я вкладка) ===
@@ -4125,6 +4135,7 @@ pcall(function()
     
     print("✅ Прозрачность применена для вкладок Игроки и X-Ray")
 end)
+
 -- ===== ПРОЗРАЧНОСТЬ ДЛЯ СПИСКА ИГРОКОВ (НИКИ) =====
 pcall(function()
     local playersTab = Tabs[7]
@@ -4158,6 +4169,7 @@ pcall(function()
     
     print("✅ Список игроков и ники стали прозрачными (50%)")
 end)
+
 -- ===== ПРОЗРАЧНОСТЬ ДЛЯ СТРОК С ИГРОКАМИ (ONLINE/OFFLINE, ИМЯ, ID, ТП) =====
 pcall(function()
     -- Делаем прозрачными все строки с игроками
@@ -4187,6 +4199,7 @@ pcall(function()
     
     print("✅ Строки с игроками (online/offline, имя, ID, ТП) стали прозрачными (50%)")
 end)
+
 -- ===== ПРОЗРАЧНОСТЬ КНОПОК И ИЗМЕНЕНИЕ ФОРМЫ =====
 pcall(function()
     -- === КНОПКА A_D (ГЛАВНАЯ) ===
@@ -4279,6 +4292,7 @@ pcall(function()
     print("✅ Кнопки растягивания на стенках - прозрачные и круглые")
     print("✅ Угловые кнопки - прозрачные")
 end)
+
 -- ===== УДАЛЕНИЕ СТРЕЛОК И УВЕЛИЧЕНИЕ КНОПОК РАСТЯГИВАНИЯ =====
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
@@ -4340,6 +4354,7 @@ pcall(function()
     print("✅ Кнопки растягивания увеличены в 2 раза")
     print("✅ Кнопки на стенках - круглые, угловые - квадратные")
 end)
+
 -- ===== УМЕНЬШЕНИЕ КНОПОК РАСТЯГИВАНИЯ В 2 РАЗА =====
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
@@ -4405,6 +4420,7 @@ pcall(function()
     print("✅ Стрелочки удалены")
     print("✅ Кнопки на стенках - круглые, угловые - квадратные")
 end)
+
 -- ===== ВСЕ КНОПКИ: ПРОЗРАЧНОСТЬ 30% И ЗАКРУГЛЕНИЕ В 3 РАЗА =====
 pcall(function()
     -- Функция для обработки кнопок
@@ -4513,6 +4529,7 @@ pcall(function()
     print("✅ Главная кнопка A_D - круглая")
     print("✅ Кнопки растягивания на стенках - круглые, в углах - скругленные")
 end)
+
 -- ===== ИСПРАВЛЕНИЕ КНОПОК: ТП В ИГРОКАХ И УГЛОВЫЕ КНОПКИ =====
 pcall(function()
     -- === КНОПКИ ТП ВО ВКЛАДКЕ ИГРОКИ ===
@@ -4613,6 +4630,7 @@ pcall(function()
     print("✅ Угловые кнопки растягивания стали квадратными")
     print("✅ Кнопки на стенках остались круглыми")
 end)
+
 -- ===== КНОПКА ТП ВО ВКЛАДКЕ ИГРОКИ - КРУГЛАЯ =====
 pcall(function()
     local playersTab = Tabs[7]
@@ -4657,6 +4675,7 @@ pcall(function()
     print("✅ Кнопки ТП во вкладке Игроки теперь круглые")
     print("✅ На кнопках ТП вместо текста иконка ▶")
 end)
+
 -- ===== КНОПКА ТП ВО ВКЛАДКЕ ИГРОКИ - ПРОЗРАЧНАЯ И КРУГЛАЯ =====
 pcall(function()
     local playersTab = Tabs[7]
@@ -4700,6 +4719,7 @@ pcall(function()
     
     print("✅ Кнопки ТП во вкладке Игроки теперь прозрачные (30%) и круглые")
 end)
+
 -- ===== СДЕЛАТЬ КНОПКИ ВКЛАДОК КВАДРАТНЫМИ =====
 pcall(function()
     -- Проходим по всем кнопкам вкладок
@@ -4722,6 +4742,7 @@ pcall(function()
     
     print("✅ Кнопки вкладок стали квадратными (без скругления)")
 end)
+
 -- ===== ВКЛАДКА "КЛИКИР" (ПУСТАЯ) =====
 pcall(function()
     -- Проверяем, существует ли уже вкладка "Кликир"
@@ -4794,6 +4815,7 @@ pcall(function()
         print("✅ Добавлена пустая вкладка 'Кликир'")
     end
 end)
+
 -- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР =====
 pcall(function()
     -- Находим вкладку "Кликир"
@@ -5026,6 +5048,7 @@ pcall(function()
     print("📌 Alt+K - включить/выключить автокликер")
     print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
 end)
+
 -- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР (НЕ РАБОТАЕТ ПРИ НАВЕДЕНИИ НА СКРИПТ) =====
 pcall(function()
     -- Находим вкладку "Кликир"
@@ -5288,6 +5311,7 @@ pcall(function()
     print("📌 Автокликер НЕ работает когда курсор наведен на GUI панель")
     print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
 end)
+
 -- ===== ВКЛАДКА "КЛИКИР" - АВТОКЛИКЕР (РАБОЧАЯ ВЕРСИЯ) =====
 pcall(function()
     -- Находим вкладку "Кликир"
@@ -5567,7 +5591,6 @@ pcall(function()
     print("📌 Автокликер НЕ работает когда курсор наведен на GUI панель")
     print("📌 Слайдер регулирует задержку между кликами (50-1000 мс)")
 end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
 
 -- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - ЗАКРУГЛЕНИЕ =====
 pcall(function()
@@ -5720,7 +5743,6 @@ pcall(function()
     print("✅ Точки теперь отображаются с цифрами в кружках")
     print("✅ При удалении точки нумерация автоматически обновляется")
 end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
 
 -- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
 pcall(function()
@@ -5887,36 +5909,6 @@ pcall(function()
     print("✅ Точки теперь видны в мире как светящиеся сферы с номерами")
     print("✅ Нумерация обновляется автоматически при удалении/добавлении точек")
 end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
-
--- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
-pcall(function()
-    local clickerTab = nil
-    for i, tab in pairs(Tabs) do
-        if TabNames[i] == "Кликир" then
-            clickerTab = tab
-            break
-        end
-    end
-    
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
-                -- Добавляем скругление ×3
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(0, 24) -- Скругление ×3 (было 8, стало 24)
-                
-                -- Делаем прозрачность как у других кнопок
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
-    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
-end)
 
 -- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО СФЕРЫ С ЦИФРАМИ, БЕЗ НАЗВАНИЙ) =====
 pcall(function()
@@ -6076,36 +6068,6 @@ pcall(function()
     print("✅ Точки теперь видны в мире как светящиеся сферы с цифрами")
     print("✅ Названия точек НЕ отображаются в мире")
     print("✅ При добавлении/удалении точки все обновляется автоматически")
-end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
-
--- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
-pcall(function()
-    local clickerTab = nil
-    for i, tab in pairs(Tabs) do
-        if TabNames[i] == "Кликир" then
-            clickerTab = tab
-            break
-        end
-    end
-    
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
-                -- Добавляем скругление ×3
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(0, 24) -- Скругление ×3
-                
-                -- Делаем прозрачность как у других кнопок
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
-    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
 end)
 
 -- ===== УДАЛЯЕМ ПОЛЕ ВВОДА ИМЕНИ ТОЧКИ И ДЕЛАЕМ АВТО-НУМЕРАЦИЮ =====
@@ -6371,429 +6333,6 @@ pcall(function()
     print("✅ Точки теперь видны в мире как светящиеся сферы с цифрами")
     print("✅ Названия точек НЕ отображаются в мире")
     print("✅ При добавлении/удалении точки все обновляется автоматически")
-end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
-
--- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
-pcall(function()
-    local clickerTab = nil
-    for i, tab in pairs(Tabs) do
-        if TabNames[i] == "Кликир" then
-            clickerTab = tab
-            break
-        end
-    end
-    
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(0, 24)
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
-    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
-end)
-
--- ===== ИСПРАВЛЕНИЕ: УДАЛЯЕМ СТАРЫЕ КНОПКИ И ПЕРЕСОЗДАЕМ ИНТЕРФЕЙС ВКЛАДКИ ТОЧКИ =====
-pcall(function()
-    local pointsTab = Tabs[1]
-    if not pointsTab then return end
-    
-    -- ПОЛНОСТЬЮ ОЧИЩАЕМ ВКЛАДКУ ТОЧКИ
-    for _, child in pairs(pointsTab:GetChildren()) do
-        child:Destroy()
-    end
-    
-    -- Создаём список точек
-    local PointsList = Instance.new("ScrollingFrame")
-    PointsList.Name = "PointsList"
-    PointsList.Size = UDim2.new(1, 0, 0.6, 0)
-    PointsList.BackgroundColor3 = Library.Theme.Panel
-    PointsList.BorderColor3 = Library.Theme.Border
-    PointsList.BorderSizePixel = 2
-    PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
-    PointsList.ScrollBarThickness = 8
-    PointsList.BackgroundTransparency = 0.5
-    PointsList.Parent = pointsTab
-    
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 5)
-    ListLayout.Parent = PointsList
-    
-    -- Панель управления
-    local PointControl = Instance.new("Frame")
-    PointControl.Name = "PointControl"
-    PointControl.Size = UDim2.new(1, 0, 0.35, 0)
-    PointControl.Position = UDim2.new(0, 0, 0.62, 0)
-    PointControl.BackgroundTransparency = 1
-    PointControl.Parent = pointsTab
-    
-    -- Кнопка установки точки
-    local SetBtn = Instance.new("TextButton")
-    SetBtn.Name = "SetBtn"
-    SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-    SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-    SetBtn.BackgroundColor3 = Library.Theme.Success
-    SetBtn.BorderColor3 = Library.Theme.Border
-    SetBtn.BorderSizePixel = 2
-    SetBtn.Text = "УСТАНОВИТЬ ТОЧКУ"
-    SetBtn.TextColor3 = Library.Theme.Text
-    SetBtn.TextScaled = true
-    SetBtn.Font = Enum.Font.SourceSansBold
-    SetBtn.BackgroundTransparency = 0.3
-    SetBtn.Parent = PointControl
-    
-    local setCorner = Instance.new("UICorner")
-    setCorner.CornerRadius = UDim.new(0, 12)
-    setCorner.Parent = SetBtn
-    
-    -- Кнопка телепорта
-    local TeleportBtn = Instance.new("TextButton")
-    TeleportBtn.Name = "TeleportBtn"
-    TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-    TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
-    TeleportBtn.BackgroundColor3 = Library.Theme.Accent
-    TeleportBtn.BorderColor3 = Library.Theme.Border
-    TeleportBtn.BorderSizePixel = 2
-    TeleportBtn.Text = "ТЕЛЕПОРТ"
-    TeleportBtn.TextColor3 = Library.Theme.Text
-    TeleportBtn.TextScaled = true
-    TeleportBtn.Font = Enum.Font.SourceSansBold
-    TeleportBtn.BackgroundTransparency = 0.3
-    TeleportBtn.Parent = PointControl
-    
-    local tpCorner = Instance.new("UICorner")
-    tpCorner.CornerRadius = UDim.new(0, 12)
-    tpCorner.Parent = TeleportBtn
-    
-    -- Кнопка очистки
-    local ClearBtn = Instance.new("TextButton")
-    ClearBtn.Name = "ClearBtn"
-    ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
-    ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
-    ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    ClearBtn.BorderColor3 = Library.Theme.Border
-    ClearBtn.BorderSizePixel = 2
-    ClearBtn.Text = "ОЧИСТИТЬ ВСЕ"
-    ClearBtn.TextColor3 = Library.Theme.Text
-    ClearBtn.TextScaled = true
-    ClearBtn.Font = Enum.Font.SourceSansBold
-    ClearBtn.BackgroundTransparency = 0.3
-    ClearBtn.Parent = PointControl
-    
-    local clearCorner = Instance.new("UICorner")
-    clearCorner.CornerRadius = UDim.new(0, 12)
-    clearCorner.Parent = ClearBtn
-    
-    -- Информация о точках
-    local PointInfo = Instance.new("TextLabel")
-    PointInfo.Name = "PointInfo"
-    PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
-    PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
-    PointInfo.BackgroundTransparency = 1
-    PointInfo.Text = "Точек: 0 / 1000"
-    PointInfo.TextColor3 = Library.Theme.Text
-    PointInfo.TextScaled = true
-    PointInfo.Font = Enum.Font.SourceSans
-    PointInfo.Parent = PointControl
-    
-    -- Сохраняем ссылки
-    _G.PointsList = PointsList
-    _G.PointInfo = PointInfo
-    
-    print("✅ Вкладка Точки полностью пересоздана, дублирование кнопок устранено")
-end)
-
--- ===== ПЕРЕОПРЕДЕЛЯЕМ ФУНКЦИИ ДЛЯ РАБОТЫ С ТОЧКАМИ =====
-pcall(function()
-    -- Функция обновления списка точек
-    function UpdatePointsList()
-        local PointsList = _G.PointsList
-        if not PointsList then return end
-        
-        -- Очищаем список
-        for _, child in pairs(PointsList:GetChildren()) do
-            if child:IsA("Frame") then child:Destroy() end
-        end
-        
-        -- Отображаем точки
-        for i, data in ipairs(PointsData) do
-            local name = data.name
-            local pos = data.pos
-            
-            local ItemFrame = Instance.new("Frame")
-            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
-            ItemFrame.BackgroundColor3 = Library.Theme.Panel
-            ItemFrame.BorderColor3 = Library.Theme.Border
-            ItemFrame.BorderSizePixel = 1
-            ItemFrame.BackgroundTransparency = 0.5
-            ItemFrame.Parent = PointsList
-            
-            -- Кружок с цифрой
-            local circleFrame = Instance.new("Frame")
-            circleFrame.Size = UDim2.new(0, 30, 0, 30)
-            circleFrame.Position = UDim2.new(0, 5, 0.5, -15)
-            circleFrame.BackgroundColor3 = Library.Theme.Accent
-            circleFrame.BorderColor3 = Library.Theme.Border
-            circleFrame.BorderSizePixel = 2
-            circleFrame.Parent = ItemFrame
-            
-            local circleCorner = Instance.new("UICorner")
-            circleCorner.CornerRadius = UDim.new(1, 0)
-            circleCorner.Parent = circleFrame
-            
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.Parent = circleFrame
-            
-            -- Имя точки
-            local NameLabel = Instance.new("TextLabel")
-            NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
-            NameLabel.Position = UDim2.new(0.12, 0, 0, 0)
-            NameLabel.BackgroundTransparency = 1
-            NameLabel.Text = name
-            NameLabel.TextColor3 = Library.Theme.Text
-            NameLabel.TextScaled = true
-            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-            NameLabel.Font = Enum.Font.SourceSans
-            NameLabel.Parent = ItemFrame
-            
-            -- Кнопка телепорта
-            local TeleportPointBtn = Instance.new("TextButton")
-            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
-            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
-            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
-            TeleportPointBtn.BorderColor3 = Library.Theme.Border
-            TeleportPointBtn.BorderSizePixel = 1
-            TeleportPointBtn.Text = "TP"
-            TeleportPointBtn.TextColor3 = Library.Theme.Text
-            TeleportPointBtn.TextScaled = true
-            TeleportPointBtn.Font = Enum.Font.SourceSansBold
-            TeleportPointBtn.BackgroundTransparency = 0.3
-            TeleportPointBtn.Parent = ItemFrame
-            
-            local tpCorner = Instance.new("UICorner")
-            tpCorner.CornerRadius = UDim.new(0, 8)
-            tpCorner.Parent = TeleportPointBtn
-            
-            TeleportPointBtn.MouseButton1Click:Connect(function() 
-                TeleportToPosition(pos) 
-            end)
-            
-            -- Кнопка удаления
-            local DeleteBtn = Instance.new("TextButton")
-            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
-            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
-            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-            DeleteBtn.BorderColor3 = Library.Theme.Border
-            DeleteBtn.BorderSizePixel = 1
-            DeleteBtn.Text = "X"
-            DeleteBtn.TextColor3 = Library.Theme.Text
-            DeleteBtn.TextScaled = true
-            DeleteBtn.Font = Enum.Font.SourceSansBold
-            DeleteBtn.BackgroundTransparency = 0.3
-            DeleteBtn.Parent = ItemFrame
-            
-            local delCorner = Instance.new("UICorner")
-            delCorner.CornerRadius = UDim.new(0, 8)
-            delCorner.Parent = DeleteBtn
-            
-            DeleteBtn.MouseButton1Click:Connect(function()
-                table.remove(PointsData, i)
-                UpdatePointsList()
-                UpdatePointInfo()
-                UpdatePointVisuals()
-            end)
-        end
-        
-        local count = #PointsData
-        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
-    end
-    
-    -- Функция обновления информации о точках
-    function UpdatePointInfo()
-        local PointInfo = _G.PointInfo
-        if PointInfo then
-            local count = #PointsData
-            PointInfo.Text = "Точек: " .. count .. " / " .. MAX_POINTS
-        end
-    end
-    
-    -- Функция установки точки
-    function SetPoint()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-        
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        
-        if #PointsData >= MAX_POINTS then return end
-        
-        local name = "Точка " .. (#PointsData + 1)
-        local pos = hrp.Position
-        table.insert(PointsData, {name = name, pos = pos})
-        UpdatePointsList()
-        UpdatePointInfo()
-        UpdatePointVisuals()
-    end
-    
-    -- Функция очистки всех точек
-    function ClearAllPoints()
-        PointsData = {}
-        UpdatePointsList()
-        UpdatePointInfo()
-        ClearPointVisuals()
-    end
-    
-    -- Назначаем обработчики кнопкам
-    local pointsTab = Tabs[1]
-    if pointsTab then
-        local SetBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("SetBtn")
-        local TeleportBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("TeleportBtn")
-        local ClearBtn = pointsTab:FindFirstChild("PointControl"):FindFirstChild("ClearBtn")
-        
-        if SetBtn then SetBtn.MouseButton1Click:Connect(SetPoint) end
-        if TeleportBtn then TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint) end
-        if ClearBtn then ClearBtn.MouseButton1Click:Connect(ClearAllPoints) end
-    end
-    
-    print("✅ Функции точек переопределены, дублирование устранено")
-end)
-
--- ===== ВИЗУАЛИЗАЦИЯ ТОЧЕК В МИРЕ (ТОЛЬКО СФЕРЫ С ЦИФРАМИ) =====
-pcall(function()
-    local PointVisuals = {}
-    
-    function ClearPointVisuals()
-        for _, obj in pairs(PointVisuals) do
-            if obj and obj.Parent then
-                obj:Destroy()
-            end
-        end
-        PointVisuals = {}
-    end
-    
-    function UpdatePointVisuals()
-        ClearPointVisuals()
-        
-        for i, data in ipairs(PointsData) do
-            local pos = data.pos
-            
-            local sphere = Instance.new("Part")
-            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
-            sphere.Position = pos
-            sphere.Anchored = true
-            sphere.CanCollide = false
-            sphere.Material = Enum.Material.Neon
-            sphere.BrickColor = BrickColor.new("Bright blue")
-            sphere.Transparency = 0.3
-            sphere.Shape = Enum.PartType.Ball
-            sphere.Parent = workspace
-            table.insert(PointVisuals, sphere)
-            
-            local highlight = Instance.new("Highlight")
-            highlight.Parent = sphere
-            highlight.FillColor = Color3.fromRGB(0, 150, 255)
-            highlight.FillTransparency = 0.3
-            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
-            highlight.OutlineTransparency = 0
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            table.insert(PointVisuals, highlight)
-            
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "PointNumber"
-            billboard.Size = UDim2.new(0, 60, 0, 60)
-            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = sphere
-            table.insert(PointVisuals, billboard)
-            
-            local bgFrame = Instance.new("Frame")
-            bgFrame.Size = UDim2.new(1, 0, 1, 0)
-            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-            bgFrame.BackgroundTransparency = 0.2
-            bgFrame.BorderSizePixel = 2
-            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
-            bgFrame.Parent = billboard
-            
-            local bgCorner = Instance.new("UICorner")
-            bgCorner.CornerRadius = UDim.new(1, 0)
-            bgCorner.Parent = bgFrame
-            
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            numLabel.TextStrokeTransparency = 0.3
-            numLabel.Parent = bgFrame
-            table.insert(PointVisuals, numLabel)
-        end
-    end
-    
-    -- Обновляем визуализацию
-    task.wait(0.5)
-    UpdatePointVisuals()
-    
-    -- Обновляем при переключении вкладки
-    for i, btn in ipairs(TabButtons) do
-        btn.MouseButton1Click:Connect(function()
-            if i == 1 then
-                task.wait(0.1)
-                UpdatePointVisuals()
-            end
-        end)
-    end
-    
-    -- Обновляем при респавне
-    game.Players.LocalPlayer.CharacterAdded:Connect(function()
-        task.wait(1)
-        UpdatePointVisuals()
-    end)
-    
-    print("✅ Визуализация точек обновлена, дублирование цифр устранено")
-end)
--- ===== ВСТАВЬТЕ ЭТИ СТРОЧКИ В КОНЕЦ СКРИПТА =====
-
--- ===== КНОПКА ВКЛ/ВЫКЛ В ВКЛАДКЕ КЛИКИР - СКРУГЛЕНИЕ ×3 =====
-pcall(function()
-    local clickerTab = nil
-    for i, tab in pairs(Tabs) do
-        if TabNames[i] == "Кликир" then
-            clickerTab = tab
-            break
-        end
-    end
-    
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ВКЛ" or obj.Text == "ВЫКЛ") then
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(0, 24)
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
-    print("✅ Кнопка вкладки Кликир имеет скругление ×3")
 end)
 
 -- ===== ПЕРЕСОЗДАЕМ ВКЛАДКУ ТОЧКИ БЕЗ НАЗВАНИЙ =====
@@ -7170,4 +6709,1972 @@ pcall(function()
     
     print("✅ В мире отображаются только цифры в кружках")
     print("✅ Названия точек полностью удалены")
+end)
+
+-- ===== ВКЛАДКА "ХИДБОКСЫ" =====
+pcall(function()
+    -- Находим вкладку "Хидбоксы"
+    local hitboxTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Хидбоксы" then
+            hitboxTab = tab
+            break
+        end
+    end
+    
+    if not hitboxTab then
+        print("❌ Вкладка 'Хидбоксы' не найдена, создаем...")
+        
+        -- Добавляем вкладку, если её нет
+        table.insert(TabNames, "Хидбоксы")
+        
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+        
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Хидбоксы"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем интерфейс вкладки
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.2, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ХИДБОКСЫ ИГРОКОВ"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.22, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Отображает хитбоксы игроков. Синие - не убивают, Красные - убивают"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.4, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "ВЫКЛ"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.65, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Хидбоксы: Выключены"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА ХИДБОКСОВ =====
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    
+    -- Функция очистки визуализации хитбоксов
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+    
+    -- Функция проверки, убивает ли игрок
+    local function IsPlayerKiller(player)
+        if not player or not player.Character then return false end
+        
+        -- Проверяем наличие оружия
+        local character = player.Character
+        for _, tool in pairs(character:GetChildren()) do
+            if tool:IsA("Tool") then
+                -- Проверяем, есть ли у оружия свойство "Damage" или оно может убивать
+                if tool:FindFirstChild("Damage") or tool:FindFirstChild("Handle") then
+                    return true
+                end
+            end
+        end
+        
+        -- Проверяем наличие атрибута "Killer"
+        if character:GetAttribute("Killer") == true then
+            return true
+        end
+        
+        -- Проверяем наличие "KillPart" в руках
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name:find("Kill") then
+                return true
+            end
+        end
+        
+        return false
+    end
+    
+    -- Функция создания хитбокса для игрока
+    local function CreateHitbox(player)
+        if not player or not player.Character then return nil end
+        
+        local character = player.Character
+        local isKiller = IsPlayerKiller(player)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+        local transparency = 0.7
+        
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = character
+        box.Adornee = character
+        box.Size = Vector3.new(4, 6, 4)
+        box.Transparency = transparency
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
+        
+        return box
+    end
+    
+    -- Функция обновления хитбоксов
+    local function UpdateHitboxes()
+        ClearHitboxes()
+        
+        if not HitboxEnabled then return end
+        
+        local localPlayer = game.Players.LocalPlayer
+        local players = game.Players:GetPlayers()
+        
+        for _, player in pairs(players) do
+            if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local box = CreateHitbox(player)
+                if box then
+                    table.insert(HitboxVisuals, box)
+                end
+            end
+        end
+    end
+    
+    -- Включение хитбоксов
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+        
+        toggleBtn.Text = "ВКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Хидбоксы: Включены"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        UpdateHitboxes()
+        
+        -- Подписываемся на обновления
+        HitboxConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            if not HitboxEnabled then return end
+            -- Обновляем только если изменились игроки
+            local currentPlayers = {}
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character then
+                    table.insert(currentPlayers, player)
+                end
+            end
+            
+            -- Проверяем, нужно ли обновить
+            local needUpdate = false
+            if #HitboxVisuals ~= #currentPlayers then
+                needUpdate = true
+            else
+                for i, box in pairs(HitboxVisuals) do
+                    if not box or not box.Parent then
+                        needUpdate = true
+                        break
+                    end
+                end
+            end
+            
+            if needUpdate then
+                UpdateHitboxes()
+            end
+        end)
+        
+        print("✅ Хидбоксы включены")
+    end
+    
+    -- Выключение хитбоксов
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+        
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+        
+        ClearHitboxes()
+        
+        toggleBtn.Text = "ВЫКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Хидбоксы: Выключены"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Хидбоксы выключены")
+    end
+    
+    -- Переключение хитбоксов
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+    
+    -- Обработчики
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+    
+    -- Хоткей Alt+H
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+    
+    -- Очищаем при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(1)
+            UpdateHitboxes()
+        end
+    end)
+    
+    -- Делаем функции глобальными
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+    
+    print("✅ Вкладка 'Хидбоксы' создана!")
+    print("📌 Alt+H - включить/выключить хидбоксы")
+    print("📌 Синие - не убивают, Красные - убивают")
+    print("📌 Прозрачность 70%")
+end)
+-- ===== ВКЛАДКА "ХИДБОКСЫ" - ТЕКСТУРЫ МИРА (ИСПРАВЛЕННАЯ) =====
+pcall(function()
+    -- Находим вкладку "Хидбоксы"
+    local hitboxTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Хидбоксы" then
+            hitboxTab = tab
+            break
+        end
+    end
+    
+    if not hitboxTab then
+        -- Добавляем вкладку, если её нет
+        table.insert(TabNames, "Хидбоксы")
+        
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+        
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Хидбоксы"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем интерфейс вкладки
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ХИДБОКСЫ ТЕКСТУР МИРА"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Синий - можно касаться | Красный - убивает | Прозрачность 70%"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "ВЫКЛ"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Хидбоксы: Выключены"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА ХИДБОКСОВ ДЛЯ ТЕКСТУР МИРА =====
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local HitboxUpdateConnection = nil
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 0.5 -- Обновляем раз в 0.5 секунды для уменьшения нагрузки
+    
+    -- Функция проверки, является ли часть убивающей
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Проверяем по названию
+        local name = part.Name:lower()
+        if name:find("kill") or name:find("lava") or name:find("spike") or name:find("danger") then
+            return true
+        end
+        
+        -- Проверяем по материалу (некоторые материалы опасны)
+        if part.Material == Enum.Material.Neon then
+            return true
+        end
+        
+        -- Проверяем атрибуты
+        if part:GetAttribute("Killer") == true then
+            return true
+        end
+        
+        -- Проверяем наличие скрипта, который может убивать
+        for _, child in pairs(part:GetDescendants()) do
+            if child:IsA("Script") or child:IsA("LocalScript") then
+                local scriptText = child.Source or ""
+                if scriptText:find("Humanoid") and (scriptText:find("Damage") or scriptText:find("Kill") or scriptText:find("TakeDamage")) then
+                    return true
+                end
+            end
+        end
+        
+        return false
+    end
+    
+    -- Функция проверки, является ли часть твёрдой (препятствие)
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Пропускаем части игроков
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            return false
+        end
+        
+        -- Пропускаем части других игроков
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and part:IsDescendantOf(player.Character) then
+                return false
+            end
+        end
+        
+        -- Пропускаем GUI
+        if part:IsDescendantOf(game.CoreGui) or part:IsDescendantOf(game.StarterGui) then
+            return false
+        end
+        
+        -- Проверяем, является ли часть твёрдой
+        if part.CanCollide == false then return false end
+        if part.Anchored == false then return false end
+        
+        -- Проверяем размер (слишком маленькие части не учитываем)
+        local size = part.Size
+        if size.X < 0.5 and size.Y < 0.5 and size.Z < 0.5 then return false end
+        
+        return true
+    end
+    
+    -- Функция очистки визуализации хитбоксов
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+    
+    -- Функция создания хитбокса для части
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+        
+        local isKiller = IsKillerPart(part)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+        
+        -- Используем BoxHandleAdornment для отображения хитбокса
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+        
+        -- Добавляем эффект свечения для убивающих частей
+        if isKiller then
+            local glow = Instance.new("SelectionBox")
+            glow.Parent = part
+            glow.Adornee = part
+            glow.Color3 = Color3.fromRGB(255, 0, 0)
+            glow.LineThickness = 0.1
+            glow.Transparency = 0.5
+            return box, glow
+        end
+        
+        return box
+    end
+    
+    -- Функция обновления хитбоксов (оптимизированная)
+    local function UpdateHitboxes()
+        ClearHitboxes()
+        
+        if not HitboxEnabled then return end
+        
+        local localPlayer = game.Players.LocalPlayer
+        if not localPlayer then return end
+        
+        local parts = workspace:GetDescendants()
+        local count = 0
+        
+        -- Ограничиваем количество обрабатываемых частей для производительности
+        local MAX_PARTS = 500
+        
+        for _, part in pairs(parts) do
+            if count >= MAX_PARTS then break end
+            
+            if part:IsA("BasePart") and IsSolidPart(part) then
+                local isKiller = IsKillerPart(part)
+                local box = CreateHitboxForPart(part)
+                if box then
+                    if type(box) == "table" then
+                        for _, obj in pairs(box) do
+                            if obj then table.insert(HitboxVisuals, obj) end
+                        end
+                    else
+                        table.insert(HitboxVisuals, box)
+                    end
+                    count = count + 1
+                end
+            end
+        end
+    end
+    
+    -- Включение хитбоксов
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+        
+        toggleBtn.Text = "ВКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Хидбоксы: Включены"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        UpdateHitboxes()
+        
+        -- Подписываемся на обновления (редко, для производительности)
+        HitboxConnection = game:GetService("RunService").Stepped:Connect(function()
+            if not HitboxEnabled then return end
+            
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+        
+        -- Подписываемся на изменения в workspace
+        HitboxUpdateConnection = workspace.DescendantAdded:Connect(function(descendant)
+            if HitboxEnabled and descendant:IsA("BasePart") and IsSolidPart(descendant) then
+                -- Обновляем с небольшой задержкой
+                task.wait(0.1)
+                UpdateHitboxes()
+            end
+        end)
+        
+        print("✅ Хидбоксы текстур включены")
+    end
+    
+    -- Выключение хитбоксов
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+        
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+        
+        if HitboxUpdateConnection then
+            HitboxUpdateConnection:Disconnect()
+            HitboxUpdateConnection = nil
+        end
+        
+        ClearHitboxes()
+        
+        toggleBtn.Text = "ВЫКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Хидбоксы: Выключены"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Хидбоксы текстур выключены")
+    end
+    
+    -- Переключение хитбоксов
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+    
+    -- Обработчики
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+    
+    -- Хоткей Alt+H
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+    
+    -- Очищаем при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(1)
+            UpdateHitboxes()
+        end
+    end)
+    
+    -- Делаем функции глобальными
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+    
+    print("✅ Вкладка 'Хидбоксы' обновлена - теперь показывает текстуры мира!")
+    print("📌 Alt+H - включить/выключить хидбоксы")
+    print("📌 Синий - можно касаться (твёрдые поверхности)")
+    print("📌 Красный - убивает (лаковая яма, спайки и т.д.)")
+    print("📌 Прозрачность 70%")
+    print("📌 Оптимизировано: обновление раз в 0.5 секунды")
+    print("📌 Ограничение: максимум 500 частей для производительности")
+end)
+-- ===== ВКЛАДКА "ХИДБОКСЫ" - ОПТИМИЗИРОВАННАЯ ВЕРСИЯ (БЕЗ ЛАГОВ) =====
+pcall(function()
+    -- Находим вкладку "Хидбоксы"
+    local hitboxTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Хидбоксы" then
+            hitboxTab = tab
+            break
+        end
+    end
+    
+    if not hitboxTab then
+        table.insert(TabNames, "Хидбоксы")
+        
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+        
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Хидбоксы"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем интерфейс вкладки
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ХИДБОКСЫ ТЕКСТУР МИРА (ОПТИМИЗИРОВАНО)"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Синий - можно касаться | Красный - убивает | Прозрачность 70%"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "ВЫКЛ"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Хидбоксы: Выключены"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ОПТИМИЗИРОВАННАЯ ЛОГИКА ХИДБОКСОВ =====
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local CheckedParts = {}
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 2 -- Обновляем раз в 2 секунды для производительности
+    
+    -- Кэш для убивающих частей
+    local KillerPartsCache = {}
+    local SolidPartsCache = {}
+    local CacheTime = 0
+    local CACHE_LIFETIME = 5 -- Кэш живет 5 секунд
+    
+    -- Функция проверки, является ли часть убивающей (с кэшированием)
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Проверяем кэш
+        if KillerPartsCache[part] ~= nil then
+            return KillerPartsCache[part]
+        end
+        
+        local isKiller = false
+        
+        -- Проверяем по названию
+        local name = part.Name:lower()
+        if name:find("kill") or name:find("lava") or name:find("spike") or name:find("danger") or name:find("fire") then
+            isKiller = true
+        end
+        
+        -- Проверяем материал
+        if part.Material == Enum.Material.Neon then
+            isKiller = true
+        end
+        
+        -- Проверяем атрибуты (только если есть атрибуты)
+        if not isKiller and part:GetAttribute("Killer") == true then
+            isKiller = true
+        end
+        
+        -- Проверяем цвет (приблизительно)
+        if not isKiller and part.Color and part.Color.R > 0.8 and part.Color.G < 0.2 and part.Color.B < 0.2 then
+            isKiller = true
+        end
+        
+        -- Сохраняем в кэш
+        KillerPartsCache[part] = isKiller
+        
+        return isKiller
+    end
+    
+    -- Функция проверки, является ли часть твёрдой (с кэшированием)
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Проверяем кэш
+        if SolidPartsCache[part] ~= nil then
+            return SolidPartsCache[part]
+        end
+        
+        local isSolid = false
+        
+        -- Пропускаем части игроков
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            SolidPartsCache[part] = false
+            return false
+        end
+        
+        -- Проверяем, является ли часть твёрдой
+        if part.CanCollide == true and part.Anchored == true then
+            -- Проверяем размер
+            local size = part.Size
+            if size.X > 0.5 and size.Y > 0.5 and size.Z > 0.5 then
+                isSolid = true
+            end
+        end
+        
+        -- Сохраняем в кэш
+        SolidPartsCache[part] = isSolid
+        
+        return isSolid
+    end
+    
+    -- Функция очистки визуализации хитбоксов
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+        
+        -- Очищаем кэш при очистке
+        KillerPartsCache = {}
+        SolidPartsCache = {}
+    end
+    
+    -- Функция создания хитбокса для части (только одна кнопка)
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+        
+        local isKiller = IsKillerPart(part)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+        
+        -- Используем BoxHandleAdornment
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+        
+        return box
+    end
+    
+    -- Функция обновления хитбоксов (оптимизированная)
+    local function UpdateHitboxes()
+        -- Очищаем старые визуалы
+        ClearHitboxes()
+        
+        if not HitboxEnabled then return end
+        
+        -- Собираем части только из текущего workspace
+        local parts = workspace:GetChildren()
+        local count = 0
+        
+        -- Ограничиваем количество частей для производительности
+        local MAX_PARTS = 300
+        
+        -- Рекурсивно собираем части
+        local function collectParts(obj)
+            if count >= MAX_PARTS then return end
+            
+            if obj:IsA("BasePart") then
+                if IsSolidPart(obj) then
+                    local box = CreateHitboxForPart(obj)
+                    if box then
+                        table.insert(HitboxVisuals, box)
+                        count = count + 1
+                    end
+                end
+            end
+            
+            -- Рекурсивно обходим дочерние объекты
+            for _, child in pairs(obj:GetChildren()) do
+                if count >= MAX_PARTS then break end
+                
+                -- Пропускаем игроков и GUI для производительности
+                if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+                    continue
+                end
+                
+                if child:IsDescendantOf(game.CoreGui) or child:IsDescendantOf(game.StarterGui) then
+                    continue
+                end
+                
+                collectParts(child)
+            end
+        end
+        
+        -- Начинаем сбор с workspace
+        collectParts(workspace)
+        
+        -- Обновляем время кэша
+        CacheTime = tick()
+    end
+    
+    -- Включение хитбоксов
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+        
+        toggleBtn.Text = "ВКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Хидбоксы: Включены"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        -- Первое обновление
+        UpdateHitboxes()
+        
+        -- Подписываемся на обновления с большим интервалом
+        HitboxConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not HitboxEnabled then return end
+            
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                -- Проверяем, не истек ли кэш
+                if currentTime - CacheTime >= CACHE_LIFETIME then
+                    KillerPartsCache = {}
+                    SolidPartsCache = {}
+                end
+                
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+        
+        print("✅ Хидбоксы включены (оптимизированная версия)")
+    end
+    
+    -- Выключение хитбоксов
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+        
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+        
+        ClearHitboxes()
+        
+        toggleBtn.Text = "ВЫКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Хидбоксы: Выключены"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        -- Очищаем кэш
+        KillerPartsCache = {}
+        SolidPartsCache = {}
+        
+        print("✅ Хидбоксы выключены")
+    end
+    
+    -- Переключение хитбоксов
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+    
+    -- Обработчики
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+    
+    -- Хоткей Alt+H
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+    
+    -- Очищаем кэш при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(2)
+            KillerPartsCache = {}
+            SolidPartsCache = {}
+            UpdateHitboxes()
+        end
+    end)
+    
+    -- Очищаем при выходе из игры
+    game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+        if HitboxEnabled then
+            ClearHitboxes()
+        end
+    end)
+    
+    -- Делаем функции глобальными
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+    
+    print("========================================")
+    print("✅ ХИДБОКСЫ ОПТИМИЗИРОВАНЫ!")
+    print("📌 Интервал обновления: 2 секунды")
+    print("📌 Максимум частей: 300")
+    print("📌 Кэширование для производительности")
+    print("📌 Alt+H - включить/выключить")
+    print("========================================")
+end)
+-- ===== ВКЛАДКА "ХИДБОКСЫ" - ИСПРАВЛЕННАЯ ВЕРСИЯ (ТОЛЬКО УБИВАЮЩИЕ КРАСНЫМ) =====
+pcall(function()
+    -- Находим вкладку "Хидбоксы"
+    local hitboxTab = nil
+    for i, tab in pairs(Tabs) do
+        if TabNames[i] == "Хидбоксы" then
+            hitboxTab = tab
+            break
+        end
+    end
+    
+    if not hitboxTab then
+        table.insert(TabNames, "Хидбоксы")
+        
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+        
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Хидбоксы"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем интерфейс вкладки
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ХИДБОКСЫ ТЕКСТУР МИРА"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "КРАСНЫЙ - убивает | СИНИЙ - можно касаться | Прозрачность 70%"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "ВЫКЛ"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Хидбоксы: Выключены"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ОПТИМИЗИРОВАННАЯ ЛОГИКА ХИДБОКСОВ (ТОЛЬКО УБИВАЮЩИЕ) =====
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 2 -- Обновляем раз в 2 секунды
+    
+    -- Кэш для убивающих частей
+    local KillerPartsCache = {}
+    local CacheTime = 0
+    local CACHE_LIFETIME = 5 -- Кэш живет 5 секунд
+    
+    -- РАСШИРЕННЫЙ СПИСОК УБИВАЮЩИХ ЧАСТЕЙ
+    local KILLER_KEYWORDS = {
+        "kill", "lava", "spike", "danger", "fire", "acid", "poison",
+        "death", "deadly", "hazard", "toxic", "burn", "melt", "crush",
+        "trap", "saw", "blade", "spike", "thorn", "needle", "sharp",
+        "void", "fall", "bottomless", "pit", "abyss"
+    }
+    
+    -- Функция проверки, является ли часть убивающей
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Проверяем кэш
+        if KillerPartsCache[part] ~= nil then
+            return KillerPartsCache[part]
+        end
+        
+        local isKiller = false
+        local name = part.Name:lower()
+        
+        -- Проверяем по ключевым словам в названии
+        for _, keyword in pairs(KILLER_KEYWORDS) do
+            if name:find(keyword) then
+                isKiller = true
+                break
+            end
+        end
+        
+        -- Проверяем материал
+        if not isKiller then
+            if part.Material == Enum.Material.Neon then
+                isKiller = true
+            end
+        end
+        
+        -- Проверяем атрибуты
+        if not isKiller then
+            if part:GetAttribute("Killer") == true or part:GetAttribute("Damage") or part:GetAttribute("Deadly") then
+                isKiller = true
+            end
+        end
+        
+        -- Проверяем цвет (ярко-красный, оранжевый, желтый - часто опасные)
+        if not isKiller and part.Color then
+            local r, g, b = part.Color.R, part.Color.G, part.Color.B
+            
+            -- Ярко-красный
+            if r > 0.8 and g < 0.2 and b < 0.2 then
+                isKiller = true
+            end
+            
+            -- Ярко-оранжевый
+            if r > 0.8 and g > 0.4 and g < 0.7 and b < 0.2 then
+                isKiller = true
+            end
+            
+            -- Ярко-желтый (лава)
+            if r > 0.8 and g > 0.7 and b < 0.3 then
+                isKiller = true
+            end
+        end
+        
+        -- Проверяем, есть ли скрипт с убийством
+        if not isKiller then
+            for _, child in pairs(part:GetDescendants()) do
+                if child:IsA("Script") or child:IsA("LocalScript") then
+                    local source = child.Source or ""
+                    if source:find("Humanoid") and (source:find("Damage") or source:find("Kill") or source:find("TakeDamage") or source:find("health")) then
+                        isKiller = true
+                        break
+                    end
+                end
+            end
+        end
+        
+        -- Сохраняем в кэш
+        KillerPartsCache[part] = isKiller
+        
+        return isKiller
+    end
+    
+    -- Функция проверки, является ли часть твёрдой
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+        
+        -- Пропускаем части игроков
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            return false
+        end
+        
+        -- Проверяем, является ли часть твёрдой
+        if part.CanCollide == true and part.Anchored == true then
+            local size = part.Size
+            if size.X > 0.5 and size.Y > 0.5 and size.Z > 0.5 then
+                return true
+            end
+        end
+        
+        return false
+    end
+    
+    -- Функция очистки визуализации хитбоксов
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+    
+    -- Функция создания хитбокса для части (только для убивающих)
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+        
+        -- Проверяем, убивает ли эта часть
+        if not IsKillerPart(part) then
+            return nil -- Пропускаем не убивающие части
+        end
+        
+        -- Создаем красный хитбокс
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = Color3.fromRGB(255, 0, 0) -- КРАСНЫЙ
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+        
+        return box
+    end
+    
+    -- Функция обновления хитбоксов (только убивающие)
+    local function UpdateHitboxes()
+        ClearHitboxes()
+        
+        if not HitboxEnabled then return end
+        
+        -- Собираем части
+        local parts = workspace:GetDescendants()
+        local count = 0
+        
+        -- Ограничиваем количество частей
+        local MAX_PARTS = 300
+        
+        for _, part in pairs(parts) do
+            if count >= MAX_PARTS then break end
+            
+            if part:IsA("BasePart") and IsSolidPart(part) then
+                local box = CreateHitboxForPart(part)
+                if box then
+                    table.insert(HitboxVisuals, box)
+                    count = count + 1
+                end
+            end
+        end
+    end
+    
+    -- Включение хитбоксов
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+        
+        toggleBtn.Text = "ВКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Хидбоксы: Включены (только убивающие)"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        UpdateHitboxes()
+        
+        HitboxConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not HitboxEnabled then return end
+            
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                if currentTime - CacheTime >= CACHE_LIFETIME then
+                    KillerPartsCache = {}
+                end
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+        
+        print("✅ Хидбоксы включены (ТОЛЬКО УБИВАЮЩИЕ ЧАСТИ)")
+    end
+    
+    -- Выключение хитбоксов
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+        
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+        
+        ClearHitboxes()
+        KillerPartsCache = {}
+        
+        toggleBtn.Text = "ВЫКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Хидбоксы: Выключены"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Хидбоксы выключены")
+    end
+    
+    -- Переключение хитбоксов
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+    
+    -- Обработчики
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+    
+    -- Хоткей Alt+H
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+    
+    -- Делаем функции глобальными
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+    
+    print("========================================")
+    print("✅ ХИДБОКСЫ ИСПРАВЛЕНЫ!")
+    print("📌 КРАСНЫЙ цвет - ТОЛЬКО убивающие части")
+    print("📌 Обычные части НЕ обводятся (синий убран)")
+    print("📌 Alt+H - включить/выключить")
+    print("========================================")
+end)
+-- ===== ВКЛАДКА "СКОРОСТЬ" =====
+pcall(function()
+    -- Проверяем, существует ли уже вкладка "Скорость"
+    local speedTabIndex = nil
+    for i, name in ipairs(TabNames) do
+        if name == "Скорость" then
+            speedTabIndex = i
+            break
+        end
+    end
+    
+    if not speedTabIndex then
+        -- Добавляем название вкладки в список (после Хидбоксов)
+        table.insert(TabNames, "Скорость")
+        
+        -- Создаём новую вкладку
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        
+        -- Создаём кнопку для новой вкладки
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Скорость"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+        
+        -- Обновляем CanvasSize
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        
+        -- Добавляем обработчик для новой кнопки
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+        
+        -- Находим созданную вкладку
+        speedTabIndex = #Tabs
+    end
+    
+    local speedTab = Tabs[speedTabIndex]
+    if not speedTab then return end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(speedTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Создаем контейнер
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = speedTab
+    
+    -- Основной фрейм
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ИЗМЕНЕНИЕ СКОРОСТИ"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+    
+    -- Информация
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.12, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Изменяет скорость передвижения персонажа (16 - 300)"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+    
+    -- Кнопка включения/выключения
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "ВЫКЛ"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+    
+    -- Статус
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.58, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Изменение скорости: Выключено"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+    
+    -- Текущая скорость
+    local currentSpeedLabel = Instance.new("TextLabel")
+    currentSpeedLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    currentSpeedLabel.Position = UDim2.new(0, 0, 0.68, 0)
+    currentSpeedLabel.BackgroundTransparency = 1
+    currentSpeedLabel.Text = "Текущая скорость: 16"
+    currentSpeedLabel.TextColor3 = Library.Theme.Text
+    currentSpeedLabel.TextScaled = true
+    currentSpeedLabel.Font = Enum.Font.SourceSans
+    currentSpeedLabel.Parent = mainFrame
+    
+    -- Метка ползунка
+    local speedLabel = Instance.new("TextLabel")
+    speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
+    speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
+    speedLabel.BackgroundTransparency = 1
+    speedLabel.Text = "Скорость: 16"
+    speedLabel.TextColor3 = Library.Theme.Text
+    speedLabel.TextScaled = true
+    speedLabel.Font = Enum.Font.SourceSansBold
+    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    speedLabel.Parent = mainFrame
+    
+    -- Ползунок скорости
+    local speedSlider = Instance.new("Frame")
+    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
+    speedSlider.BackgroundColor3 = Library.Theme.Border
+    speedSlider.BorderSizePixel = 0
+    speedSlider.Parent = mainFrame
+    
+    local speedFill = Instance.new("Frame")
+    speedFill.Size = UDim2.new(0, 0, 1, 0)
+    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    speedFill.BorderSizePixel = 0
+    speedFill.Parent = speedSlider
+    
+    local speedButton = Instance.new("TextButton")
+    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
+    speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
+    speedButton.BackgroundColor3 = Library.Theme.Text
+    speedButton.BorderColor3 = Library.Theme.Border
+    speedButton.BorderSizePixel = 2
+    speedButton.Text = ""
+    speedButton.Parent = speedSlider
+    
+    -- Хоткей
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+    
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Хоткей: Alt+M"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+    
+    -- ===== ЛОГИКА ИЗМЕНЕНИЯ СКОРОСТИ =====
+    local SpeedEnabled = false
+    local TargetSpeed = 16
+    local MIN_SPEED = 16
+    local MAX_SPEED = 300
+    local SpeedConnection = nil
+    
+    -- Функция обновления скорости
+    local function UpdateSpeed()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+        
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        if not humanoid then return end
+        
+        if SpeedEnabled then
+            humanoid.WalkSpeed = TargetSpeed
+        end
+    end
+    
+    -- Функция обновления ползунка
+    local function UpdateSlider()
+        local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
+        speedFill.Size = UDim2.new(percent, 0, 1, 0)
+        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        speedLabel.Text = "Скорость: " .. math.floor(TargetSpeed)
+        
+        -- Обновляем текущую скорость в статусе
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                currentSpeedLabel.Text = "Текущая скорость: " .. math.floor(humanoid.WalkSpeed)
+            end
+        end
+    end
+    
+    -- Включение изменения скорости
+    local function EnableSpeed()
+        if SpeedEnabled then return end
+        SpeedEnabled = true
+        
+        toggleBtn.Text = "ВКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Изменение скорости: Включено"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+        
+        -- Применяем скорость
+        UpdateSpeed()
+        
+        -- Подписываемся на обновления
+        SpeedConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not SpeedEnabled then return end
+            UpdateSpeed()
+        end)
+        
+        -- Подписываемся на респавн
+        game.Players.LocalPlayer.CharacterAdded:Connect(function()
+            if SpeedEnabled then
+                task.wait(0.5)
+                UpdateSpeed()
+            end
+        end)
+        
+        print("✅ Изменение скорости включено (цель: " .. TargetSpeed .. ")")
+    end
+    
+    -- Выключение изменения скорости
+    local function DisableSpeed()
+        if not SpeedEnabled then return end
+        SpeedEnabled = false
+        
+        if SpeedConnection then
+            SpeedConnection:Disconnect()
+            SpeedConnection = nil
+        end
+        
+        -- Возвращаем стандартную скорость
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                currentSpeedLabel.Text = "Текущая скорость: 16"
+            end
+        end
+        
+        toggleBtn.Text = "ВЫКЛ"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Изменение скорости: Выключено"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        print("✅ Изменение скорости выключено")
+    end
+    
+    -- Переключение
+    local function ToggleSpeed()
+        if SpeedEnabled then
+            DisableSpeed()
+        else
+            EnableSpeed()
+        end
+    end
+    
+    -- Обработчик кнопки
+    toggleBtn.MouseButton1Click:Connect(ToggleSpeed)
+    
+    -- Хоткей Alt+M
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.M and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleSpeed()
+        end
+    end)
+    
+    -- Обработчик ползунка
+    local isDragging = false
+    speedButton.MouseButton1Down:Connect(function() isDragging = true end)
+    
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = speedSlider.AbsolutePosition
+            local sliderSize = speedSlider.AbsoluteSize
+            local mouseX = input.Position.X
+            
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            TargetSpeed = math.floor(MIN_SPEED + percent * (MAX_SPEED - MIN_SPEED))
+            UpdateSlider()
+            
+            if SpeedEnabled then
+                UpdateSpeed()
+            end
+        end
+    end)
+    
+    -- Инициализация
+    UpdateSlider()
+    
+    -- Обновляем при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if SpeedEnabled then
+            UpdateSpeed()
+        end
+        UpdateSlider()
+    end)
+    
+    -- Обновляем текущую скорость в цикле
+    spawn(function()
+        while true do
+            wait(1)
+            if not SpeedEnabled then
+                local player = game.Players.LocalPlayer
+                if player and player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid and humanoid.WalkSpeed ~= 16 then
+                        -- Если скорость изменилась без нашего ведома, обновляем отображение
+                        currentSpeedLabel.Text = "Текущая скорость: " .. math.floor(humanoid.WalkSpeed)
+                    end
+                end
+            end
+        end
+    end)
+    
+    -- Делаем функции глобальными
+    _G.ToggleSpeed = ToggleSpeed
+    
+    print("========================================")
+    print("✅ ВКЛАДКА 'СКОРОСТЬ' ДОБАВЛЕНА!")
+    print("📌 Alt+M - включить/выключить изменение скорости")
+    print("📌 Ползунок регулирует скорость (16 - 300)")
+    print("📌 Включение/выключение через кнопку или хоткей")
+    print("========================================")
+end)
+-- ===== ОТОБРАЖЕНИЕ СКОРОСТИ НАД ГОЛОВОЙ (М/С) - БЕЗ ДРЫГАНИЯ =====
+pcall(function()
+    -- Создаем GUI для отображения скорости
+    local SpeedDisplayGui = Instance.new("BillboardGui")
+    SpeedDisplayGui.Name = "SpeedDisplay"
+    SpeedDisplayGui.Size = UDim2.new(0, 80, 0, 25)
+    SpeedDisplayGui.StudsOffset = Vector3.new(0, 3.5, 0)
+    SpeedDisplayGui.AlwaysOnTop = true
+    SpeedDisplayGui.MaxDistance = 50
+    SpeedDisplayGui.Enabled = true
+    SpeedDisplayGui.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    
+    -- Текст скорости (БЕЗ ФОНА)
+    local speedLabel = Instance.new("TextLabel")
+    speedLabel.Size = UDim2.new(1, 0, 1, 0)
+    speedLabel.BackgroundTransparency = 1
+    speedLabel.Text = "0 м/с"
+    speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+    speedLabel.TextScaled = true
+    speedLabel.Font = Enum.Font.SourceSansBold
+    speedLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    speedLabel.TextStrokeTransparency = 0.5
+    speedLabel.Parent = SpeedDisplayGui
+    
+    -- Переменные для хранения
+    local lastPosition = nil
+    local lastTime = tick()
+    local smoothSpeed = 0
+    local displaySpeed = 0
+    local updateCounter = 0
+    
+    -- Функция обновления скорости
+    local function UpdateSpeedDisplay()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            SpeedDisplayGui.Enabled = false
+            return
+        end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            SpeedDisplayGui.Enabled = false
+            return
+        end
+        
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+        
+        -- Обновляем скорость только если прошло достаточно времени
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+                
+                -- Сильное сглаживание для устранения дрыгания
+                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
+                
+                -- Обновляем отображение только если скорость изменилась более чем на 0.2
+                if math.abs(smoothSpeed - displaySpeed) > 0.2 then
+                    displaySpeed = smoothSpeed
+                    
+                    -- Округляем до 1 десятичного знака
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+                    
+                    if displaySpeed < 0.3 then
+                        speedLabel.Text = "0 м/с"
+                        speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+                    else
+                        speedLabel.Text = tostring(roundedSpeed) .. " м/с"
+                        
+                        -- Меняем цвет в зависимости от скорости
+                        if displaySpeed < 5 then
+                            speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255) -- Синий
+                        elseif displaySpeed < 15 then
+                            speedLabel.TextColor3 = Color3.fromRGB(0, 255, 100) -- Зеленый
+                        elseif displaySpeed < 30 then
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 200, 0) -- Желтый
+                        elseif displaySpeed < 50 then
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 150, 0) -- Оранжевый
+                        else
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Красный
+                        end
+                    end
+                end
+            end
+            
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+        
+        SpeedDisplayGui.Enabled = true
+    end
+    
+    -- Создаем цикл обновления
+    local speedUpdateConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        UpdateSpeedDisplay()
+    end)
+    
+    -- Обновляем при респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+        task.wait(0.5)
+        
+        -- Удаляем старый GUI
+        local oldGui = newCharacter:FindFirstChild("SpeedDisplay")
+        if oldGui then oldGui:Destroy() end
+        
+        -- Создаем новый GUI
+        local newSpeedDisplay = SpeedDisplayGui:Clone()
+        newSpeedDisplay.Parent = newCharacter
+        
+        -- Обновляем ссылку
+        SpeedDisplayGui = newSpeedDisplay
+        
+        -- Сбрасываем позицию
+        lastPosition = nil
+        lastTime = tick()
+        smoothSpeed = 0
+        displaySpeed = 0
+        
+        -- Обновляем speedLabel
+        local label = newSpeedDisplay:FindFirstChildWhichIsA("TextLabel")
+        if label then
+            label.Text = "0 м/с"
+            label.TextColor3 = Color3.fromRGB(0, 200, 255)
+        end
+    end)
+    
+    -- Очищаем при выходе
+    game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+        SpeedDisplayGui.Enabled = false
+    end)
+    
+    print("========================================")
+    print("✅ ОТОБРАЖЕНИЕ СКОРОСТИ ВКЛЮЧЕНО!")
+    print("📌 Скорость отображается НАД ГОЛОВОЙ персонажа")
+    print("📌 БЕЗ ЧЕРНОГО ФОНА - только цифры")
+    print("📌 Единица измерения: м/с (метры в секунду)")
+    print("📌 СИЛЬНОЕ СГЛАЖИВАНИЕ - цифры НЕ ДРЫГАЮТСЯ")
+    print("📌 Когда стоите - показывает 0 м/с")
+    print("📌 Когда двигаетесь - показывает плавную скорость")
+    print("========================================")
 end)
