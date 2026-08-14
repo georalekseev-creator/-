@@ -9311,3 +9311,1197 @@ pcall(function()
     print("📌 Градиент цветов: Голубой→Зелёный→Жёлтый→Оранжевый→Красный→Розовый→Фиолетовый")
     print("========================================")
 end)
+-- ===== СЧЁТЧИК СКОРОСТИ (БЕЗ КНОПКИ S, ТОЛЬКО ХОТКЕЙ ALT+S) =====
+pcall(function()
+    -- ===== 1. ЖЕСТКО УДАЛЯЕМ ВСЕ СТАРЫЕ СЧЁТЧИКИ =====
+    local function NukeAllSpeedIndicators()
+        for _, gui in pairs(game.CoreGui:GetChildren()) do
+            if gui:IsA("BillboardGui") and (gui.Name == "SpeedIndicator" or gui.Name == "SpeedDisplay") then
+                gui:Destroy()
+            end
+        end
+        
+        local player = game.Players.LocalPlayer
+        if player then
+            if player.PlayerGui then
+                for _, gui in pairs(player.PlayerGui:GetChildren()) do
+                    if gui:IsA("BillboardGui") and (gui.Name == "SpeedIndicator" or gui.Name == "SpeedDisplay") then
+                        gui:Destroy()
+                    end
+                end
+            end
+            
+            if player.Character then
+                for _, child in pairs(player.Character:GetChildren()) do
+                    if child:IsA("BillboardGui") and (child.Name == "SpeedIndicator" or child.Name == "SpeedDisplay") then
+                        child:Destroy()
+                    end
+                end
+            end
+        end
+        
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BillboardGui") and (obj.Name == "SpeedIndicator" or obj.Name == "SpeedDisplay") then
+                obj:Destroy()
+            end
+        end
+        
+        print("💥 ВСЕ старые счётчики скорости УНИЧТОЖЕНЫ!")
+    end
+    
+    -- Выполняем ядерную очистку
+    NukeAllSpeedIndicators()
+    
+    -- ===== 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+    _G.SpeedIndicatorEnabled = true
+    local SpeedIndicatorConnection = nil
+    local SpeedIndicatorGui = nil
+    local SpeedIndicatorLabel = nil
+    local isSpeedIndicatorActive = false
+    local respawnTimer = nil
+    
+    -- ===== 3. ПЕРЕМЕННЫЕ ДЛЯ СКОРОСТИ (ВСЕГДА СБРАСЫВАЕМ) =====
+    local lastPosition = nil
+    local lastTime = tick()
+    local smoothSpeed = 0
+    local displaySpeed = 0
+    
+    -- ===== 4. ФУНКЦИЯ СБРОСА СКОРОСТИ =====
+    local function ResetSpeedData()
+        lastPosition = nil
+        lastTime = tick()
+        smoothSpeed = 0
+        displaySpeed = 0
+        
+        if SpeedIndicatorLabel then
+            SpeedIndicatorLabel.Text = "0 м/с"
+            SpeedIndicatorLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+        end
+        
+        if SpeedIndicatorGui then
+            SpeedIndicatorGui.Enabled = true
+        end
+        
+        print("🔄 Данные скорости сброшены до 0")
+    end
+    
+    -- ===== 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+    local function LerpColor(c1, c2, t)
+        return Color3.new(
+            c1.R + (c2.R - c1.R) * t,
+            c1.G + (c2.G - c1.G) * t,
+            c1.B + (c2.B - c1.B) * t
+        )
+    end
+    
+    local function GetSpeedColor(speed)
+        local colors = {
+            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
+            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
+            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
+            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
+            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
+            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
+        }
+        
+        if speed <= colors[1].speed then return colors[1].color end
+        if speed >= colors[#colors].speed then return colors[#colors].color end
+        
+        for i = 1, #colors - 1 do
+            local low = colors[i]
+            local high = colors[i + 1]
+            if speed >= low.speed and speed <= high.speed then
+                local t = (speed - low.speed) / (high.speed - low.speed)
+                t = t * t * (3 - 2 * t)
+                return LerpColor(low.color, high.color, t)
+            end
+        end
+        return colors[1].color
+    end
+    
+    -- ===== 6. СОЗДАНИЕ СЧЁТЧИКА (СО СБРОСОМ ДО 0) =====
+    local function CreateSingleSpeedIndicator(char)
+        if not char then return nil, nil end
+        
+        NukeAllSpeedIndicators()
+        
+        local gui = Instance.new("BillboardGui")
+        gui.Name = "SpeedIndicator"
+        gui.Size = UDim2.new(0, 80, 0, 25)
+        gui.StudsOffset = Vector3.new(0, 3.5, 0)
+        gui.AlwaysOnTop = true
+        gui.MaxDistance = 50
+        gui.Enabled = _G.SpeedIndicatorEnabled
+        gui.Parent = char
+        
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = "0 м/с"
+        label.TextColor3 = Color3.fromRGB(0, 200, 255)
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        label.TextStrokeTransparency = 0.5
+        label.Parent = gui
+        
+        SpeedIndicatorGui = gui
+        SpeedIndicatorLabel = label
+        
+        ResetSpeedData()
+        
+        return gui, label
+    end
+    
+    -- ===== 7. ОБНОВЛЕНИЕ СКОРОСТИ =====
+    local function UpdateSpeedIndicator()
+        if not _G.SpeedIndicatorEnabled then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local gui = player.Character:FindFirstChild("SpeedIndicator")
+        if not gui then
+            NukeAllSpeedIndicators()
+            local newGui, newLabel = CreateSingleSpeedIndicator(player.Character)
+            if newGui then
+                SpeedIndicatorGui = newGui
+                SpeedIndicatorLabel = newLabel
+                ResetSpeedData()
+            else
+                return
+            end
+        else
+            SpeedIndicatorGui = gui
+            SpeedIndicatorLabel = gui:FindFirstChildWhichIsA("TextLabel")
+        end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+        
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
+                
+                if math.abs(smoothSpeed - displaySpeed) > 0.01 then
+                    displaySpeed = smoothSpeed
+                    
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+                    
+                    if SpeedIndicatorGui then
+                        SpeedIndicatorGui.Enabled = true
+                    end
+                    
+                    if SpeedIndicatorLabel then
+                        local targetColor = GetSpeedColor(displaySpeed)
+                        
+                        if not SpeedIndicatorLabel:GetAttribute("AnimStartTime") then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                        end
+                        
+                        local currentTarget = SpeedIndicatorLabel:GetAttribute("TargetColor")
+                        if currentTarget and (currentTarget.R ~= targetColor.R or 
+                           currentTarget.G ~= targetColor.G or 
+                           currentTarget.B ~= targetColor.B) then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                        end
+                        
+                        local animStart = SpeedIndicatorLabel:GetAttribute("AnimStartTime") or tick()
+                        local elapsed = tick() - animStart
+                        local progress = math.min(elapsed / 1.0, 1)
+                        
+                        local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+                        
+                        local startColor = SpeedIndicatorLabel:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
+                        local targetColorAttr = SpeedIndicatorLabel:GetAttribute("TargetColor") or targetColor
+                        local currentColor = LerpColor(startColor, targetColorAttr, eased)
+                        
+                        SpeedIndicatorLabel.TextColor3 = currentColor
+                        
+                        if displaySpeed < 0.3 then
+                            SpeedIndicatorLabel.Text = "0 м/с"
+                        else
+                            SpeedIndicatorLabel.Text = tostring(roundedSpeed) .. " м/с"
+                        end
+                        
+                        if progress >= 1 then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+                            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+                        end
+                    end
+                end
+            end
+            
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+    end
+    
+    -- ===== 8. ЗАПУСК И ОСТАНОВКА =====
+    local function StartSpeedIndicator()
+        if SpeedIndicatorConnection then
+            SpeedIndicatorConnection:Disconnect()
+            SpeedIndicatorConnection = nil
+        end
+        
+        isSpeedIndicatorActive = true
+        
+        NukeAllSpeedIndicators()
+        ResetSpeedData()
+        
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local gui, label = CreateSingleSpeedIndicator(player.Character)
+            if gui then
+                SpeedIndicatorGui = gui
+                SpeedIndicatorLabel = label
+                gui.Enabled = _G.SpeedIndicatorEnabled
+                ResetSpeedData()
+            end
+        end
+        
+        SpeedIndicatorConnection = game:GetService("RunService").RenderStepped:Connect(UpdateSpeedIndicator)
+        print("✅ Индикатор скорости запущен (0 м/с)")
+    end
+    
+    local function StopSpeedIndicator()
+        if SpeedIndicatorConnection then
+            SpeedIndicatorConnection:Disconnect()
+            SpeedIndicatorConnection = nil
+        end
+        
+        isSpeedIndicatorActive = false
+        NukeAllSpeedIndicators()
+        print("✅ Индикатор скорости остановлен")
+    end
+    
+    -- ===== 9. ПЕРЕКЛЮЧЕНИЕ (ТОЛЬКО ХОТКЕЙ) =====
+    local function ToggleSpeedIndicator()
+        _G.SpeedIndicatorEnabled = not _G.SpeedIndicatorEnabled
+        
+        if _G.SpeedIndicatorEnabled then
+            if not isSpeedIndicatorActive then
+                StartSpeedIndicator()
+            else
+                if SpeedIndicatorGui then
+                    SpeedIndicatorGui.Enabled = true
+                end
+                ResetSpeedData()
+            end
+            print("✅ Индикатор скорости ВКЛЮЧЕН")
+        else
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            print("✅ Индикатор скорости ВЫКЛЮЧЕН")
+        end
+    end
+    
+    -- ===== 10. ОБРАБОТКА СМЕРТИ =====
+    local function RestartAfterDeath()
+        StopSpeedIndicator()
+        
+        if respawnTimer then
+            task.cancel(respawnTimer)
+            respawnTimer = nil
+        end
+        
+        respawnTimer = task.spawn(function()
+            task.wait(2)
+            if _G.SpeedIndicatorEnabled then
+                NukeAllSpeedIndicators()
+                ResetSpeedData()
+                StartSpeedIndicator()
+                print("✅ Индикатор скорости перезапущен через 2 секунды (0 м/с)")
+            end
+            respawnTimer = nil
+        end)
+    end
+    
+    local function SetupDeathHandler()
+        local player = game.Players.LocalPlayer
+        if not player then return end
+        
+        player.CharacterAdded:Connect(function(newChar)
+            NukeAllSpeedIndicators()
+            
+            if not _G.SpeedIndicatorEnabled then
+                return
+            end
+            
+            task.wait(0.3)
+            
+            NukeAllSpeedIndicators()
+            ResetSpeedData()
+            
+            local gui, label = CreateSingleSpeedIndicator(newChar)
+            if gui then
+                SpeedIndicatorGui = gui
+                SpeedIndicatorLabel = label
+                gui.Enabled = _G.SpeedIndicatorEnabled
+                ResetSpeedData()
+            end
+            
+            if not isSpeedIndicatorActive then
+                StartSpeedIndicator()
+            end
+            
+            local humanoid = newChar:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    RestartAfterDeath()
+                end)
+            end
+        end)
+        
+        if player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    RestartAfterDeath()
+                end)
+            end
+        end
+    end
+    
+    -- ===== 11. УДАЛЯЕМ СТАРУЮ КНОПКУ ЕСЛИ ЕСТЬ =====
+    local oldBtn = ScreenGui:FindFirstChild("SpeedToggleBtn")
+    if oldBtn then oldBtn:Destroy() end
+    
+    -- ===== 12. ФИНАЛЬНЫЙ ЗАПУСК =====
+    NukeAllSpeedIndicators()
+    ResetSpeedData()
+    
+    if _G.SpeedIndicatorEnabled then
+        StartSpeedIndicator()
+    end
+    
+    SetupDeathHandler()
+    
+    -- ===== 13. ХОТКЕЙ ALT+S (ЕДИНСТВЕННОЕ УПРАВЛЕНИЕ) =====
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.S and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleSpeedIndicator()
+            if _G.SpeedIndicatorEnabled then
+                ResetSpeedData()
+            end
+        end
+    end)
+    
+    print("========================================")
+    print("✅ СЧЁТЧИК СКОРОСТИ НАСТРОЕН!")
+    print("📌 Кнопка 'S' УДАЛЕНА")
+    print("📌 Управление ТОЛЬКО через хоткей Alt+S")
+    print("📌 При создании счётчика - 0 м/с")
+    print("📌 После смерти - 0 м/с через 2 секунды")
+    print("========================================")
+end)
+-- ===== ВКЛАДКА ИГРОКИ (ВСЕ ИГРОКИ, ТП РАБОТАЕТ, БЕЗ СЧЕТЧИКА) =====
+pcall(function()
+    -- Находим вкладку "Игроки" (7-я вкладка)
+    local playersTab = Tabs[7]
+    if not playersTab then
+        print("❌ Вкладка 'Игроки' не найдена")
+        return
+    end
+    
+    -- Очищаем вкладку
+    for _, child in pairs(playersTab:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- ===== СОЗДАЕМ ИНТЕРФЕЙС =====
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = playersTab
+    
+    -- Заголовок (без счетчика)
+    local titleFrame = Instance.new("Frame")
+    titleFrame.Size = UDim2.new(1, 0, 0.08, 0)
+    titleFrame.Position = UDim2.new(0, 0, 0, 0)
+    titleFrame.BackgroundColor3 = Library.Theme.Panel
+    titleFrame.BorderColor3 = Library.Theme.Border
+    titleFrame.BorderSizePixel = 2
+    titleFrame.BackgroundTransparency = 0.5
+    titleFrame.Parent = container
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 1, 0)
+    title.Position = UDim2.new(0, 10, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "ИГРОКИ"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = titleFrame
+    
+    -- Список игроков
+    local playersList = Instance.new("ScrollingFrame")
+    playersList.Name = "PlayersList"
+    playersList.Size = UDim2.new(1, 0, 0.9, 0)
+    playersList.Position = UDim2.new(0, 0, 0.09, 0)
+    playersList.BackgroundColor3 = Library.Theme.Panel
+    playersList.BorderColor3 = Library.Theme.Border
+    playersList.BorderSizePixel = 2
+    playersList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    playersList.ScrollBarThickness = 8
+    playersList.BackgroundTransparency = 0.5
+    playersList.Parent = container
+    
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 5)
+    listLayout.Parent = playersList
+    
+    -- ===== ЛОГИКА ОТОБРАЖЕНИЯ =====
+    local playerItems = {}
+    
+    -- Функция телепортации к игроку
+    local function TeleportToPlayer(targetPlayer)
+        local player = game.Players.LocalPlayer
+        if not player then
+            print("❌ Игрок не найден")
+            return
+        end
+        
+        if not player.Character then
+            print("❌ У вас нет персонажа")
+            return
+        end
+        
+        if not targetPlayer then
+            print("❌ Целевой игрок не найден")
+            return
+        end
+        
+        if not targetPlayer.Character then
+            print("❌ У целевого игрока нет персонажа")
+            return
+        end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        
+        if not hrp then
+            print("❌ У вас нет HumanoidRootPart")
+            return
+        end
+        
+        if not targetHrp then
+            print("❌ У целевого игрока нет HumanoidRootPart")
+            return
+        end
+        
+        local targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
+        hrp.CFrame = CFrame.new(targetPos)
+        print("✅ Телепорт к " .. targetPlayer.Name)
+    end
+    
+    -- Упрощенная проверка онлайна
+    local function IsPlayerOnline(player)
+        if not player then return false end
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            return true
+        end
+        return false
+    end
+    
+    -- Функция создания элемента игрока
+    local function CreatePlayerItem(player)
+        if not player then return nil end
+        if player == game.Players.LocalPlayer then return nil end
+        
+        local isOnline = IsPlayerOnline(player)
+        
+        local ItemFrame = Instance.new("Frame")
+        ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+        ItemFrame.BackgroundColor3 = Library.Theme.Panel
+        ItemFrame.BorderColor3 = Library.Theme.Border
+        ItemFrame.BorderSizePixel = 2
+        ItemFrame.BackgroundTransparency = 0.5
+        ItemFrame.Parent = playersList
+        
+        -- Статус (зеленая/желтая точка)
+        local statusDot = Instance.new("Frame")
+        statusDot.Size = UDim2.new(0, 12, 0, 12)
+        statusDot.Position = UDim2.new(0, 8, 0.5, -6)
+        statusDot.BorderSizePixel = 0
+        statusDot.BackgroundColor3 = isOnline and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 200, 0)
+        statusDot.Parent = ItemFrame
+        
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = statusDot
+        
+        -- Имя игрока
+        local NameLabel = Instance.new("TextLabel")
+        NameLabel.Size = UDim2.new(0.45, 0, 1, 0)
+        NameLabel.Position = UDim2.new(0.08, 0, 0, 0)
+        NameLabel.BackgroundTransparency = 1
+        NameLabel.Text = player.Name
+        NameLabel.TextColor3 = isOnline and Library.Theme.Text or Color3.fromRGB(200, 200, 100)
+        NameLabel.TextScaled = true
+        NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        NameLabel.Font = Enum.Font.SourceSansBold
+        NameLabel.Parent = ItemFrame
+        
+        -- ID игрока
+        local IDLabel = Instance.new("TextLabel")
+        IDLabel.Size = UDim2.new(0.2, 0, 1, 0)
+        IDLabel.Position = UDim2.new(0.5, 0, 0, 0)
+        IDLabel.BackgroundTransparency = 1
+        IDLabel.Text = "ID: " .. player.UserId
+        IDLabel.TextColor3 = isOnline and Library.Theme.Text or Color3.fromRGB(200, 200, 100)
+        IDLabel.TextScaled = true
+        IDLabel.TextXAlignment = Enum.TextXAlignment.Left
+        IDLabel.Font = Enum.Font.SourceSans
+        IDLabel.Parent = ItemFrame
+        
+        -- Кнопка телепорта
+        local TeleportBtn = Instance.new("TextButton")
+        TeleportBtn.Size = UDim2.new(0.12, 0, 0.7, 0)
+        TeleportBtn.Position = UDim2.new(0.82, 0, 0.15, 0)
+        TeleportBtn.BackgroundColor3 = isOnline and Color3.fromRGB(40, 180, 60) or Color3.fromRGB(100, 100, 100)
+        TeleportBtn.BorderColor3 = isOnline and Color3.fromRGB(60, 220, 80) or Color3.fromRGB(150, 150, 150)
+        TeleportBtn.BorderSizePixel = 2
+        TeleportBtn.BackgroundTransparency = 0.3
+        TeleportBtn.Text = "ТП"
+        TeleportBtn.TextColor3 = Library.Theme.Text
+        TeleportBtn.TextScaled = true
+        TeleportBtn.Font = Enum.Font.SourceSansBold
+        TeleportBtn.Parent = ItemFrame
+        
+        -- Скругление кнопки
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(1, 0)
+        btnCorner.Parent = TeleportBtn
+        
+        -- Обработчик телепорта
+        TeleportBtn.MouseButton1Click:Connect(function()
+            if IsPlayerOnline(player) then
+                TeleportToPlayer(player)
+            else
+                print("❌ Игрок " .. player.Name .. " оффлайн, телепорт невозможен")
+            end
+        end)
+        
+        -- Двойной клик по имени для телепорта
+        local lastClickTime = 0
+        NameLabel.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local currentTime = tick()
+                if currentTime - lastClickTime < 0.3 then
+                    if IsPlayerOnline(player) then
+                        TeleportToPlayer(player)
+                    else
+                        print("❌ Игрок " .. player.Name .. " оффлайн, телепорт невозможен")
+                    end
+                end
+                lastClickTime = currentTime
+            end
+        end)
+        
+        return ItemFrame
+    end
+    
+    -- ===== ФУНКЦИЯ ОБНОВЛЕНИЯ СПИСКА =====
+    local function UpdatePlayersList()
+        local localPlayer = game.Players.LocalPlayer
+        if not localPlayer then return end
+        
+        -- Получаем ВСЕХ игроков (кроме себя)
+        local allPlayers = {}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= localPlayer then
+                table.insert(allPlayers, player)
+            end
+        end
+        
+        -- Сортируем по имени
+        table.sort(allPlayers, function(a, b) return a.Name < b.Name end)
+        
+        -- Создаем список текущих имен
+        local currentPlayerNames = {}
+        for _, player in pairs(allPlayers) do
+            currentPlayerNames[player.Name] = true
+        end
+        
+        -- Удаляем игроков, которые вышли
+        local toRemove = {}
+        for name, item in pairs(playerItems) do
+            if not currentPlayerNames[name] then
+                table.insert(toRemove, name)
+            end
+        end
+        
+        for _, name in pairs(toRemove) do
+            if playerItems[name] and playerItems[name].Parent then
+                playerItems[name]:Destroy()
+            end
+            playerItems[name] = nil
+        end
+        
+        -- Добавляем новых игроков
+        for _, player in pairs(allPlayers) do
+            if not playerItems[player.Name] then
+                local item = CreatePlayerItem(player)
+                if item then
+                    playerItems[player.Name] = item
+                end
+            end
+        end
+        
+        -- Обновляем размер канваса
+        local count = #allPlayers
+        local totalHeight = count * 50 + 10
+        if totalHeight < 10 then totalHeight = 10 end
+        playersList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+        
+        return count
+    end
+    
+    -- ===== АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ =====
+    -- При добавлении игрока
+    game.Players.PlayerAdded:Connect(function(player)
+        task.wait(0.5)
+        UpdatePlayersList()
+    end)
+    
+    -- При удалении игрока
+    game.Players.PlayerRemoving:Connect(function(player)
+        if playerItems[player.Name] then
+            if playerItems[player.Name].Parent then
+                playerItems[player.Name]:Destroy()
+            end
+            playerItems[player.Name] = nil
+        end
+        UpdatePlayersList()
+    end)
+    
+    -- При респавне
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        UpdatePlayersList()
+    end)
+    
+    -- При переключении вкладки
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 7 then
+                task.wait(0.1)
+                UpdatePlayersList()
+            end
+        end)
+    end
+    
+    -- Постоянное обновление (каждые 2 секунды)
+    spawn(function()
+        while true do
+            wait(2)
+            UpdatePlayersList()
+        end
+    end)
+    
+    -- ===== ПЕРВОНАЧАЛЬНОЕ ЗАПОЛНЕНИЕ =====
+    task.wait(0.5)
+    local count = UpdatePlayersList()
+    print("✅ Загружено игроков: " .. (count or 0))
+    task.wait(0.5)
+    UpdatePlayersList()
+    
+    print("========================================")
+    print("✅ ВКЛАДКА 'ИГРОКИ' ИСПРАВЛЕНА!")
+    print("📌 Надпись 'Игроки: 0' УДАЛЕНА")
+    print("📌 Показываются ВСЕ игроки на сервере")
+    print("📌 Зеленая точка - можно ТП")
+    print("📌 Желтая точка - оффлайн/загрузка")
+    print("📌 Кнопка 'ТП' - работает для онлайн")
+    print("========================================")
+end)
+-- ===== СЧЁТЧИК СКОРОСТИ (БЕЗ КНОПКИ S, ТОЛЬКО ХОТКЕЙ ALT+S, СУПЕР БЫСТРЫЙ СБРОС) =====
+pcall(function()
+    -- ===== 1. ЖЕСТКО УДАЛЯЕМ ВСЕ СТАРЫЕ СЧЁТЧИКИ =====
+    local function NukeAllSpeedIndicators()
+        for _, gui in pairs(game.CoreGui:GetChildren()) do
+            if gui:IsA("BillboardGui") and (gui.Name == "SpeedIndicator" or gui.Name == "SpeedDisplay") then
+                gui:Destroy()
+            end
+        end
+        
+        local player = game.Players.LocalPlayer
+        if player then
+            if player.PlayerGui then
+                for _, gui in pairs(player.PlayerGui:GetChildren()) do
+                    if gui:IsA("BillboardGui") and (gui.Name == "SpeedIndicator" or gui.Name == "SpeedDisplay") then
+                        gui:Destroy()
+                    end
+                end
+            end
+            
+            if player.Character then
+                for _, child in pairs(player.Character:GetChildren()) do
+                    if child:IsA("BillboardGui") and (child.Name == "SpeedIndicator" or child.Name == "SpeedDisplay") then
+                        child:Destroy()
+                    end
+                end
+            end
+        end
+        
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BillboardGui") and (obj.Name == "SpeedIndicator" or obj.Name == "SpeedDisplay") then
+                obj:Destroy()
+            end
+        end
+        
+        print("💥 ВСЕ старые счётчики скорости УНИЧТОЖЕНЫ!")
+    end
+    
+    -- Выполняем ядерную очистку
+    NukeAllSpeedIndicators()
+    
+    -- ===== 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+    _G.SpeedIndicatorEnabled = true
+    local SpeedIndicatorConnection = nil
+    local SpeedIndicatorGui = nil
+    local SpeedIndicatorLabel = nil
+    local isSpeedIndicatorActive = false
+    local respawnTimer = nil
+    
+    -- ===== 3. ПЕРЕМЕННЫЕ ДЛЯ СКОРОСТИ =====
+    local lastPosition = nil
+    local lastTime = tick()
+    local smoothSpeed = 0
+    local displaySpeed = 0
+    local isMoving = false
+    local stopTimer = 0
+    local STOP_DELAY = 0.15 -- Задержка перед сбросом (0.15 секунды - в 2 раза быстрее)
+    
+    -- ===== 4. ФУНКЦИЯ СБРОСА СКОРОСТИ =====
+    local function ResetSpeedData()
+        lastPosition = nil
+        lastTime = tick()
+        smoothSpeed = 0
+        displaySpeed = 0
+        isMoving = false
+        stopTimer = 0
+        
+        if SpeedIndicatorLabel then
+            SpeedIndicatorLabel.Text = "0 м/с"
+            SpeedIndicatorLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+        end
+        
+        if SpeedIndicatorGui then
+            SpeedIndicatorGui.Enabled = true
+        end
+        
+        print("🔄 Данные скорости сброшены до 0")
+    end
+    
+    -- ===== 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+    local function LerpColor(c1, c2, t)
+        return Color3.new(
+            c1.R + (c2.R - c1.R) * t,
+            c1.G + (c2.G - c1.G) * t,
+            c1.B + (c2.B - c1.B) * t
+        )
+    end
+    
+    local function GetSpeedColor(speed)
+        local colors = {
+            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
+            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
+            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
+            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
+            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
+            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
+        }
+        
+        if speed <= colors[1].speed then return colors[1].color end
+        if speed >= colors[#colors].speed then return colors[#colors].color end
+        
+        for i = 1, #colors - 1 do
+            local low = colors[i]
+            local high = colors[i + 1]
+            if speed >= low.speed and speed <= high.speed then
+                local t = (speed - low.speed) / (high.speed - low.speed)
+                t = t * t * (3 - 2 * t)
+                return LerpColor(low.color, high.color, t)
+            end
+        end
+        return colors[1].color
+    end
+    
+    -- ===== 6. СОЗДАНИЕ СЧЁТЧИКА =====
+    local function CreateSingleSpeedIndicator(char)
+        if not char then return nil, nil end
+        
+        NukeAllSpeedIndicators()
+        
+        local gui = Instance.new("BillboardGui")
+        gui.Name = "SpeedIndicator"
+        gui.Size = UDim2.new(0, 80, 0, 25)
+        gui.StudsOffset = Vector3.new(0, 3.5, 0)
+        gui.AlwaysOnTop = true
+        gui.MaxDistance = 50
+        gui.Enabled = _G.SpeedIndicatorEnabled
+        gui.Parent = char
+        
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = "0 м/с"
+        label.TextColor3 = Color3.fromRGB(0, 200, 255)
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        label.TextStrokeTransparency = 0.5
+        label.Parent = gui
+        
+        SpeedIndicatorGui = gui
+        SpeedIndicatorLabel = label
+        
+        ResetSpeedData()
+        
+        return gui, label
+    end
+    
+    -- ===== 7. ОБНОВЛЕНИЕ СКОРОСТИ (СУПЕР БЫСТРЫЙ СБРОС) =====
+    local function UpdateSpeedIndicator()
+        if not _G.SpeedIndicatorEnabled then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local gui = player.Character:FindFirstChild("SpeedIndicator")
+        if not gui then
+            NukeAllSpeedIndicators()
+            local newGui, newLabel = CreateSingleSpeedIndicator(player.Character)
+            if newGui then
+                SpeedIndicatorGui = newGui
+                SpeedIndicatorLabel = newLabel
+                ResetSpeedData()
+            else
+                return
+            end
+        else
+            SpeedIndicatorGui = gui
+            SpeedIndicatorLabel = gui:FindFirstChildWhichIsA("TextLabel")
+        end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            return
+        end
+        
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+        
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+                
+                -- Определяем, двигается ли игрок
+                if speed > 0.5 then
+                    isMoving = true
+                    stopTimer = 0
+                    -- Плавное сглаживание при движении
+                    smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.15
+                else
+                    -- Игрок остановился
+                    if isMoving then
+                        isMoving = false
+                        stopTimer = currentTime
+                    end
+                    
+                    -- СУПЕР БЫСТРЫЙ СБРОС (в 6 раз быстрее чем было)
+                    local resetSpeed = 0.6 -- В 6 раз быстрее (было 0.1, стало 0.6)
+                    
+                    -- Проверяем, прошло ли достаточно времени с момента остановки
+                    if currentTime - stopTimer >= STOP_DELAY then
+                        smoothSpeed = smoothSpeed - smoothSpeed * resetSpeed
+                    else
+                        -- Если только остановился, тоже быстро сбрасываем
+                        smoothSpeed = smoothSpeed - smoothSpeed * 0.3
+                    end
+                end
+                
+                -- Отсекаем слишком маленькие значения (мгновенный сброс до 0)
+                if smoothSpeed < 0.1 then
+                    smoothSpeed = 0
+                end
+                
+                -- Если скорость изменилась или стала 0
+                if math.abs(smoothSpeed - displaySpeed) > 0.01 or smoothSpeed == 0 then
+                    displaySpeed = smoothSpeed
+                    
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+                    
+                    if SpeedIndicatorGui then
+                        SpeedIndicatorGui.Enabled = true
+                    end
+                    
+                    if SpeedIndicatorLabel then
+                        local targetColor = GetSpeedColor(displaySpeed)
+                        
+                        if not SpeedIndicatorLabel:GetAttribute("AnimStartTime") then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                        end
+                        
+                        local currentTarget = SpeedIndicatorLabel:GetAttribute("TargetColor")
+                        if currentTarget and (currentTarget.R ~= targetColor.R or 
+                           currentTarget.G ~= targetColor.G or 
+                           currentTarget.B ~= targetColor.B) then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                        end
+                        
+                        local animStart = SpeedIndicatorLabel:GetAttribute("AnimStartTime") or tick()
+                        local elapsed = tick() - animStart
+                        local progress = math.min(elapsed / 1.0, 1)
+                        
+                        local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+                        
+                        local startColor = SpeedIndicatorLabel:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
+                        local targetColorAttr = SpeedIndicatorLabel:GetAttribute("TargetColor") or targetColor
+                        local currentColor = LerpColor(startColor, targetColorAttr, eased)
+                        
+                        SpeedIndicatorLabel.TextColor3 = currentColor
+                        
+                        if displaySpeed < 0.3 then
+                            SpeedIndicatorLabel.Text = "0 м/с"
+                        else
+                            SpeedIndicatorLabel.Text = tostring(roundedSpeed) .. " м/с"
+                        end
+                        
+                        if progress >= 1 then
+                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+                            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+                            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+                        end
+                    end
+                end
+            end
+            
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+    end
+    
+    -- ===== 8. ЗАПУСК И ОСТАНОВКА =====
+    local function StartSpeedIndicator()
+        if SpeedIndicatorConnection then
+            SpeedIndicatorConnection:Disconnect()
+            SpeedIndicatorConnection = nil
+        end
+        
+        isSpeedIndicatorActive = true
+        
+        NukeAllSpeedIndicators()
+        ResetSpeedData()
+        
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local gui, label = CreateSingleSpeedIndicator(player.Character)
+            if gui then
+                SpeedIndicatorGui = gui
+                SpeedIndicatorLabel = label
+                gui.Enabled = _G.SpeedIndicatorEnabled
+                ResetSpeedData()
+            end
+        end
+        
+        SpeedIndicatorConnection = game:GetService("RunService").RenderStepped:Connect(UpdateSpeedIndicator)
+        print("✅ Индикатор скорости запущен (0 м/с, СУПЕР БЫСТРЫЙ СБРОС)")
+    end
+    
+    local function StopSpeedIndicator()
+        if SpeedIndicatorConnection then
+            SpeedIndicatorConnection:Disconnect()
+            SpeedIndicatorConnection = nil
+        end
+        
+        isSpeedIndicatorActive = false
+        NukeAllSpeedIndicators()
+        print("✅ Индикатор скорости остановлен")
+    end
+    
+    -- ===== 9. ПЕРЕКЛЮЧЕНИЕ =====
+    local function ToggleSpeedIndicator()
+        _G.SpeedIndicatorEnabled = not _G.SpeedIndicatorEnabled
+        
+        if _G.SpeedIndicatorEnabled then
+            if not isSpeedIndicatorActive then
+                StartSpeedIndicator()
+            else
+                if SpeedIndicatorGui then
+                    SpeedIndicatorGui.Enabled = true
+                end
+                ResetSpeedData()
+            end
+            print("✅ Индикатор скорости ВКЛЮЧЕН")
+        else
+            if SpeedIndicatorGui then
+                SpeedIndicatorGui.Enabled = false
+            end
+            print("✅ Индикатор скорости ВЫКЛЮЧЕН")
+        end
+    end
+    
+    -- ===== 10. ОБРАБОТКА СМЕРТИ =====
+    local function RestartAfterDeath()
+        StopSpeedIndicator()
+        
+        if respawnTimer then
+            task.cancel(respawnTimer)
+            respawnTimer = nil
+        end
+        
+        respawnTimer = task.spawn(function()
+            task.wait(2)
+            if _G.SpeedIndicatorEnabled then
+                NukeAllSpeedIndicators()
+                ResetSpeedData()
+                StartSpeedIndicator()
+                print("✅ Индикатор скорости перезапущен через 2 секунды (0 м/с)")
+            end
+            respawnTimer = nil
+        end)
+    end
+    
+    local function SetupDeathHandler()
+        local player = game.Players.LocalPlayer
+        if not player then return end
+        
+        player.CharacterAdded:Connect(function(newChar)
+            NukeAllSpeedIndicators()
+            
+            if not _G.SpeedIndicatorEnabled then
+                return
+            end
+            
+            task.wait(0.3)
+            
+            NukeAllSpeedIndicators()
+            ResetSpeedData()
+            
+            local gui, label = CreateSingleSpeedIndicator(newChar)
+            if gui then
+                SpeedIndicatorGui = gui
+                SpeedIndicatorLabel = label
+                gui.Enabled = _G.SpeedIndicatorEnabled
+                ResetSpeedData()
+            end
+            
+            if not isSpeedIndicatorActive then
+                StartSpeedIndicator()
+            end
+            
+            local humanoid = newChar:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    RestartAfterDeath()
+                end)
+            end
+        end)
+        
+        if player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    RestartAfterDeath()
+                end)
+            end
+        end
+    end
+    
+    -- ===== 11. УДАЛЯЕМ СТАРУЮ КНОПКУ ЕСЛИ ЕСТЬ =====
+    local oldBtn = ScreenGui:FindFirstChild("SpeedToggleBtn")
+    if oldBtn then oldBtn:Destroy() end
+    
+    -- ===== 12. ФИНАЛЬНЫЙ ЗАПУСК =====
+    NukeAllSpeedIndicators()
+    ResetSpeedData()
+    
+    if _G.SpeedIndicatorEnabled then
+        StartSpeedIndicator()
+    end
+    
+    SetupDeathHandler()
+    
+    -- ===== 13. ХОТКЕЙ ALT+S =====
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.S and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleSpeedIndicator()
+            if _G.SpeedIndicatorEnabled then
+                ResetSpeedData()
+            end
+        end
+    end)
+    
+    print("========================================")
+    print("✅ СЧЁТЧИК СКОРОСТИ ОБНОВЛЕН!")
+    print("📌 При остановке - сброс в 6 раз БЫСТРЕЕ")
+    print("📌 Задержка перед сбросом: 0.15 сек")
+    print("📌 Мгновенный сброс до 0 если скорость < 0.1")
+    print("📌 Управление: Alt+S")
+    print("📌 При смерти: 0 м/с через 2 секунды")
+    print("========================================")
+end)
