@@ -344,7 +344,7 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
-local TabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+local TabNames = {"Points", "Click-TP", "Flight", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Hitboxes", "Speed"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
@@ -494,7 +494,7 @@ ModeIndicator.TextScaled = true
 ModeIndicator.Font = Enum.Font.SourceSans
 ModeIndicator.Parent = ClickTeleportFrame
 
--- ===== TAB 3: FLY =====
+-- ===== TAB 3: FLIGHT =====
 local FlyTab = Tabs[3]
 
 local FlyFrame = Instance.new("Frame")
@@ -508,7 +508,7 @@ FlyFrame.Parent = FlyTab
 local FlyTitle = Instance.new("TextLabel")
 FlyTitle.Size = UDim2.new(1, 0, 0.25, 0)
 FlyTitle.BackgroundTransparency = 1
-FlyTitle.Text = "FLY MOD"
+FlyTitle.Text = "FLIGHT MODE"
 FlyTitle.TextColor3 = Library.Theme.Text
 FlyTitle.TextScaled = true
 FlyTitle.Font = Enum.Font.SourceSansBold
@@ -530,7 +530,7 @@ local FlyIndicator = Instance.new("TextLabel")
 FlyIndicator.Size = UDim2.new(1, 0, 0.15, 0)
 FlyIndicator.Position = UDim2.new(0, 0, 0.7, 0)
 FlyIndicator.BackgroundTransparency = 1
-FlyIndicator.Text = "Fly: Disabled"
+FlyIndicator.Text = "Flight: Disabled"
 FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 FlyIndicator.TextScaled = true
 FlyIndicator.Font = Enum.Font.SourceSans
@@ -2017,7 +2017,7 @@ local function ToggleFly()
     if FlyEnabled then
         FlyToggleBtn.Text = "ON"
         FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        FlyIndicator.Text = "Fly: Enabled"
+        FlyIndicator.Text = "Flight: Enabled"
         FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
 
         humanoid.PlatformStand = false
@@ -2093,7 +2093,7 @@ local function ToggleFly()
     else
         FlyToggleBtn.Text = "OFF"
         FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        FlyIndicator.Text = "Fly: Disabled"
+        FlyIndicator.Text = "Flight: Disabled"
         FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 
         if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
@@ -2379,6 +2379,7 @@ for i, btn in ipairs(TabButtons) do
         if i == 7 then UpdatePlayersList(); lastPlayerUpdate = tick() end
         if i == 8 then UpdateXRaySlider() end
         if i == 9 then if SPIEnabled then UpdateSPI() end end
+        if i == 12 then if HitboxEnabled then UpdateHitboxes() end end
     end)
 end
 
@@ -2594,6 +2595,7 @@ MainButton.MouseButton1Click:Connect(function()
         lastPlayerUpdate = tick()
         UpdateXRaySlider()
         if SPIEnabled then UpdateSPI() end
+        if HitboxEnabled then UpdateHitboxes() end
     end
 end)
 
@@ -2640,6 +2642,7 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if input.KeyCode == Enum.KeyCode.Z and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ClearWalkPoints() end
     if input.KeyCode == Enum.KeyCode.P and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then PlacePlatformUnderPlayer() end
     if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleSPI() end
+    if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleHitboxes() end
 end)
 
 local function LoadSavedPoints()
@@ -2688,7 +2691,7 @@ end)
 print("Admin Panel loaded!")
 print("Tabs are now VERTICALLY positioned on the left")
 print("Arrow switching between tabs removed")
-print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed")
+print("All tabs: Points, Click-TP, Flight, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Hitboxes, Speed")
 print("Alt+C - click-teleport")
 print("Alt+F - flight with run animation (WASD + Space/Ctrl)")
 print("Alt+W - start/pause walk | Alt+X - add walk point")
@@ -2697,6 +2700,7 @@ print("Alt+N - noclip")
 print("Alt+P - place platform under feet")
 print("Alt+R - X-Ray (world only, NOT GUI)")
 print("Alt+I - SPI (show players through walls)")
+print("Alt+H - Hitboxes (show character hitboxes)")
 
 -- ===== VISIBLE BLUE RESIZE BUTTONS (ON ALL WALLS) =====
 local RESIZE_BUTTON_SIZE = 10
@@ -2974,7 +2978,7 @@ do
         local title = Instance.new("TextLabel")
         title.Size = UDim2.new(1, 0, 0.15, 0)
         title.BackgroundTransparency = 1
-        title.Text = "FREECAM MODE"
+        title.Text = "FREECAM MODE (FIXED)"
         title.TextColor3 = Library.Theme.Text
         title.TextScaled = true
         title.Font = Enum.Font.SourceSansBold
@@ -3122,41 +3126,20 @@ do
 
             if humanoid then
                 humanoid.AutoRotate = false
-                humanoid.PlatformStand = false
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-
-                local animator = humanoid:FindFirstChild("Animator")
-                if animator then
-                    local hasWalkAnim = false
-                    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                        if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move") or track.Animation.Name:find("idle")) then
-                            hasWalkAnim = true
-                            break
-                        end
-                    end
-
-                    if not hasWalkAnim then
-                        local animation = Instance.new("Animation")
-                        animation.AnimationId = "rbxassetid://507766686"
-                        local track = animator:LoadAnimation(animation)
-                        if track then
-                            track:Play()
-                            track:AdjustSpeed(1)
-                        end
-                    end
-                end
-            end
-
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                savedAnchored = char.HumanoidRootPart.Anchored
-                char.HumanoidRootPart.Anchored = true
+                humanoid.PlatformStand = true
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
             end
 
             isFreecamActive = true
             isCursorLocked = true
 
             game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
+
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                savedAnchored = char.HumanoidRootPart.Anchored
+                char.HumanoidRootPart.Anchored = true
+            end
 
             toggleBtn.Text = "ON"
             toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
@@ -3170,7 +3153,7 @@ do
                 end
             end)
 
-            print("✅ Freecam enabled. Character animations preserved!")
+            print("✅ Freecam enabled. Character remains visible!")
         end
 
         local function disableFreecam()
@@ -3211,7 +3194,7 @@ do
             statusLabel.Text = "Freecam: Disabled"
             statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
 
-            print("✅ Freecam disabled. Character restored with animations.")
+            print("✅ Freecam disabled. Character restored.")
         end
 
         local function toggleFreecam()
@@ -6345,6 +6328,2360 @@ pcall(function()
 end)
 
 pcall(function()
+    local hitboxTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Hitboxes" then
+            hitboxTab = tab
+            break
+        end
+    end
+
+    if not hitboxTab then
+        print("❌ 'Hitboxes' tab not found, creating...")
+
+        table.insert(TabNames, "Hitboxes")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Hitboxes"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.2, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "PLAYER HITBOXES"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.22, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Shows player hitboxes. Blue - don't kill, Red - kill"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.4, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.65, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Hitboxes: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Hotkey: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+
+    local function IsPlayerKiller(player)
+        if not player or not player.Character then return false end
+
+        local character = player.Character
+        for _, tool in pairs(character:GetChildren()) do
+            if tool:IsA("Tool") then
+                if tool:FindFirstChild("Damage") or tool:FindFirstChild("Handle") then
+                    return true
+                end
+            end
+        end
+
+        if character:GetAttribute("Killer") == true then
+            return true
+        end
+
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name:find("Kill") then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function CreateHitbox(player)
+        if not player or not player.Character then return nil end
+
+        local character = player.Character
+        local isKiller = IsPlayerKiller(player)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+        local transparency = 0.7
+
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = character
+        box.Adornee = character
+        box.Size = Vector3.new(4, 6, 4)
+        box.Transparency = transparency
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
+
+        return box
+    end
+
+    local function UpdateHitboxes()
+        ClearHitboxes()
+
+        if not HitboxEnabled then return end
+
+        local localPlayer = game.Players.LocalPlayer
+        local players = game.Players:GetPlayers()
+
+        for _, player in pairs(players) do
+            if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local box = CreateHitbox(player)
+                if box then
+                    table.insert(HitboxVisuals, box)
+                end
+            end
+        end
+    end
+
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Hitboxes: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        UpdateHitboxes()
+
+        HitboxConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            if not HitboxEnabled then return end
+            local currentPlayers = {}
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character then
+                    table.insert(currentPlayers, player)
+                end
+            end
+
+            local needUpdate = false
+            if #HitboxVisuals ~= #currentPlayers then
+                needUpdate = true
+            else
+                for i, box in pairs(HitboxVisuals) do
+                    if not box or not box.Parent then
+                        needUpdate = true
+                        break
+                    end
+                end
+            end
+
+            if needUpdate then
+                UpdateHitboxes()
+            end
+        end)
+
+        print("✅ Hitboxes enabled")
+    end
+
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+
+        ClearHitboxes()
+
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Hitboxes: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Hitboxes disabled")
+    end
+
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(1)
+            UpdateHitboxes()
+        end
+    end)
+
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+
+    print("✅ 'Hitboxes' tab created!")
+    print("📌 Alt+H - toggle hitboxes")
+    print("📌 Blue - don't kill, Red - kill")
+    print("📌 70% transparency")
+end)
+
+pcall(function()
+    local hitboxTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Hitboxes" then
+            hitboxTab = tab
+            break
+        end
+    end
+
+    if not hitboxTab then
+        table.insert(TabNames, "Hitboxes")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Hitboxes"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "WORLD TEXTURE HITBOXES"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Blue - can touch | Red - kills | 70% transparency"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Hitboxes: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Hotkey: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local HitboxUpdateConnection = nil
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 0.5
+
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+
+        local name = part.Name:lower()
+        if name:find("kill") or name:find("lava") or name:find("spike") or name:find("danger") then
+            return true
+        end
+
+        if part.Material == Enum.Material.Neon then
+            return true
+        end
+
+        if part:GetAttribute("Killer") == true then
+            return true
+        end
+
+        for _, child in pairs(part:GetDescendants()) do
+            if child:IsA("Script") or child:IsA("LocalScript") then
+                local scriptText = child.Source or ""
+                if scriptText:find("Humanoid") and (scriptText:find("Damage") or scriptText:find("Kill") or scriptText:find("TakeDamage")) then
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            return false
+        end
+
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and part:IsDescendantOf(player.Character) then
+                return false
+            end
+        end
+
+        if part:IsDescendantOf(game.CoreGui) or part:IsDescendantOf(game.StarterGui) then
+            return false
+        end
+
+        if part.CanCollide == false then return false end
+        if part.Anchored == false then return false end
+
+        local size = part.Size
+        if size.X < 0.5 and size.Y < 0.5 and size.Z < 0.5 then return false end
+
+        return true
+    end
+
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+
+        local isKiller = IsKillerPart(part)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+
+        if isKiller then
+            local glow = Instance.new("SelectionBox")
+            glow.Parent = part
+            glow.Adornee = part
+            glow.Color3 = Color3.fromRGB(255, 0, 0)
+            glow.LineThickness = 0.1
+            glow.Transparency = 0.5
+            return box, glow
+        end
+
+        return box
+    end
+
+    local function UpdateHitboxes()
+        ClearHitboxes()
+
+        if not HitboxEnabled then return end
+
+        local localPlayer = game.Players.LocalPlayer
+        if not localPlayer then return end
+
+        local parts = workspace:GetDescendants()
+        local count = 0
+
+        local MAX_PARTS = 500
+
+        for _, part in pairs(parts) do
+            if count >= MAX_PARTS then break end
+
+            if part:IsA("BasePart") and IsSolidPart(part) then
+                local isKiller = IsKillerPart(part)
+                local box = CreateHitboxForPart(part)
+                if box then
+                    if type(box) == "table" then
+                        for _, obj in pairs(box) do
+                            if obj then table.insert(HitboxVisuals, obj) end
+                        end
+                    else
+                        table.insert(HitboxVisuals, box)
+                    end
+                    count = count + 1
+                end
+            end
+        end
+    end
+
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Hitboxes: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        UpdateHitboxes()
+
+        HitboxConnection = game:GetService("RunService").Stepped:Connect(function()
+            if not HitboxEnabled then return end
+
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+
+        HitboxUpdateConnection = workspace.DescendantAdded:Connect(function(descendant)
+            if HitboxEnabled and descendant:IsA("BasePart") and IsSolidPart(descendant) then
+                task.wait(0.1)
+                UpdateHitboxes()
+            end
+        end)
+
+        print("✅ Texture hitboxes enabled")
+    end
+
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+
+        if HitboxUpdateConnection then
+            HitboxUpdateConnection:Disconnect()
+            HitboxUpdateConnection = nil
+        end
+
+        ClearHitboxes()
+
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Hitboxes: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Texture hitboxes disabled")
+    end
+
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(1)
+            UpdateHitboxes()
+        end
+    end)
+
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+
+    print("✅ 'Hitboxes' tab updated - now shows world textures!")
+    print("📌 Alt+H - toggle hitboxes")
+    print("📌 Blue - safe to touch (solid surfaces)")
+    print("📌 Red - kills (lava, spikes, etc.)")
+    print("📌 70% transparency")
+    print("📌 Optimized: updates every 0.5 seconds")
+    print("📌 Limit: max 500 parts for performance")
+end)
+
+pcall(function()
+    local hitboxTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Hitboxes" then
+            hitboxTab = tab
+            break
+        end
+    end
+
+    if not hitboxTab then
+        table.insert(TabNames, "Hitboxes")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Hitboxes"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "WORLD TEXTURE HITBOXES (OPTIMIZED)"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Blue - can touch | Red - kills | 70% transparency"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Hitboxes: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Hotkey: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local CheckedParts = {}
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 2
+
+    local KillerPartsCache = {}
+    local SolidPartsCache = {}
+    local CacheTime = 0
+    local CACHE_LIFETIME = 5
+
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+
+        if KillerPartsCache[part] ~= nil then
+            return KillerPartsCache[part]
+        end
+
+        local isKiller = false
+
+        local name = part.Name:lower()
+        if name:find("kill") or name:find("lava") or name:find("spike") or name:find("danger") or name:find("fire") then
+            isKiller = true
+        end
+
+        if part.Material == Enum.Material.Neon then
+            isKiller = true
+        end
+
+        if not isKiller and part:GetAttribute("Killer") == true then
+            isKiller = true
+        end
+
+        if not isKiller and part.Color and part.Color.R > 0.8 and part.Color.G < 0.2 and part.Color.B < 0.2 then
+            isKiller = true
+        end
+
+        KillerPartsCache[part] = isKiller
+
+        return isKiller
+    end
+
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+
+        if SolidPartsCache[part] ~= nil then
+            return SolidPartsCache[part]
+        end
+
+        local isSolid = false
+
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            SolidPartsCache[part] = false
+            return false
+        end
+
+        if part.CanCollide == true and part.Anchored == true then
+            local size = part.Size
+            if size.X > 0.5 and size.Y > 0.5 and size.Z > 0.5 then
+                isSolid = true
+            end
+        end
+
+        SolidPartsCache[part] = isSolid
+
+        return isSolid
+    end
+
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+
+        KillerPartsCache = {}
+        SolidPartsCache = {}
+    end
+
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+
+        local isKiller = IsKillerPart(part)
+        local color = isKiller and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 150, 255)
+
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = color
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+
+        return box
+    end
+
+    local function UpdateHitboxes()
+        ClearHitboxes()
+
+        if not HitboxEnabled then return end
+
+        local parts = workspace:GetChildren()
+        local count = 0
+
+        local MAX_PARTS = 300
+
+        local function collectParts(obj)
+            if count >= MAX_PARTS then return end
+
+            if obj:IsA("BasePart") then
+                if IsSolidPart(obj) then
+                    local box = CreateHitboxForPart(obj)
+                    if box then
+                        table.insert(HitboxVisuals, box)
+                        count = count + 1
+                    end
+                end
+            end
+
+            for _, child in pairs(obj:GetChildren()) do
+                if count >= MAX_PARTS then break end
+
+                if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+                    continue
+                end
+
+                if child:IsDescendantOf(game.CoreGui) or child:IsDescendantOf(game.StarterGui) then
+                    continue
+                end
+
+                collectParts(child)
+            end
+        end
+
+        collectParts(workspace)
+
+        CacheTime = tick()
+    end
+
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Hitboxes: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        UpdateHitboxes()
+
+        HitboxConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not HitboxEnabled then return end
+
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                if currentTime - CacheTime >= CACHE_LIFETIME then
+                    KillerPartsCache = {}
+                    SolidPartsCache = {}
+                end
+
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+
+        print("✅ Hitboxes enabled (optimized version)")
+    end
+
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+
+        ClearHitboxes()
+
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Hitboxes: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        KillerPartsCache = {}
+        SolidPartsCache = {}
+
+        print("✅ Hitboxes disabled")
+    end
+
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        if HitboxEnabled then
+            task.wait(2)
+            KillerPartsCache = {}
+            SolidPartsCache = {}
+            UpdateHitboxes()
+        end
+    end)
+
+    game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+        if HitboxEnabled then
+            ClearHitboxes()
+        end
+    end)
+
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+
+    print("========================================")
+    print("✅ HITBOXES OPTIMIZED!")
+    print("📌 Update interval: 2 seconds")
+    print("📌 Max parts: 300")
+    print("📌 Caching for performance")
+    print("📌 Alt+H - toggle")
+    print("========================================")
+end)
+
+pcall(function()
+    local hitboxTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "Hitboxes" then
+            hitboxTab = tab
+            break
+        end
+    end
+
+    if not hitboxTab then
+        table.insert(TabNames, "Hitboxes")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+        hitboxTab = newTab
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Hitboxes"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+            if HitboxEnabled then UpdateHitboxes() end
+        end)
+    end
+
+    for _, child in pairs(hitboxTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = hitboxTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "WORLD TEXTURE HITBOXES"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.15, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "RED - kills | BLUE - safe to touch | 70% transparency"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Hitboxes: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Hotkey: Alt+H"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+
+    local HitboxEnabled = false
+    local HitboxVisuals = {}
+    local HitboxConnection = nil
+    local LastUpdateTime = 0
+    local UPDATE_INTERVAL = 2
+
+    local KillerPartsCache = {}
+    local CacheTime = 0
+    local CACHE_LIFETIME = 5
+
+    local KILLER_KEYWORDS = {
+        "kill", "lava", "spike", "danger", "fire", "acid", "poison",
+        "death", "deadly", "hazard", "toxic", "burn", "melt", "crush",
+        "trap", "saw", "blade", "spike", "thorn", "needle", "sharp",
+        "void", "fall", "bottomless", "pit", "abyss"
+    }
+
+    local function IsKillerPart(part)
+        if not part or not part.Parent then return false end
+
+        if KillerPartsCache[part] ~= nil then
+            return KillerPartsCache[part]
+        end
+
+        local isKiller = false
+        local name = part.Name:lower()
+
+        for _, keyword in pairs(KILLER_KEYWORDS) do
+            if name:find(keyword) then
+                isKiller = true
+                break
+            end
+        end
+
+        if not isKiller then
+            if part.Material == Enum.Material.Neon then
+                isKiller = true
+            end
+        end
+
+        if not isKiller then
+            if part:GetAttribute("Killer") == true or part:GetAttribute("Damage") or part:GetAttribute("Deadly") then
+                isKiller = true
+            end
+        end
+
+        if not isKiller and part.Color then
+            local r, g, b = part.Color.R, part.Color.G, part.Color.B
+
+            if r > 0.8 and g < 0.2 and b < 0.2 then
+                isKiller = true
+            end
+
+            if r > 0.8 and g > 0.4 and g < 0.7 and b < 0.2 then
+                isKiller = true
+            end
+
+            if r > 0.8 and g > 0.7 and b < 0.3 then
+                isKiller = true
+            end
+        end
+
+        if not isKiller then
+            for _, child in pairs(part:GetDescendants()) do
+                if child:IsA("Script") or child:IsA("LocalScript") then
+                    local source = child.Source or ""
+                    if source:find("Humanoid") and (source:find("Damage") or source:find("Kill") or source:find("TakeDamage") or source:find("health")) then
+                        isKiller = true
+                        break
+                    end
+                end
+            end
+        end
+
+        KillerPartsCache[part] = isKiller
+
+        return isKiller
+    end
+
+    local function IsSolidPart(part)
+        if not part or not part.Parent then return false end
+
+        local localPlayer = game.Players.LocalPlayer
+        if localPlayer and localPlayer.Character and part:IsDescendantOf(localPlayer.Character) then
+            return false
+        end
+
+        if part.CanCollide == true and part.Anchored == true then
+            local size = part.Size
+            if size.X > 0.5 and size.Y > 0.5 and size.Z > 0.5 then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function ClearHitboxes()
+        for _, obj in pairs(HitboxVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        HitboxVisuals = {}
+    end
+
+    local function CreateHitboxForPart(part)
+        if not part or not part.Parent then return nil end
+
+        if not IsKillerPart(part) then
+            return nil
+        end
+
+        local box = Instance.new("BoxHandleAdornment")
+        box.Parent = part
+        box.Adornee = part
+        box.Size = part.Size
+        box.Transparency = 0.7
+        box.Color3 = Color3.fromRGB(255, 0, 0)
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+
+        return box
+    end
+
+    local function UpdateHitboxes()
+        ClearHitboxes()
+
+        if not HitboxEnabled then return end
+
+        local parts = workspace:GetDescendants()
+        local count = 0
+
+        local MAX_PARTS = 300
+
+        for _, part in pairs(parts) do
+            if count >= MAX_PARTS then break end
+
+            if part:IsA("BasePart") and IsSolidPart(part) then
+                local box = CreateHitboxForPart(part)
+                if box then
+                    table.insert(HitboxVisuals, box)
+                    count = count + 1
+                end
+            end
+        end
+    end
+
+    local function EnableHitboxes()
+        if HitboxEnabled then return end
+        HitboxEnabled = true
+
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Hitboxes: Enabled (killer only)"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        UpdateHitboxes()
+
+        HitboxConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not HitboxEnabled then return end
+
+            local currentTime = tick()
+            if currentTime - LastUpdateTime >= UPDATE_INTERVAL then
+                if currentTime - CacheTime >= CACHE_LIFETIME then
+                    KillerPartsCache = {}
+                end
+                UpdateHitboxes()
+                LastUpdateTime = currentTime
+            end
+        end)
+
+        print("✅ Hitboxes enabled (KILLER PARTS ONLY)")
+    end
+
+    local function DisableHitboxes()
+        if not HitboxEnabled then return end
+        HitboxEnabled = false
+
+        if HitboxConnection then
+            HitboxConnection:Disconnect()
+            HitboxConnection = nil
+        end
+
+        ClearHitboxes()
+        KillerPartsCache = {}
+
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Hitboxes: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Hitboxes disabled")
+    end
+
+    local function ToggleHitboxes()
+        if HitboxEnabled then
+            DisableHitboxes()
+        else
+            EnableHitboxes()
+        end
+    end
+
+    toggleBtn.MouseButton1Click:Connect(ToggleHitboxes)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.H and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleHitboxes()
+        end
+    end)
+
+    _G.ToggleHitboxes = ToggleHitboxes
+    _G.UpdateHitboxes = UpdateHitboxes
+
+    print("========================================")
+    print("✅ HITBOXES FIXED!")
+    print("📌 RED color - ONLY killing parts")
+    print("📌 Regular parts are NOT outlined (blue removed)")
+    print("📌 Alt+H - toggle")
+    print("========================================")
+end)
+
+pcall(function()
+    local speedTabIndex = nil
+    for i, name in ipairs(TabNames) do
+        if name == "Speed" then
+            speedTabIndex = i
+            break
+        end
+    end
+
+    if not speedTabIndex then
+        table.insert(TabNames, "Speed")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "Speed"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+
+        speedTabIndex = #Tabs
+    end
+
+    local speedTab = Tabs[speedTabIndex]
+    if not speedTab then return end
+
+    for _, child in pairs(speedTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = speedTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "SPEED MODIFICATION"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.12, 0)
+    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Changes player movement speed (16 - 300)"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    toggleBtn.BorderColor3 = Library.Theme.Border
+    toggleBtn.BorderSizePixel = 2
+    toggleBtn.Text = "OFF"
+    toggleBtn.TextColor3 = Library.Theme.Text
+    toggleBtn.TextScaled = true
+    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.BackgroundTransparency = 0.3
+    toggleBtn.Parent = mainFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.58, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Speed modification: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local currentSpeedLabel = Instance.new("TextLabel")
+    currentSpeedLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    currentSpeedLabel.Position = UDim2.new(0, 0, 0.68, 0)
+    currentSpeedLabel.BackgroundTransparency = 1
+    currentSpeedLabel.Text = "Current speed: 16"
+    currentSpeedLabel.TextColor3 = Library.Theme.Text
+    currentSpeedLabel.TextScaled = true
+    currentSpeedLabel.Font = Enum.Font.SourceSans
+    currentSpeedLabel.Parent = mainFrame
+
+    local speedLabel = Instance.new("TextLabel")
+    speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
+    speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
+    speedLabel.BackgroundTransparency = 1
+    speedLabel.Text = "Speed: 16"
+    speedLabel.TextColor3 = Library.Theme.Text
+    speedLabel.TextScaled = true
+    speedLabel.Font = Enum.Font.SourceSansBold
+    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    speedLabel.Parent = mainFrame
+
+    local speedSlider = Instance.new("Frame")
+    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
+    speedSlider.BackgroundColor3 = Library.Theme.Border
+    speedSlider.BorderSizePixel = 0
+    speedSlider.Parent = mainFrame
+
+    local speedFill = Instance.new("Frame")
+    speedFill.Size = UDim2.new(0, 0, 1, 0)
+    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    speedFill.BorderSizePixel = 0
+    speedFill.Parent = speedSlider
+
+    local speedButton = Instance.new("TextButton")
+    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
+    speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
+    speedButton.BackgroundColor3 = Library.Theme.Text
+    speedButton.BorderColor3 = Library.Theme.Border
+    speedButton.BorderSizePixel = 2
+    speedButton.Text = ""
+    speedButton.Parent = speedSlider
+
+    local hotkeyFrame = Instance.new("Frame")
+    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
+    hotkeyFrame.BackgroundTransparency = 1
+    hotkeyFrame.Parent = container
+
+    local hotkeyLabel = Instance.new("TextLabel")
+    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+    hotkeyLabel.BackgroundTransparency = 1
+    hotkeyLabel.Text = "Hotkey: Alt+M"
+    hotkeyLabel.TextColor3 = Library.Theme.Accent
+    hotkeyLabel.TextScaled = true
+    hotkeyLabel.Font = Enum.Font.SourceSansBold
+    hotkeyLabel.Parent = hotkeyFrame
+
+    local SpeedEnabled = false
+    local TargetSpeed = 16
+    local MIN_SPEED = 16
+    local MAX_SPEED = 300
+    local SpeedConnection = nil
+
+    local function UpdateSpeed()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        if not humanoid then return end
+
+        if SpeedEnabled then
+            humanoid.WalkSpeed = TargetSpeed
+        end
+    end
+
+    local function UpdateSlider()
+        local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
+        speedFill.Size = UDim2.new(percent, 0, 1, 0)
+        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
+
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
+            end
+        end
+    end
+
+    local function EnableSpeed()
+        if SpeedEnabled then return end
+        SpeedEnabled = true
+
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Speed modification: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        UpdateSpeed()
+
+        SpeedConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not SpeedEnabled then return end
+            UpdateSpeed()
+        end)
+
+        game.Players.LocalPlayer.CharacterAdded:Connect(function()
+            if SpeedEnabled then
+                task.wait(0.5)
+                UpdateSpeed()
+            end
+        end)
+
+        print("✅ Speed modification enabled (target: " .. TargetSpeed .. ")")
+    end
+
+    local function DisableSpeed()
+        if not SpeedEnabled then return end
+        SpeedEnabled = false
+
+        if SpeedConnection then
+            SpeedConnection:Disconnect()
+            SpeedConnection = nil
+        end
+
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                currentSpeedLabel.Text = "Current speed: 16"
+            end
+        end
+
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Speed modification: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Speed modification disabled")
+    end
+
+    local function ToggleSpeed()
+        if SpeedEnabled then
+            DisableSpeed()
+        else
+            EnableSpeed()
+        end
+    end
+
+    toggleBtn.MouseButton1Click:Connect(ToggleSpeed)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.M and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleSpeed()
+        end
+    end)
+
+    local isDragging = false
+    speedButton.MouseButton1Down:Connect(function() isDragging = true end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = speedSlider.AbsolutePosition
+            local sliderSize = speedSlider.AbsoluteSize
+            local mouseX = input.Position.X
+
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            TargetSpeed = math.floor(MIN_SPEED + percent * (MAX_SPEED - MIN_SPEED))
+            UpdateSlider()
+
+            if SpeedEnabled then
+                UpdateSpeed()
+            end
+        end
+    end)
+
+    UpdateSlider()
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if SpeedEnabled then
+            UpdateSpeed()
+        end
+        UpdateSlider()
+    end)
+
+    spawn(function()
+        while true do
+            wait(1)
+            if not SpeedEnabled then
+                local player = game.Players.LocalPlayer
+                if player and player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid and humanoid.WalkSpeed ~= 16 then
+                        currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
+                    end
+                end
+            end
+        end
+    end)
+
+    _G.ToggleSpeed = ToggleSpeed
+
+    print("========================================")
+    print("✅ 'SPEED' TAB ADDED!")
+    print("📌 Alt+M - toggle speed modification")
+    print("📌 Slider adjusts speed (16 - 300)")
+    print("📌 Toggle via button or hotkey")
+    print("========================================")
+end)
+
+pcall(function()
+    local SpeedDisplayGui = Instance.new("BillboardGui")
+    SpeedDisplayGui.Name = "SpeedDisplay"
+    SpeedDisplayGui.Size = UDim2.new(0, 80, 0, 25)
+    SpeedDisplayGui.StudsOffset = Vector3.new(0, 3.5, 0)
+    SpeedDisplayGui.AlwaysOnTop = true
+    SpeedDisplayGui.MaxDistance = 50
+    SpeedDisplayGui.Enabled = true
+    SpeedDisplayGui.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+
+    local speedLabel = Instance.new("TextLabel")
+    speedLabel.Size = UDim2.new(1, 0, 1, 0)
+    speedLabel.BackgroundTransparency = 1
+    speedLabel.Text = "0 m/s"
+    speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+    speedLabel.TextScaled = true
+    speedLabel.Font = Enum.Font.SourceSansBold
+    speedLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    speedLabel.TextStrokeTransparency = 0.5
+    speedLabel.Parent = SpeedDisplayGui
+
+    local lastPosition = nil
+    local lastTime = tick()
+    local smoothSpeed = 0
+    local displaySpeed = 0
+    local updateCounter = 0
+
+    local function UpdateSpeedDisplay()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            SpeedDisplayGui.Enabled = false
+            return
+        end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            SpeedDisplayGui.Enabled = false
+            return
+        end
+
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+
+                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
+
+                if math.abs(smoothSpeed - displaySpeed) > 0.2 then
+                    displaySpeed = smoothSpeed
+
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+
+                    if displaySpeed < 0.3 then
+                        speedLabel.Text = "0 m/s"
+                        speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+                    else
+                        speedLabel.Text = tostring(roundedSpeed) .. " m/s"
+
+                        if displaySpeed < 5 then
+                            speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+                        elseif displaySpeed < 15 then
+                            speedLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+                        elseif displaySpeed < 30 then
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+                        elseif displaySpeed < 50 then
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
+                        else
+                            speedLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        end
+                    end
+                end
+            end
+
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+
+        SpeedDisplayGui.Enabled = true
+    end
+
+    local speedUpdateConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        UpdateSpeedDisplay()
+    end)
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+        task.wait(0.5)
+
+        local oldGui = newCharacter:FindFirstChild("SpeedDisplay")
+        if oldGui then oldGui:Destroy() end
+
+        local newSpeedDisplay = SpeedDisplayGui:Clone()
+        newSpeedDisplay.Parent = newCharacter
+
+        SpeedDisplayGui = newSpeedDisplay
+
+        lastPosition = nil
+        lastTime = tick()
+        smoothSpeed = 0
+        displaySpeed = 0
+
+        local label = newSpeedDisplay:FindFirstChildWhichIsA("TextLabel")
+        if label then
+            label.Text = "0 m/s"
+            label.TextColor3 = Color3.fromRGB(0, 200, 255)
+        end
+    end)
+
+    game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+        SpeedDisplayGui.Enabled = false
+    end)
+
+    print("========================================")
+    print("✅ SPEED DISPLAY ENABLED!")
+    print("📌 Speed is displayed ABOVE the character's head")
+    print("📌 NO BLACK BACKGROUND - only numbers")
+    print("📌 Unit: m/s (meters per second)")
+    print("📌 STRONG SMOOTHING - numbers do NOT jitter")
+    print("📌 When standing still - shows 0 m/s")
+    print("📌 When moving - shows smooth speed")
+    print("========================================")
+end)
+
+pcall(function()
+    local function LerpColor(color1, color2, t)
+        return Color3.new(
+            color1.R + (color2.R - color1.R) * t,
+            color1.G + (color2.G - color1.G) * t,
+            color1.B + (color2.B - color1.B) * t
+        )
+    end
+
+    local function GetSpeedColor(speed)
+        local colors = {
+            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
+            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
+            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
+            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
+            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
+            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
+        }
+
+        if speed <= colors[1].speed then
+            return colors[1].color
+        end
+
+        if speed >= colors[#colors].speed then
+            return colors[#colors].color
+        end
+
+        for i = 1, #colors - 1 do
+            local low = colors[i]
+            local high = colors[i + 1]
+
+            if speed >= low.speed and speed <= high.speed then
+                local t = (speed - low.speed) / (high.speed - low.speed)
+                t = t * t * (3 - 2 * t)
+                return LerpColor(low.color, high.color, t)
+            end
+        end
+
+        return colors[1].color
+    end
+
+    local function UpdateSpeedDisplayWithSmoothColor()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+
+        local gui = player.Character:FindFirstChild("SpeedDisplay")
+        if not gui then return end
+
+        local label = gui:FindFirstChildWhichIsA("TextLabel")
+        if not label then return end
+
+        local data = gui:GetAttribute("SpeedData")
+        if not data then return end
+
+        local currentSpeed = data.displaySpeed or 0
+
+        local targetColor = GetSpeedColor(currentSpeed)
+
+        if not label:GetAttribute("SmoothColor") then
+            label:SetAttribute("SmoothColor", targetColor)
+            label.TextColor3 = targetColor
+            return
+        end
+
+        local currentColor = label:GetAttribute("SmoothColor")
+
+        local lerpSpeed = 0.08
+        local newColor = LerpColor(currentColor, targetColor, lerpSpeed)
+
+        label:SetAttribute("SmoothColor", newColor)
+        label.TextColor3 = newColor
+    end
+
+    local function PatchSpeedDisplay()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+
+        local gui = player.Character:FindFirstChild("SpeedDisplay")
+        if not gui then return end
+
+        local label = gui:FindFirstChildWhichIsA("TextLabel")
+        if not label then return end
+
+        local data = gui:GetAttribute("SpeedData")
+        if data then
+            local speed = data.displaySpeed or 0
+            local color = GetSpeedColor(speed)
+            label:SetAttribute("SmoothColor", color)
+            label.TextColor3 = color
+        end
+    end
+
+    local smoothColorConnection = nil
+
+    local function StartSmoothColorUpdate()
+        if smoothColorConnection then
+            smoothColorConnection:Disconnect()
+            smoothColorConnection = nil
+        end
+
+        smoothColorConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            UpdateSpeedDisplayWithSmoothColor()
+        end)
+
+        print("✅ Smooth color transition for speed counter enabled")
+    end
+
+    StartSmoothColorUpdate()
+
+    local oldCharacterAdded = CharacterAddedConnection
+    if oldCharacterAdded then
+        oldCharacterAdded:Disconnect()
+    end
+
+    CharacterAddedConnection = game.Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
+        task.wait(0.5)
+
+        local gui = newChar:FindFirstChild("SpeedDisplay")
+        if gui then
+            local label = gui:FindFirstChildWhichIsA("TextLabel")
+            if label then
+                local data = gui:GetAttribute("SpeedData")
+                if data then
+                    local speed = data.displaySpeed or 0
+                    local color = GetSpeedColor(speed)
+                    label:SetAttribute("SmoothColor", color)
+                    label.TextColor3 = color
+                end
+            end
+        end
+    end)
+
+    print("========================================")
+    print("✅ SMOOTH COLOR TRANSITION ADDED!")
+    print("📌 Color changes SMOOTHLY, without sharp jumps")
+    print("📌 Gradient:")
+    print("   0-3 m/s  → Cyan")
+    print("   3-8 m/s  → Cyan-Green → Green")
+    print("   8-18 m/s → Green → Yellow")
+    print("   18-35 m/s → Yellow → Orange")
+    print("   35-60 m/s → Orange → Red")
+    print("   60-100 m/s → Red → Pink")
+    print("   100-200 m/s → Pink → Purple")
+    print("📌 Smoothstep used for SUPER SMOOTHNESS")
+    print("========================================")
+end)
+
+pcall(function()
+    for _, btn in ipairs(TabButtons) do
+        if btn then
+            local corner = btn:FindFirstChild("UICorner")
+            if corner then corner:Destroy() end
+            btn.BorderSizePixel = 2
+            btn.BorderColor3 = Library.Theme.Border
+            btn.Size = UDim2.new(1, -5, 0, 35)
+        end
+    end
+    print("✅ Tab buttons are now square")
+end)
+
+pcall(function()
+    local function LerpColor(c1, c2, t)
+        return Color3.new(
+            c1.R + (c2.R - c1.R) * t,
+            c1.G + (c2.G - c1.G) * t,
+            c1.B + (c2.B - c1.B) * t
+        )
+    end
+
+    local function GetSpeedColor(speed)
+        local colors = {
+            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
+            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
+            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
+            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
+            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
+            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
+        }
+
+        if speed <= colors[1].speed then return colors[1].color end
+        if speed >= colors[#colors].speed then return colors[#colors].color end
+
+        for i = 1, #colors - 1 do
+            local low = colors[i]
+            local high = colors[i + 1]
+            if speed >= low.speed and speed <= high.speed then
+                local t = (speed - low.speed) / (high.speed - low.speed)
+                t = t * t * (3 - 2 * t)
+                return LerpColor(low.color, high.color, t)
+            end
+        end
+        return colors[1].color
+    end
+
+    local oldUpdate = UpdateSpeedDisplay
+
+    UpdateSpeedDisplay = function()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            local gui = player and player.Character and player.Character:FindFirstChild("SpeedDisplay")
+            if gui then gui.Enabled = false end
+            return
+        end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            local gui = player.Character:FindFirstChild("SpeedDisplay")
+            if gui then gui.Enabled = false end
+            return
+        end
+
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
+
+                if math.abs(smoothSpeed - displaySpeed) > 0.01 then
+                    displaySpeed = smoothSpeed
+
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+
+                    local gui = player.Character:FindFirstChild("SpeedDisplay")
+                    if gui then
+                        gui.Enabled = true
+                        local label = gui:FindFirstChildWhichIsA("TextLabel")
+                        if label then
+                            local targetColor = GetSpeedColor(displaySpeed)
+
+                            if not label:GetAttribute("AnimStartTime") then
+                                label:SetAttribute("AnimStartTime", tick())
+                                label:SetAttribute("StartColor", label.TextColor3)
+                                label:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local currentTarget = label:GetAttribute("TargetColor")
+                            if currentTarget and (currentTarget.R ~= targetColor.R or currentTarget.G ~= targetColor.G or currentTarget.B ~= targetColor.B) then
+                                label:SetAttribute("AnimStartTime", tick())
+                                label:SetAttribute("StartColor", label.TextColor3)
+                                label:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local animStart = label:GetAttribute("AnimStartTime") or tick()
+                            local elapsed = tick() - animStart
+                            local progress = math.min(elapsed / 1.0, 1)
+
+                            local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+
+                            local startColor = label:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
+                            local targetColorAttr = label:GetAttribute("TargetColor") or targetColor
+                            local currentColor = LerpColor(startColor, targetColorAttr, eased)
+
+                            label.TextColor3 = currentColor
+
+                            if displaySpeed < 0.3 then
+                                label.Text = "0 m/s"
+                            else
+                                label.Text = tostring(roundedSpeed) .. " m/s"
+                            end
+
+                            if progress >= 1 then
+                                label:SetAttribute("AnimStartTime", nil)
+                                label:SetAttribute("StartColor", nil)
+                                label:SetAttribute("TargetColor", nil)
+                            end
+                        end
+                    end
+                end
+            end
+
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+    end
+
+    print("✅ Speed counter got color animation over 1 second")
+    print("========================================")
+    print("✅ ALL CHANGES APPLIED!")
+    print("📌 Tab buttons - square")
+    print("📌 Speed counter - smooth color transition over 1 second")
+    print("========================================")
+end)
+
+pcall(function()
+    local function IncreaseCornerRadius(button, multiplier)
+        if not button then return end
+
+        local corner = button:FindFirstChild("UICorner")
+        if not corner then
+            corner = Instance.new("UICorner")
+            corner.Parent = button
+        end
+
+        local currentRadius = corner.CornerRadius
+        local newRadius = 0
+
+        if currentRadius.Offset > 0 then
+            newRadius = currentRadius.Offset * multiplier
+        elseif currentRadius.Scale > 0 then
+            newRadius = currentRadius.Scale * multiplier
+        else
+            newRadius = 12 * multiplier
+        end
+
+        if newRadius > 0 and newRadius < 50 then
+            corner.CornerRadius = UDim.new(0, newRadius)
+        else
+            corner.CornerRadius = UDim.new(0, 36)
+        end
+    end
+
+    for _, btn in ipairs(TabButtons) do        if btn then
+            IncreaseCornerRadius(btn, 3)
+        end
+    end
+
+    if MainButton then
+        local corner = MainButton:FindFirstChild("UICorner")
+        if not corner then
+            corner = Instance.new("UICorner")
+            corner.Parent = MainButton
+        end
+        corner.CornerRadius = UDim.new(1, 0)
+    end
+
+    if CloseBtn then
+        IncreaseCornerRadius(CloseBtn, 3)
+    end
+
+    for _, tab in pairs(Tabs) do
+        if tab then
+            for _, obj in pairs(tab:GetDescendants()) do
+                if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                    if obj.Parent and obj.Parent == MenuPanel then
+                    else
+                        IncreaseCornerRadius(obj, 3)
+                    end
+                end
+            end
+        end
+    end
+
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            local posX = child.Position.X.Scale
+            local posY = child.Position.Y.Scale
+
+            local isCorner = false
+            if (posX < 0.05 and posY < 0.05) or
+               (posX > 0.95 and posY < 0.05) or
+               (posX < 0.05 and posY > 0.95) or
+               (posX > 0.95 and posY > 0.95) then
+                isCorner = true
+            end
+
+            if isCorner then
+                local corner = child:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = child
+                end
+                corner.CornerRadius = UDim.new(0, 24)
+            else
+                local corner = child:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = child
+                end
+                corner.CornerRadius = UDim.new(1, 0)
+            end
+        end
+    end
+
+    local playersTab = Tabs[7]
+    if playersTab then
+        for _, obj in pairs(playersTab:GetDescendants()) do
+            if obj:IsA("TextButton") and obj.Text == "TP" then
+                IncreaseCornerRadius(obj, 3)
+            end
+        end
+    end
+
+    print("✅ All button rounding increased by 3x")
+    print("📌 Resize buttons on walls - round")
+    print("📌 Corner resize buttons - rounded ×3")
+    print("========================================")
+end)
+
+pcall(function()
+    for _, btn in ipairs(TabButtons) do
+        if btn then
+            local corner = btn:FindFirstChild("UICorner")
+            if corner then corner:Destroy() end
+
+            btn.BorderSizePixel = 2
+            btn.BorderColor3 = Library.Theme.Border
+            btn.Size = UDim2.new(1, -5, 0, 35)
+
+            btn.BackgroundColor3 = btn.BackgroundColor3 or Library.Theme.Button
+        end
+    end
+    print("✅ Tabs are now square (no rounding)")
+end)
+
+pcall(function()
+    local function LerpColor(c1, c2, t)
+        return Color3.new(
+            c1.R + (c2.R - c1.R) * t,
+            c1.G + (c2.G - c1.G) * t,
+            c1.B + (c2.B - c1.B) * t
+        )
+    end
+
+    local function GetSpeedColor(speed)
+        local colors = {
+            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
+            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
+            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
+            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
+            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
+            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
+            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
+        }
+
+        if speed <= colors[1].speed then return colors[1].color end
+        if speed >= colors[#colors].speed then return colors[#colors].color end
+
+        for i = 1, #colors - 1 do
+            local low = colors[i]
+            local high = colors[i + 1]
+            if speed >= low.speed and speed <= high.speed then
+                local t = (speed - low.speed) / (high.speed - low.speed)
+                t = t * t * (3 - 2 * t)
+                return LerpColor(low.color, high.color, t)
+            end
+        end
+        return colors[1].color
+    end
+
+    local oldUpdate = UpdateSpeedDisplay
+    local oldLastPosition = lastPosition
+    local oldLastTime = lastTime
+    local oldSmoothSpeed = smoothSpeed
+    local oldDisplaySpeed = displaySpeed
+
+    UpdateSpeedDisplay = function()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            local gui = player and player.Character and player.Character:FindFirstChild("SpeedDisplay")
+            if gui then gui.Enabled = false end
+            return
+        end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            local gui = player.Character:FindFirstChild("SpeedDisplay")
+            if gui then gui.Enabled = false end
+            return
+        end
+
+        local currentPos = hrp.Position
+        local currentTime = tick()
+        local deltaTime = currentTime - lastTime
+
+        if deltaTime >= 0.05 then
+            if lastPosition then
+                local distance = (currentPos - lastPosition).Magnitude
+                local speed = distance / deltaTime
+                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
+
+                if math.abs(smoothSpeed - displaySpeed) > 0.01 then
+                    displaySpeed = smoothSpeed
+
+                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
+
+                    local gui = player.Character:FindFirstChild("SpeedDisplay")
+                    if gui then
+                        gui.Enabled = true
+                        local label = gui:FindFirstChildWhichIsA("TextLabel")
+                        if label then
+                            local targetColor = GetSpeedColor(displaySpeed)
+
+                            if not label:GetAttribute("AnimStartTime") then
+                                label:SetAttribute("AnimStartTime", tick())
+                                label:SetAttribute("StartColor", label.TextColor3)
+                                label:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local currentTarget = label:GetAttribute("TargetColor")
+                            if currentTarget and (currentTarget.R ~= targetColor.R or
+                               currentTarget.G ~= targetColor.G or
+                               currentTarget.B ~= targetColor.B) then
+                                label:SetAttribute("AnimStartTime", tick())
+                                label:SetAttribute("StartColor", label.TextColor3)
+                                label:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local animStart = label:GetAttribute("AnimStartTime") or tick()
+                            local elapsed = tick() - animStart
+                            local progress = math.min(elapsed / 1.0, 1)
+
+                            local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+
+                            local startColor = label:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
+                            local targetColorAttr = label:GetAttribute("TargetColor") or targetColor
+                            local currentColor = LerpColor(startColor, targetColorAttr, eased)
+
+                            label.TextColor3 = currentColor
+
+                            if displaySpeed < 0.3 then
+                                label.Text = "0 m/s"
+                            else
+                                label.Text = tostring(roundedSpeed) .. " m/s"
+                            end
+
+                            if progress >= 1 then
+                                label:SetAttribute("AnimStartTime", nil)
+                                label:SetAttribute("StartColor", nil)
+                                label:SetAttribute("TargetColor", nil)
+                            end
+                        end
+                    end
+                end
+            end
+
+            lastPosition = currentPos
+            lastTime = currentTime
+        end
+    end
+
+    local oldCharAdded = CharacterAddedConnection
+    if oldCharAdded then
+        oldCharAdded:Disconnect()
+    end
+
+    CharacterAddedConnection = game.Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
+        task.wait(0.5)
+        local gui = newChar:FindFirstChild("SpeedDisplay")
+        if gui then
+            local label = gui:FindFirstChildWhichIsA("TextLabel")
+            if label then
+                label.Text = "0 m/s"
+                label.TextColor3 = Color3.fromRGB(0, 200, 255)
+                label:SetAttribute("AnimStartTime", nil)
+                label:SetAttribute("StartColor", nil)
+                label:SetAttribute("TargetColor", nil)
+            end
+        end
+        lastPosition = nil
+        lastTime = tick()
+        smoothSpeed = 0
+        displaySpeed = 0
+    end)
+
+    print("✅ Speed counter got smooth color animation (1 second)")
+    print("========================================")
+    print("✅ TOTAL:")
+    print("📌 Tabs are SQUARE (no rounding)")
+    print("📌 Speed counter smoothly changes color over 1 second")
+    print("📌 Color gradient: Cyan→Green→Yellow→Orange→Red→Pink→Purple")
+    print("========================================")
+end)
+
+pcall(function()
     local function NukeAllSpeedIndicators()
         for _, gui in pairs(game.CoreGui:GetChildren()) do
             if gui:IsA("BillboardGui") and (gui.Name == "SpeedIndicator" or gui.Name == "SpeedDisplay") then
@@ -7544,9 +9881,9 @@ pcall(function()
 end)
 
 print("✅ Fixed: GG+ appears letter by letter with cycling animation")
-
 -- ===== FIX: FLIGHT TAB RENAMED TO FLY WITH "FLY MOD" TITLE =====
 pcall(function()
+    -- Find the flight tab index
     local flyTabIndex = nil
     for i, name in ipairs(TabNames) do
         if name == "Flight" then
@@ -7556,51 +9893,59 @@ pcall(function()
     end
 
     if flyTabIndex then
+        -- Rename the tab in TabNames
         TabNames[flyTabIndex] = "Fly"
-
+        
+        -- Update the tab button text
         if TabButtons[flyTabIndex] then
             TabButtons[flyTabIndex].Text = "Fly"
         end
-
+        
+        -- Update the tab content - change "FLIGHT MODE" to "FLY MOD"
         local flyTab = Tabs[flyTabIndex]
         if flyTab then
+            -- Find the FlyFrame and change its title
             for _, child in pairs(flyTab:GetDescendants()) do
                 if child:IsA("TextLabel") and child.Text == "FLIGHT MODE" then
                     child.Text = "FLY MOD"
                     print("✅ Changed title to 'FLY MOD'")
                 end
             end
-
+            
+            -- Also find any other labels that might say "Flight"
             for _, child in pairs(flyTab:GetDescendants()) do
                 if child:IsA("TextLabel") and child.Text and child.Text:find("Flight") then
                     child.Text = child.Text:gsub("Flight", "Fly")
                 end
             end
         end
-
+        
+        -- Update the indicator text
         if FlyIndicator then
             if FlyIndicator.Text:find("Flight") then
                 FlyIndicator.Text = FlyIndicator.Text:gsub("Flight", "Fly")
             end
         end
-
+        
         print("✅ Tab 'Flight' renamed to 'Fly'")
         print("✅ Title changed from 'FLIGHT MODE' to 'FLY MOD'")
     else
         print("❌ 'Flight' tab not found, trying to find by index 3...")
-
+        
+        -- Fallback: try to modify by index 3 (since Flight was the 3rd tab)
         local flyTab = Tabs[3]
         if flyTab then
-            for _, child in pairs(flyTab:GetDescendants()) do                if child:IsA("TextLabel") and child.Text == "FLIGHT MODE" then
+            for _, child in pairs(flyTab:GetDescendants()) do
+                if child:IsA("TextLabel") and child.Text == "FLIGHT MODE" then
                     child.Text = "FLY MOD"
                     print("✅ Changed title to 'FLY MOD' (by index)")
                 end
             end
-
+            
             if TabButtons[3] then
                 TabButtons[3].Text = "Fly"
             end
-
+            
             if TabNames[3] then
                 TabNames[3] = "Fly"
             end
@@ -7613,11 +9958,11 @@ print("✅ FLIGHT TAB → FLY TAB")
 print("📌 Tab name: Flight → Fly")
 print("📌 Title: FLIGHT MODE → FLY MOD")
 print("========================================")
-
 -- ===== FIX: FREECAM - Remove "FIXED" text and keep player animation =====
 pcall(function()
     local freecamTab = Tabs[10]
     if not freecamTab then
+        -- Try to find Freecam tab by name
         for i, name in ipairs(TabNames) do
             if name == "Freecam" then
                 freecamTab = Tabs[i]
@@ -7625,8 +9970,9 @@ pcall(function()
             end
         end
     end
-
+    
     if freecamTab then
+        -- Remove "(FIXED)" from all labels in Freecam tab
         for _, child in pairs(freecamTab:GetDescendants()) do
             if child:IsA("TextLabel") and child.Text then
                 if child.Text:find("%(FIXED%)") then
@@ -7640,55 +9986,60 @@ pcall(function()
                 end
             end
         end
-
+        
         print("✅ Removed '(FIXED)' from Freecam tab")
     end
-end)
-
--- ===== FIX: Keep player animation in Freecam mode =====
-pcall(function()
+    
+    -- ===== FIX: Keep player animation in Freecam mode =====
+    -- Override the enableFreecam function to keep animations
     local function PatchFreecamAnimation()
+        -- Find the original enableFreecam function
         local oldEnableFreecam = enableFreecam
         local oldDisableFreecam = disableFreecam
-
+        
         if oldEnableFreecam then
+            -- Replace with new version that keeps animations
             enableFreecam = function()
                 if isFreecamActive then return end
-
+                
                 local player = game.Players.LocalPlayer
                 local char = player and player.Character
                 local humanoid = char and char:FindFirstChild("Humanoid")
                 local camera = workspace.CurrentCamera
-
+                
                 savedCameraCFrame = camera.CFrame
                 savedCameraFocus = camera.Focus
-
+                
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     savedCharacterCFrame = char.HumanoidRootPart.CFrame
                     freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
                 else
                     freecamPosition = Vector3.new(0, 10, 0)
                 end
-
+                
                 if humanoid then
                     savedWalkSpeed = humanoid.WalkSpeed
                     savedJumpPower = humanoid.JumpPower
                     savedAutoRotate = humanoid.AutoRotate
                     savedPlatformStand = humanoid.PlatformStand
                 end
-
+                
                 cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
-
+                
                 moveSpeed = baseSpeed
-
+                
                 if humanoid then
                     humanoid.AutoRotate = false
+                    -- KEEP PLATFORMSTAND FALSE TO PRESERVE ANIMATIONS
                     humanoid.PlatformStand = false
+                    -- Don't set WalkSpeed to 0 - keep movement
                     humanoid.WalkSpeed = 16
                     humanoid.JumpPower = 50
-
+                    
+                    -- Force walk animation to stay active
                     local animator = humanoid:FindFirstChild("Animator")
                     if animator then
+                        -- Check if there's an existing walk/run animation
                         local hasWalkAnim = false
                         for _, track in pairs(animator:GetPlayingAnimationTracks()) do
                             if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move") or track.Animation.Name:find("idle")) then
@@ -7696,10 +10047,11 @@ pcall(function()
                                 break
                             end
                         end
-
+                        
+                        -- If no walk anim, load one
                         if not hasWalkAnim then
                             local animation = Instance.new("Animation")
-                            animation.AnimationId = "rbxassetid://507766686"
+                            animation.AnimationId = "rbxassetid://507766686" -- Run animation
                             local track = animator:LoadAnimation(animation)
                             if track then
                                 track:Play()
@@ -7708,17 +10060,17 @@ pcall(function()
                         end
                     end
                 end
-
+                
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     savedAnchored = char.HumanoidRootPart.Anchored
                     char.HumanoidRootPart.Anchored = true
                 end
-
+                
                 isFreecamActive = true
                 isCursorLocked = true
-
+                
                 game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
-
+                
                 if toggleBtn then
                     toggleBtn.Text = "ON"
                     toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
@@ -7727,50 +10079,51 @@ pcall(function()
                     statusLabel.Text = "Freecam: Enabled"
                     statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
                 end
-
+                
                 pcall(function()
                     if MenuPanel then
                         menuOpen = false
                         MenuPanel.Visible = false
                     end
                 end)
-
+                
                 print("✅ Freecam enabled. Player animations preserved!")
             end
-
+            
+            -- Also patch disable to properly restore
             disableFreecam = function()
                 if not isFreecamActive then return end
-
+                
                 local player = game.Players.LocalPlayer
                 local char = player and player.Character
                 local humanoid = char and char:FindFirstChild("Humanoid")
                 local camera = workspace.CurrentCamera
-
+                
                 isFreecamActive = false
                 isCursorLocked = false
-
+                
                 game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-
+                
                 if savedCameraCFrame then
                     camera.CFrame = savedCameraCFrame
                     camera.Focus = savedCameraFocus
                 end
-
+                
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     char.HumanoidRootPart.Anchored = savedAnchored or false
                 end
-
+                
                 if humanoid then
                     humanoid.AutoRotate = savedAutoRotate
                     humanoid.PlatformStand = savedPlatformStand
                     humanoid.WalkSpeed = savedWalkSpeed
                     humanoid.JumpPower = savedJumpPower
                 end
-
+                
                 if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
                     char.HumanoidRootPart.CFrame = savedCharacterCFrame
                 end
-
+                
                 if toggleBtn then
                     toggleBtn.Text = "OFF"
                     toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
@@ -7779,19 +10132,21 @@ pcall(function()
                     statusLabel.Text = "Freecam: Disabled"
                     statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
                 end
-
+                
                 print("✅ Freecam disabled. Character restored with animations.")
             end
-
+            
             print("✅ Freecam patched - animations preserved!")
         end
     end
-
+    
+    -- Try to apply the patch
     local success, err = pcall(PatchFreecamAnimation)
     if not success then
         print("⚠️ Could not patch Freecam: " .. tostring(err))
     end
-
+    
+    -- Also patch the toggle function
     local function PatchToggleFreecam()
         local oldToggle = toggleFreecam
         if oldToggle then
@@ -7805,7 +10160,7 @@ pcall(function()
             print("✅ Freecam toggle patched")
         end
     end
-
+    
     pcall(PatchToggleFreecam)
 end)
 
@@ -7816,7 +10171,6 @@ print("📌 Player animations NOW WORK in Freecam mode")
 print("📌 Player no longer stands in T-pose")
 print("📌 Walk/Run animations preserved")
 print("========================================")
-
 -- ===== MAKE TABS TRANSPARENT 50% =====
 pcall(function()
     for _, btn in ipairs(TabButtons) do
@@ -7826,1037 +10180,3 @@ pcall(function()
     end
     print("✅ Tabs are now 50% transparent")
 end)
-
--- ===== TAB 11: SPEED (Moved to end after Clicker) =====
-pcall(function()
-    local speedTabIndex = nil
-    for i, name in ipairs(TabNames) do
-        if name == "Speed" then
-            speedTabIndex = i
-            break
-        end
-    end
-
-    if not speedTabIndex then
-        table.insert(TabNames, "Speed")
-
-        local newTab = Instance.new("Frame")
-        newTab.Size = UDim2.new(1, 0, 1, 0)
-        newTab.BackgroundTransparency = 1
-        newTab.Visible = false
-        newTab.Parent = TabContentContainer
-        table.insert(Tabs, newTab)
-
-        local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -5, 0, 35)
-        newBtn.BackgroundColor3 = Library.Theme.Button
-        newBtn.BorderColor3 = Library.Theme.Border
-        newBtn.BorderSizePixel = 2
-        newBtn.Text = "Speed"
-        newBtn.TextColor3 = Library.Theme.Text
-        newBtn.TextScaled = true
-        newBtn.Font = Enum.Font.SourceSansBold
-        newBtn.Parent = TabScrollingFrame
-        table.insert(TabButtons, newBtn)
-
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
-
-        newBtn.MouseButton1Click:Connect(function()
-            for j, tab in ipairs(Tabs) do
-                tab.Visible = (j == #Tabs)
-                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
-            end
-        end)
-
-        speedTabIndex = #Tabs
-    end
-
-    local speedTab = Tabs[speedTabIndex]
-    if not speedTab then return end
-
-    for _, child in pairs(speedTab:GetChildren()) do
-        child:Destroy()
-    end
-
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, 0)
-    container.BackgroundTransparency = 1
-    container.Parent = speedTab
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
-    mainFrame.BackgroundColor3 = Library.Theme.Panel
-    mainFrame.BorderColor3 = Library.Theme.Border
-    mainFrame.BorderSizePixel = 2
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.Parent = container
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "SPEED MODIFICATION"
-    title.TextColor3 = Library.Theme.Text
-    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = mainFrame
-
-    local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, -20, 0.12, 0)
-    info.Position = UDim2.new(0, 10, 0.17, 0)
-    info.BackgroundTransparency = 1
-    info.Text = "Changes player movement speed (16 - 300)"
-    info.TextColor3 = Library.Theme.Accent
-    info.TextScaled = true
-    info.Font = Enum.Font.SourceSans
-    info.TextXAlignment = Enum.TextXAlignment.Left
-    info.Parent = mainFrame
-
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    toggleBtn.BorderColor3 = Library.Theme.Border
-    toggleBtn.BorderSizePixel = 2
-    toggleBtn.Text = "OFF"
-    toggleBtn.TextColor3 = Library.Theme.Text
-    toggleBtn.TextScaled = true
-    toggleBtn.Font = Enum.Font.SourceSansBold
-    toggleBtn.BackgroundTransparency = 0.3
-    toggleBtn.Parent = mainFrame
-
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.58, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Speed modification: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
-    local currentSpeedLabel = Instance.new("TextLabel")
-    currentSpeedLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    currentSpeedLabel.Position = UDim2.new(0, 0, 0.68, 0)
-    currentSpeedLabel.BackgroundTransparency = 1
-    currentSpeedLabel.Text = "Current speed: 16"
-    currentSpeedLabel.TextColor3 = Library.Theme.Text
-    currentSpeedLabel.TextScaled = true
-    currentSpeedLabel.Font = Enum.Font.SourceSans
-    currentSpeedLabel.Parent = mainFrame
-
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
-    speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "Speed: 16"
-    speedLabel.TextColor3 = Library.Theme.Text
-    speedLabel.TextScaled = true
-    speedLabel.Font = Enum.Font.SourceSansBold
-    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    speedLabel.Parent = mainFrame
-
-    local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
-    speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
-    speedSlider.BorderSizePixel = 0
-    speedSlider.Parent = mainFrame
-
-    local speedFill = Instance.new("Frame")
-    speedFill.Size = UDim2.new(0, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    speedFill.BorderSizePixel = 0
-    speedFill.Parent = speedSlider
-
-    local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
-    speedButton.BackgroundColor3 = Library.Theme.Text
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
-    speedButton.Text = ""
-    speedButton.Parent = speedSlider
-
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+M"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
-
-    local SpeedEnabled = false
-    local TargetSpeed = 16
-    local MIN_SPEED = 16
-    local MAX_SPEED = 300
-    local SpeedConnection = nil
-
-    local function UpdateSpeed()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-
-        local humanoid = player.Character:FindFirstChild("Humanoid")
-        if not humanoid then return end
-
-        if SpeedEnabled then
-            humanoid.WalkSpeed = TargetSpeed
-        end
-    end
-
-    local function UpdateSlider()
-        local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
-        speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-        speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
-
-        local player = game.Players.LocalPlayer
-        if player and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
-            end
-        end
-    end
-
-    local function EnableSpeed()
-        if SpeedEnabled then return end
-        SpeedEnabled = true
-
-        toggleBtn.Text = "ON"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Speed modification: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        UpdateSpeed()
-
-        SpeedConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            if not SpeedEnabled then return end
-            UpdateSpeed()
-        end)
-
-        game.Players.LocalPlayer.CharacterAdded:Connect(function()
-            if SpeedEnabled then
-                task.wait(0.5)
-                UpdateSpeed()
-            end
-        end)
-
-        print("✅ Speed modification enabled (target: " .. TargetSpeed .. ")")
-    end
-
-    local function DisableSpeed()
-        if not SpeedEnabled then return end
-        SpeedEnabled = false
-
-        if SpeedConnection then
-            SpeedConnection:Disconnect()
-            SpeedConnection = nil
-        end
-
-        local player = game.Players.LocalPlayer
-        if player and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 16
-                currentSpeedLabel.Text = "Current speed: 16"
-            end
-        end
-
-        toggleBtn.Text = "OFF"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Speed modification: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ Speed modification disabled")
-    end
-
-    local function ToggleSpeed()
-        if SpeedEnabled then
-            DisableSpeed()
-        else
-            EnableSpeed()
-        end
-    end
-
-    toggleBtn.MouseButton1Click:Connect(ToggleSpeed)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.M and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-            ToggleSpeed()
-        end
-    end)
-
-    local isDragging = false
-    speedButton.MouseButton1Down:Connect(function() isDragging = true end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = speedSlider.AbsolutePosition
-            local sliderSize = speedSlider.AbsoluteSize
-            local mouseX = input.Position.X
-
-            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            TargetSpeed = math.floor(MIN_SPEED + percent * (MAX_SPEED - MIN_SPEED))
-            UpdateSlider()
-
-            if SpeedEnabled then
-                UpdateSpeed()
-            end
-        end
-    end)
-
-    UpdateSlider()
-
-    game.Players.LocalPlayer.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        if SpeedEnabled then
-            UpdateSpeed()
-        end
-        UpdateSlider()
-    end)
-
-    spawn(function()
-        while true do
-            wait(1)
-            if not SpeedEnabled then
-                local player = game.Players.LocalPlayer
-                if player and player.Character then
-                    local humanoid = player.Character:FindFirstChild("Humanoid")
-                    if humanoid and humanoid.WalkSpeed ~= 16 then
-                        currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
-                    end
-                end
-            end
-        end
-    end)
-
-    _G.ToggleSpeed = ToggleSpeed
-
-    print("========================================")
-    print("✅ 'SPEED' TAB ADDED!")
-    print("📌 Alt+M - toggle speed modification")
-    print("📌 Slider adjusts speed (16 - 300)")
-    print("📌 Toggle via button or hotkey")
-    print("========================================")
-end)
-
-pcall(function()
-    local SpeedDisplayGui = Instance.new("BillboardGui")
-    SpeedDisplayGui.Name = "SpeedDisplay"
-    SpeedDisplayGui.Size = UDim2.new(0, 80, 0, 25)
-    SpeedDisplayGui.StudsOffset = Vector3.new(0, 3.5, 0)
-    SpeedDisplayGui.AlwaysOnTop = true
-    SpeedDisplayGui.MaxDistance = 50
-    SpeedDisplayGui.Enabled = true
-    SpeedDisplayGui.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(1, 0, 1, 0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "0 m/s"
-    speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-    speedLabel.TextScaled = true
-    speedLabel.Font = Enum.Font.SourceSansBold
-    speedLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    speedLabel.TextStrokeTransparency = 0.5
-    speedLabel.Parent = SpeedDisplayGui
-
-    local lastPosition = nil
-    local lastTime = tick()
-    local smoothSpeed = 0
-    local displaySpeed = 0
-    local updateCounter = 0
-
-    local function UpdateSpeedDisplay()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then
-            SpeedDisplayGui.Enabled = false
-            return
-        end
-
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then
-            SpeedDisplayGui.Enabled = false
-            return
-        end
-
-        local currentPos = hrp.Position
-        local currentTime = tick()
-        local deltaTime = currentTime - lastTime
-
-        if deltaTime >= 0.05 then
-            if lastPosition then
-                local distance = (currentPos - lastPosition).Magnitude
-                local speed = distance / deltaTime
-
-                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
-
-                if math.abs(smoothSpeed - displaySpeed) > 0.2 then
-                    displaySpeed = smoothSpeed
-
-                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
-
-                    if displaySpeed < 0.3 then
-                        speedLabel.Text = "0 m/s"
-                        speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-                    else
-                        speedLabel.Text = tostring(roundedSpeed) .. " m/s"
-
-                        if displaySpeed < 5 then
-                            speedLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-                        elseif displaySpeed < 15 then
-                            speedLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-                        elseif displaySpeed < 30 then
-                            speedLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
-                        elseif displaySpeed < 50 then
-                            speedLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
-                        else
-                            speedLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-                        end
-                    end
-                end
-            end
-
-            lastPosition = currentPos
-            lastTime = currentTime
-        end
-
-        SpeedDisplayGui.Enabled = true
-    end
-
-    local speedUpdateConnection = game:GetService("RunService").RenderStepped:Connect(function()
-        UpdateSpeedDisplay()
-    end)
-
-    game.Players.LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-        task.wait(0.5)
-
-        local oldGui = newCharacter:FindFirstChild("SpeedDisplay")
-        if oldGui then oldGui:Destroy() end
-
-        local newSpeedDisplay = SpeedDisplayGui:Clone()
-        newSpeedDisplay.Parent = newCharacter
-
-        SpeedDisplayGui = newSpeedDisplay
-
-        lastPosition = nil
-        lastTime = tick()
-        smoothSpeed = 0
-        displaySpeed = 0
-
-        local label = newSpeedDisplay:FindFirstChildWhichIsA("TextLabel")
-        if label then
-            label.Text = "0 m/s"
-            label.TextColor3 = Color3.fromRGB(0, 200, 255)
-        end
-    end)
-
-    game.Players.LocalPlayer.CharacterRemoving:Connect(function()
-        SpeedDisplayGui.Enabled = false
-    end)
-
-    print("========================================")
-    print("✅ SPEED DISPLAY ENABLED!")
-    print("📌 Speed is displayed ABOVE the character's head")
-    print("📌 NO BLACK BACKGROUND - only numbers")
-    print("📌 Unit: m/s (meters per second)")
-    print("📌 STRONG SMOOTHING - numbers do NOT jitter")
-    print("📌 When standing still - shows 0 m/s")
-    print("📌 When moving - shows smooth speed")
-    print("========================================")
-end)
-
-pcall(function()
-    local function LerpColor(color1, color2, t)
-        return Color3.new(
-            color1.R + (color2.R - color1.R) * t,
-            color1.G + (color2.G - color1.G) * t,
-            color1.B + (color2.B - color1.B) * t
-        )
-    end
-
-    local function GetSpeedColor(speed)
-        local colors = {
-            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
-            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
-            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
-            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
-            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
-            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
-        }
-
-        if speed <= colors[1].speed then
-            return colors[1].color
-        end
-
-        if speed >= colors[#colors].speed then
-            return colors[#colors].color
-        end
-
-        for i = 1, #colors - 1 do
-            local low = colors[i]
-            local high = colors[i + 1]
-
-            if speed >= low.speed and speed <= high.speed then
-                local t = (speed - low.speed) / (high.speed - low.speed)
-                t = t * t * (3 - 2 * t)
-                return LerpColor(low.color, high.color, t)
-            end
-        end
-
-        return colors[1].color
-    end
-
-    local function UpdateSpeedDisplayWithSmoothColor()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-
-        local gui = player.Character:FindFirstChild("SpeedDisplay")
-        if not gui then return end
-
-        local label = gui:FindFirstChildWhichIsA("TextLabel")
-        if not label then return end
-
-        local data = gui:GetAttribute("SpeedData")
-        if not data then return end
-
-        local currentSpeed = data.displaySpeed or 0
-
-        local targetColor = GetSpeedColor(currentSpeed)
-
-        if not label:GetAttribute("SmoothColor") then
-            label:SetAttribute("SmoothColor", targetColor)
-            label.TextColor3 = targetColor
-            return
-        end
-
-        local currentColor = label:GetAttribute("SmoothColor")
-
-        local lerpSpeed = 0.08
-        local newColor = LerpColor(currentColor, targetColor, lerpSpeed)
-
-        label:SetAttribute("SmoothColor", newColor)
-        label.TextColor3 = newColor
-    end
-
-    local function PatchSpeedDisplay()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-
-        local gui = player.Character:FindFirstChild("SpeedDisplay")
-        if not gui then return end
-
-        local label = gui:FindFirstChildWhichIsA("TextLabel")
-        if not label then return end
-
-        local data = gui:GetAttribute("SpeedData")
-        if data then
-            local speed = data.displaySpeed or 0
-            local color = GetSpeedColor(speed)
-            label:SetAttribute("SmoothColor", color)
-            label.TextColor3 = color
-        end
-    end
-
-    local smoothColorConnection = nil
-
-    local function StartSmoothColorUpdate()
-        if smoothColorConnection then
-            smoothColorConnection:Disconnect()
-            smoothColorConnection = nil
-        end
-
-        smoothColorConnection = game:GetService("RunService").RenderStepped:Connect(function()
-            UpdateSpeedDisplayWithSmoothColor()
-        end)
-
-        print("✅ Smooth color transition for speed counter enabled")
-    end
-
-    StartSmoothColorUpdate()
-
-    local oldCharacterAdded = CharacterAddedConnection
-    if oldCharacterAdded then
-        oldCharacterAdded:Disconnect()
-    end
-
-    CharacterAddedConnection = game.Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
-        task.wait(0.5)
-
-        local gui = newChar:FindFirstChild("SpeedDisplay")
-        if gui then
-            local label = gui:FindFirstChildWhichIsA("TextLabel")
-            if label then
-                local data = gui:GetAttribute("SpeedData")
-                if data then
-                    local speed = data.displaySpeed or 0
-                    local color = GetSpeedColor(speed)
-                    label:SetAttribute("SmoothColor", color)
-                    label.TextColor3 = color
-                end
-            end
-        end
-    end)
-
-    print("========================================")
-    print("✅ SMOOTH COLOR TRANSITION ADDED!")
-    print("📌 Color changes SMOOTHLY, without sharp jumps")
-    print("📌 Gradient:")
-    print("   0-3 m/s  → Cyan")
-    print("   3-8 m/s  → Cyan-Green → Green")
-    print("   8-18 m/s → Green → Yellow")
-    print("   18-35 m/s → Yellow → Orange")
-    print("   35-60 m/s → Orange → Red")
-    print("   60-100 m/s → Red → Pink")
-    print("   100-200 m/s → Pink → Purple")
-    print("📌 Smoothstep used for SUPER SMOOTHNESS")
-    print("========================================")
-end)
-
-pcall(function()
-    for _, btn in ipairs(TabButtons) do
-        if btn then
-            local corner = btn:FindFirstChild("UICorner")
-            if corner then corner:Destroy() end
-            btn.BorderSizePixel = 2
-            btn.BorderColor3 = Library.Theme.Border
-            btn.Size = UDim2.new(1, -5, 0, 35)
-        end
-    end
-    print("✅ Tab buttons are now square")
-end)
-
-pcall(function()
-    local function LerpColor(c1, c2, t)
-        return Color3.new(
-            c1.R + (c2.R - c1.R) * t,
-            c1.G + (c2.G - c1.G) * t,
-            c1.B + (c2.B - c1.B) * t
-        )
-    end
-
-    local function GetSpeedColor(speed)
-        local colors = {
-            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
-            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
-            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
-            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
-            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
-            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
-        }
-
-        if speed <= colors[1].speed then return colors[1].color end
-        if speed >= colors[#colors].speed then return colors[#colors].color end
-
-        for i = 1, #colors - 1 do
-            local low = colors[i]
-            local high = colors[i + 1]
-            if speed >= low.speed and speed <= high.speed then
-                local t = (speed - low.speed) / (high.speed - low.speed)
-                t = t * t * (3 - 2 * t)
-                return LerpColor(low.color, high.color, t)
-            end
-        end
-        return colors[1].color
-    end
-
-    local oldUpdate = UpdateSpeedDisplay
-
-    UpdateSpeedDisplay = function()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then
-            local gui = player and player.Character and player.Character:FindFirstChild("SpeedDisplay")
-            if gui then gui.Enabled = false end
-            return
-        end
-
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then
-            local gui = player.Character:FindFirstChild("SpeedDisplay")
-            if gui then gui.Enabled = false end
-            return
-        end
-
-        local currentPos = hrp.Position
-        local currentTime = tick()
-        local deltaTime = currentTime - lastTime
-
-        if deltaTime >= 0.05 then
-            if lastPosition then
-                local distance = (currentPos - lastPosition).Magnitude
-                local speed = distance / deltaTime
-                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
-
-                if math.abs(smoothSpeed - displaySpeed) > 0.01 then
-                    displaySpeed = smoothSpeed
-
-                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
-
-                    local gui = player.Character:FindFirstChild("SpeedDisplay")
-                    if gui then
-                        gui.Enabled = true
-                        local label = gui:FindFirstChildWhichIsA("TextLabel")
-                        if label then
-                            local targetColor = GetSpeedColor(displaySpeed)
-
-                            if not label:GetAttribute("AnimStartTime") then
-                                label:SetAttribute("AnimStartTime", tick())
-                                label:SetAttribute("StartColor", label.TextColor3)
-                                label:SetAttribute("TargetColor", targetColor)
-                            end
-
-                            local currentTarget = label:GetAttribute("TargetColor")
-                            if currentTarget and (currentTarget.R ~= targetColor.R or currentTarget.G ~= targetColor.G or currentTarget.B ~= targetColor.B) then
-                                label:SetAttribute("AnimStartTime", tick())
-                                label:SetAttribute("StartColor", label.TextColor3)
-                                label:SetAttribute("TargetColor", targetColor)
-                            end
-
-                            local animStart = label:GetAttribute("AnimStartTime") or tick()
-                            local elapsed = tick() - animStart
-                            local progress = math.min(elapsed / 1.0, 1)
-
-                            local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
-
-                            local startColor = label:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
-                            local targetColorAttr = label:GetAttribute("TargetColor") or targetColor
-                            local currentColor = LerpColor(startColor, targetColorAttr, eased)
-
-                            label.TextColor3 = currentColor
-
-                            if displaySpeed < 0.3 then
-                                label.Text = "0 m/s"
-                            else
-                                label.Text = tostring(roundedSpeed) .. " m/s"
-                            end
-
-                            if progress >= 1 then
-                                label:SetAttribute("AnimStartTime", nil)
-                                label:SetAttribute("StartColor", nil)
-                                label:SetAttribute("TargetColor", nil)
-                            end
-                        end
-                    end
-                end
-            end
-
-            lastPosition = currentPos
-            lastTime = currentTime
-        end
-    end
-
-    print("✅ Speed counter got color animation over 1 second")
-    print("========================================")
-    print("✅ ALL CHANGES APPLIED!")
-    print("📌 Tab buttons - square")
-    print("📌 Speed counter - smooth color transition over 1 second")
-    print("========================================")
-end)
-
-pcall(function()
-    local function IncreaseCornerRadius(button, multiplier)
-        if not button then return end
-
-        local corner = button:FindFirstChild("UICorner")
-        if not corner then
-            corner = Instance.new("UICorner")
-            corner.Parent = button
-        end
-
-        local currentRadius = corner.CornerRadius
-        local newRadius = 0
-
-        if currentRadius.Offset > 0 then
-            newRadius = currentRadius.Offset * multiplier
-        elseif currentRadius.Scale > 0 then
-            newRadius = currentRadius.Scale * multiplier
-        else
-            newRadius = 12 * multiplier
-        end
-
-        if newRadius > 0 and newRadius < 50 then
-            corner.CornerRadius = UDim.new(0, newRadius)
-        else
-            corner.CornerRadius = UDim.new(0, 36)
-        end
-    end
-
-    for _, btn in ipairs(TabButtons) do        if btn then
-            IncreaseCornerRadius(btn, 3)
-        end
-    end
-
-    if MainButton then
-        local corner = MainButton:FindFirstChild("UICorner")
-        if not corner then
-            corner = Instance.new("UICorner")
-            corner.Parent = MainButton
-        end
-        corner.CornerRadius = UDim.new(1, 0)
-    end
-
-    if CloseBtn then
-        IncreaseCornerRadius(CloseBtn, 3)
-    end
-
-    for _, tab in pairs(Tabs) do
-        if tab then
-            for _, obj in pairs(tab:GetDescendants()) do
-                if obj:IsA("TextButton") or obj:IsA("ImageButton") then
-                    if obj.Parent and obj.Parent == MenuPanel then
-                    else
-                        IncreaseCornerRadius(obj, 3)
-                    end
-                end
-            end
-        end
-    end
-
-    for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("ImageButton") then
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isCorner = false
-            if (posX < 0.05 and posY < 0.05) or
-               (posX > 0.95 and posY < 0.05) or
-               (posX < 0.05 and posY > 0.95) or
-               (posX > 0.95 and posY > 0.95) then
-                isCorner = true
-            end
-
-            if isCorner then
-                local corner = child:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = child
-                end
-                corner.CornerRadius = UDim.new(0, 24)
-            else
-                local corner = child:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = child
-                end
-                corner.CornerRadius = UDim.new(1, 0)
-            end
-        end
-    end
-
-    local playersTab = Tabs[7]
-    if playersTab then
-        for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("TextButton") and obj.Text == "TP" then
-                IncreaseCornerRadius(obj, 3)
-            end
-        end
-    end
-
-    print("✅ All button rounding increased by 3x")
-    print("📌 Resize buttons on walls - round")
-    print("📌 Corner resize buttons - rounded ×3")
-    print("========================================")
-end)
-
-pcall(function()
-    for _, btn in ipairs(TabButtons) do
-        if btn then
-            local corner = btn:FindFirstChild("UICorner")
-            if corner then corner:Destroy() end
-
-            btn.BorderSizePixel = 2
-            btn.BorderColor3 = Library.Theme.Border
-            btn.Size = UDim2.new(1, -5, 0, 35)
-
-            btn.BackgroundColor3 = btn.BackgroundColor3 or Library.Theme.Button
-        end
-    end
-    print("✅ Tabs are now square (no rounding)")
-end)
-
-pcall(function()
-    local function LerpColor(c1, c2, t)
-        return Color3.new(
-            c1.R + (c2.R - c1.R) * t,
-            c1.G + (c2.G - c1.G) * t,
-            c1.B + (c2.B - c1.B) * t
-        )
-    end
-
-    local function GetSpeedColor(speed)
-        local colors = {
-            {speed = 0, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 3, color = Color3.fromRGB(0, 200, 255)},
-            {speed = 8, color = Color3.fromRGB(0, 255, 100)},
-            {speed = 18, color = Color3.fromRGB(255, 200, 0)},
-            {speed = 35, color = Color3.fromRGB(255, 150, 0)},
-            {speed = 60, color = Color3.fromRGB(255, 50, 50)},
-            {speed = 100, color = Color3.fromRGB(255, 0, 200)},
-            {speed = 200, color = Color3.fromRGB(200, 0, 255)},
-        }
-
-        if speed <= colors[1].speed then return colors[1].color end
-        if speed >= colors[#colors].speed then return colors[#colors].color end
-
-        for i = 1, #colors - 1 do
-            local low = colors[i]
-            local high = colors[i + 1]
-            if speed >= low.speed and speed <= high.speed then
-                local t = (speed - low.speed) / (high.speed - low.speed)
-                t = t * t * (3 - 2 * t)
-                return LerpColor(low.color, high.color, t)
-            end
-        end
-        return colors[1].color
-    end
-
-    local oldUpdate = UpdateSpeedDisplay
-    local oldLastPosition = lastPosition
-    local oldLastTime = lastTime
-    local oldSmoothSpeed = smoothSpeed
-    local oldDisplaySpeed = displaySpeed
-
-    UpdateSpeedDisplay = function()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then
-            local gui = player and player.Character and player.Character:FindFirstChild("SpeedDisplay")
-            if gui then gui.Enabled = false end
-            return
-        end
-
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then
-            local gui = player.Character:FindFirstChild("SpeedDisplay")
-            if gui then gui.Enabled = false end
-            return
-        end
-
-        local currentPos = hrp.Position
-        local currentTime = tick()
-        local deltaTime = currentTime - lastTime
-
-        if deltaTime >= 0.05 then
-            if lastPosition then
-                local distance = (currentPos - lastPosition).Magnitude
-                local speed = distance / deltaTime
-                smoothSpeed = smoothSpeed + (speed - smoothSpeed) * 0.1
-
-                if math.abs(smoothSpeed - displaySpeed) > 0.01 then
-                    displaySpeed = smoothSpeed
-
-                    local roundedSpeed = math.floor(displaySpeed * 10 + 0.5) / 10
-
-                    local gui = player.Character:FindFirstChild("SpeedDisplay")
-                    if gui then
-                        gui.Enabled = true
-                        local label = gui:FindFirstChildWhichIsA("TextLabel")
-                        if label then
-                            local targetColor = GetSpeedColor(displaySpeed)
-
-                            if not label:GetAttribute("AnimStartTime") then
-                                label:SetAttribute("AnimStartTime", tick())
-                                label:SetAttribute("StartColor", label.TextColor3)
-                                label:SetAttribute("TargetColor", targetColor)
-                            end
-
-                            local currentTarget = label:GetAttribute("TargetColor")
-                            if currentTarget and (currentTarget.R ~= targetColor.R or
-                               currentTarget.G ~= targetColor.G or
-                               currentTarget.B ~= targetColor.B) then
-                                label:SetAttribute("AnimStartTime", tick())
-                                label:SetAttribute("StartColor", label.TextColor3)
-                                label:SetAttribute("TargetColor", targetColor)
-                            end
-
-                            local animStart = label:GetAttribute("AnimStartTime") or tick()
-                            local elapsed = tick() - animStart
-                            local progress = math.min(elapsed / 1.0, 1)
-
-                            local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
-
-                            local startColor = label:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
-                            local targetColorAttr = label:GetAttribute("TargetColor") or targetColor
-                            local currentColor = LerpColor(startColor, targetColorAttr, eased)
-
-                            label.TextColor3 = currentColor
-
-                            if displaySpeed < 0.3 then
-                                label.Text = "0 m/s"
-                            else
-                                label.Text = tostring(roundedSpeed) .. " m/s"
-                            end
-
-                            if progress >= 1 then
-                                label:SetAttribute("AnimStartTime", nil)
-                                label:SetAttribute("StartColor", nil)
-                                label:SetAttribute("TargetColor", nil)
-                            end
-                        end
-                    end
-                end
-            end
-
-            lastPosition = currentPos
-            lastTime = currentTime
-        end
-    end
-
-    local oldCharAdded = CharacterAddedConnection
-    if oldCharAdded then
-        oldCharAdded:Disconnect()
-    end
-
-    CharacterAddedConnection = game.Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
-        task.wait(0.5)
-        local gui = newChar:FindFirstChild("SpeedDisplay")
-        if gui then
-            local label = gui:FindFirstChildWhichIsA("TextLabel")
-            if label then
-                label.Text = "0 m/s"
-                label.TextColor3 = Color3.fromRGB(0, 200, 255)
-                label:SetAttribute("AnimStartTime", nil)
-                label:SetAttribute("StartColor", nil)
-                label:SetAttribute("TargetColor", nil)
-            end
-        end
-        lastPosition = nil
-        lastTime = tick()
-        smoothSpeed = 0
-        displaySpeed = 0
-    end)
-
-    print("✅ Speed counter got smooth color animation (1 second)")
-    print("========================================")
-    print("✅ TOTAL:")
-    print("📌 Tabs are SQUARE (no rounding)")
-    print("📌 Speed counter smoothly changes color over 1 second")
-    print("📌 Color gradient: Cyan→Green→Yellow→Orange→Red→Pink→Purple")
-    print("========================================")
-end)
-
-print("========================================")
-print("✅ FINAL VERSION!")
-print("📌 Tab order: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed")
-print("📌 Hitboxes tab REMOVED")
-print("📌 Flight → Fly")
-print("📌 Freecam - animations work, '(FIXED)' removed")
-print("========================================")
