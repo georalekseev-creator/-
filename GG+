@@ -10171,3 +10171,12 @@ print("📌 Player animations NOW WORK in Freecam mode")
 print("📌 Player no longer stands in T-pose")
 print("📌 Walk/Run animations preserved")
 print("========================================")
+-- ===== MAKE TABS TRANSPARENT 50% =====
+pcall(function()
+    for _, btn in ipairs(TabButtons) do
+        if btn then
+            btn.BackgroundTransparency = 0.7
+        end
+    end
+    print("✅ Tabs are now 50% transparent")
+end)
