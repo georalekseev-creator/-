@@ -108,10 +108,6 @@ local function ShowLoadingAnimation()
     local line2Shown = false
     local isFading = false
 
-    local textScale = 10000
-    local targetScale = 1
-    local scaleDuration = 1
-
     local connection
 
     connection = game:GetService("RunService").RenderStepped:Connect(function()
@@ -123,22 +119,24 @@ local function ShowLoadingAnimation()
         local timeLeft = math.max(0, math.ceil(duration - elapsed))
         timeLabel.Text = "Remaining: " .. timeLeft .. " sec"
 
-        if elapsed <= 1 then
-            local scaleProgress = elapsed / 1
-            local eased = 1 - (1 - scaleProgress) * (1 - scaleProgress)
-            textScale = 10000 - (10000 - 1) * eased
-            textLabel.TextScaled = false
-            textLabel.TextSize = math.max(1, textScale)
-        else
+        -- Анимация появления букв GG+
+        if charIndex <= #text then
+            local revealProgress = math.min(elapsed * 1.5, 1)
+            local charsToShow = math.max(1, math.floor(revealProgress * #text))
+            local displayText = string.sub(text, 1, charsToShow)
+            
+            if #displayText < #text then
+                displayText = displayText .. string.rep("_", #text - #displayText)
+            end
+            
+            textLabel.Text = displayText
             textLabel.TextScaled = true
             textLabel.TextSize = 0
-        end
+            
+            if charsToShow >= #text then
+                charIndex = #text + 1
+            end
 
-        if elapsed < 0.01 then
-            textLabel.Text = "GG+"
-        end
-
-        if charIndex <= #text then
             local dots = math.floor(elapsed * 2) % 4
             subtitle.Text = "Loading" .. string.rep(".", dots)
         end
@@ -168,6 +166,7 @@ local function ShowLoadingAnimation()
             animationComplete = true
             subtitle.Text = "READY!"
             timeLabel.Text = "Loading complete!"
+            textLabel.Text = "GG+"
 
             task.wait(0.5)
 
@@ -215,7 +214,7 @@ end
 ShowLoadingAnimation()
 task.wait(0.5)
 
--- Main Library
+-- Main Library with Theme Colors
 local Library = {
     Theme = {
         Background = Color3.fromRGB(20, 40, 60),
@@ -237,6 +236,141 @@ local Library = {
     }
 }
 
+-- ===== THEME COLOR VARIABLES (for settings) =====
+local function GetThemeColors()
+    return {
+        Background = Library.Theme.Background,
+        Panel = Library.Theme.Panel,
+        Border = Library.Theme.Border,
+        Text = Library.Theme.Text,
+        Button = Library.Theme.Button,
+        ButtonHover = Library.Theme.ButtonHover,
+        Accent = Library.Theme.Accent,
+        Success = Library.Theme.Success,
+        Warning = Library.Theme.Warning,
+        FlyActive = Library.Theme.FlyActive,
+        WalkActive = Library.Theme.WalkActive,
+        NoclipActive = Library.Theme.NoclipActive,
+        Platform = Library.Theme.Platform,
+        PlayerOnline = Library.Theme.PlayerOnline,
+        PlayerOffline = Library.Theme.PlayerOffline,
+        SPI = Library.Theme.SPI
+    }
+end
+
+-- ===== FUNCTION TO APPLY THEME COLORS (EXCLUDING BUTTONS, TABS, RESIZE, GG+) =====
+local function ApplyThemeColors(colors)
+    local themeColors = colors or Library.Theme
+    
+    -- Update MenuPanel
+    if MenuPanel then
+        MenuPanel.BackgroundColor3 = themeColors.Background
+        MenuPanel.BorderColor3 = themeColors.Border
+    end
+    
+    -- Update TitleFrame
+    if TitleFrame then
+        TitleFrame.BackgroundColor3 = themeColors.Panel
+    end
+    
+    if Title then
+        Title.TextColor3 = themeColors.Text
+    end
+    
+    -- Update TabBar
+    if TabBar then
+        TabBar.BackgroundColor3 = themeColors.Panel
+        TabBar.BorderColor3 = themeColors.Border
+    end
+    
+    -- Update all panels
+    local panels = {
+        PointsList, WalkPointsList, PlayersList, NoclipFrame, 
+        XRayControlFrame, SPIControlFrame, PlatformFrame, 
+        FlyFrame, WalkFrame, ClickTeleportFrame, PlayersControlPanel
+    }
+    for _, panel in pairs(panels) do
+        if panel then
+            panel.BackgroundColor3 = themeColors.Panel
+            panel.BorderColor3 = themeColors.Border
+        end
+    end
+    
+    -- Update text colors on all labels (skip buttons, resize buttons, GG+)
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj:IsA("TextLabel") then
+            -- Skip GG+ text
+            if obj.Parent ~= MainButton and obj.Name ~= "ButtonLabel" then
+                -- Skip resize button labels
+                local isResize = false
+                if obj.Parent and obj.Parent:IsA("ImageButton") then
+                    isResize = true
+                end
+                if not isResize then
+                    -- Don't change colors of ON/OFF/status indicators
+                    if obj.TextColor3 ~= Color3.fromRGB(200, 40, 40) and 
+                       obj.TextColor3 ~= Color3.fromRGB(0, 200, 100) and
+                       obj.TextColor3 ~= Color3.fromRGB(255, 255, 255) then
+                        obj.TextColor3 = themeColors.Text
+                    end
+                end
+            end
+        end
+        if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj ~= MenuPanel and obj.Parent ~= nil then
+            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" then
+                obj.BackgroundColor3 = themeColors.Panel
+                obj.BorderColor3 = themeColors.Border
+            end
+        end
+        -- Update TextButtons that are NOT tab buttons, NOT GG+, NOT resize buttons
+        if obj:IsA("TextButton") then
+            local isTabButton = false
+            for _, btn in ipairs(TabButtons) do
+                if btn == obj then isTabButton = true; break end
+            end
+            local isMainButton = (obj == MainButton or obj.Parent == MainButton)
+            local isResizeButton = (obj.Parent and obj.Parent:IsA("ImageButton") and obj.Parent.Parent == MenuPanel)
+            
+            if not isTabButton and not isMainButton and not isResizeButton then
+                -- Only change color if it's not a toggle button (ON/OFF)
+                if obj.Text ~= "ON" and obj.Text ~= "OFF" then
+                    obj.TextColor3 = themeColors.Text
+                end
+            end
+        end
+    end
+    
+    -- Update specific elements
+    if PointInfo then PointInfo.TextColor3 = themeColors.Text end
+    if WalkStatus then WalkStatus.TextColor3 = themeColors.Text end
+    if WalkSpeedLabel then WalkSpeedLabel.TextColor3 = themeColors.Text end
+    if SpeedLabel then SpeedLabel.TextColor3 = themeColors.Text end
+    if FlyIndicator then 
+        if FlyEnabled then
+            FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
+        else
+            FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
+        end
+    end
+    if NoclipIndicator then
+        if NoclipEnabled then
+            NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
+        else
+            NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
+        end
+    end
+    if PlatformInfo then PlatformInfo.TextColor3 = themeColors.Text end
+    if PlayersCountLabel then PlayersCountLabel.TextColor3 = themeColors.Text end
+    if SPICountLabel then SPICountLabel.TextColor3 = themeColors.Text end
+    if SPIIndicator then
+        if SPIEnabled then
+            SPIIndicator.TextColor3 = themeColors.SPI
+        else
+            SPIIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
+        end
+    end
+end
+
 -- GUI Creation
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdminPanel"
@@ -254,6 +388,7 @@ MainButton.BorderSizePixel = 2
 MainButton.Image = "rbxassetid://1234567890"
 MainButton.ImageColor3 = Library.Theme.Accent
 MainButton.Parent = ScreenGui
+MainButton.ClipsDescendants = true
 
 local ButtonLabel = Instance.new("TextLabel")
 ButtonLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -284,6 +419,7 @@ MenuPanel.BorderColor3 = Library.Theme.Border
 MenuPanel.BorderSizePixel = 3
 MenuPanel.Visible = false
 MenuPanel.Parent = ScreenGui
+MenuPanel.ClipsDescendants = true
 
 -- Title (now GG+ instead of ADMIN PANEL)
 local TitleFrame = Instance.new("Frame")
@@ -344,7 +480,7 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
--- REMOVED Hitboxes tab
+-- Вкладка Settings УДАЛЕНА
 local TabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
@@ -405,19 +541,6 @@ PointControl.Size = UDim2.new(1, 0, 0.35, 0)
 PointControl.Position = UDim2.new(0, 0, 0.62, 0)
 PointControl.BackgroundTransparency = 1
 PointControl.Parent = PointsTab
-
-local NameInput = Instance.new("TextBox")
-NameInput.Size = UDim2.new(0.6, -5, 0.3, -5)
-NameInput.Position = UDim2.new(0, 0, 0.05, 0)
-NameInput.BackgroundColor3 = Library.Theme.Panel
-NameInput.BorderColor3 = Library.Theme.Border
-NameInput.BorderSizePixel = 2
-NameInput.Text = "Point name"
-NameInput.TextColor3 = Library.Theme.Text
-NameInput.TextScaled = true
-NameInput.Font = Enum.Font.SourceSans
-NameInput.ClearTextOnFocus = false
-NameInput.Parent = PointControl
 
 local SetBtn = Instance.new("TextButton")
 SetBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
@@ -913,21 +1036,9 @@ PlayersTitle.TextXAlignment = Enum.TextXAlignment.Left
 PlayersTitle.Font = Enum.Font.SourceSansBold
 PlayersTitle.Parent = PlayersControlPanel
 
-local RefreshPlayersBtn = Instance.new("TextButton")
-RefreshPlayersBtn.Size = UDim2.new(0.2, -10, 0.7, 0)
-RefreshPlayersBtn.Position = UDim2.new(0.78, 0, 0.15, 0)
-RefreshPlayersBtn.BackgroundColor3 = Library.Theme.Accent
-RefreshPlayersBtn.BorderColor3 = Library.Theme.Border
-RefreshPlayersBtn.BorderSizePixel = 2
-RefreshPlayersBtn.Text = "REFRESH"
-RefreshPlayersBtn.TextColor3 = Library.Theme.Text
-RefreshPlayersBtn.TextScaled = true
-RefreshPlayersBtn.Font = Enum.Font.SourceSansBold
-RefreshPlayersBtn.Parent = PlayersControlPanel
-
 local PlayersCountLabel = Instance.new("TextLabel")
 PlayersCountLabel.Size = UDim2.new(0.3, 0, 0.4, 0)
-PlayersCountLabel.Position = UDim2.new(0.55, 0, 0.3, 0)
+PlayersCountLabel.Position = UDim2.new(0.7, 0, 0.3, 0)
 PlayersCountLabel.BackgroundTransparency = 1
 PlayersCountLabel.Text = "Players: 0"
 PlayersCountLabel.TextColor3 = Library.Theme.Text
@@ -985,7 +1096,6 @@ local function UpdatePlayersList()
         if player ~= localPlayer then
             local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
             
-            -- Only show online players
             if isOnline then
                 count = count + 1
 
@@ -1039,6 +1149,10 @@ local function UpdatePlayersList()
                 TeleportPlayerBtn.TextScaled = true
                 TeleportPlayerBtn.Font = Enum.Font.SourceSansBold
                 TeleportPlayerBtn.Parent = ItemFrame
+                
+                local tpCorner = Instance.new("UICorner")
+                tpCorner.CornerRadius = UDim.new(0, 10)
+                tpCorner.Parent = TeleportPlayerBtn
 
                 TeleportPlayerBtn.MouseButton1Click:Connect(function()
                     TeleportToPlayer(player)
@@ -1078,11 +1192,6 @@ spawn(function()
         wait(UPDATE_INTERVAL)
         UpdatePlayersListIfNeeded()
     end
-end)
-
-RefreshPlayersBtn.MouseButton1Click:Connect(function()
-    UpdatePlayersList()
-    lastPlayerUpdate = tick()
 end)
 
 -- ===== TAB 8: X-RAY =====
@@ -1867,10 +1976,7 @@ local function SetPoint()
 
     if #PointsData >= MAX_POINTS then return end
 
-    local name = NameInput.Text
-    if name == "" or name == "Point name" then
-        name = "Point " .. (#PointsData + 1)
-    end
+    local name = "Point " .. (#PointsData + 1)
 
     local pos = hrp.Position
     table.insert(PointsData, {name = name, pos = pos})
@@ -1952,13 +2058,7 @@ local function UpdateWalkPointsList()
         end)
 
         RenameBtn.MouseButton1Click:Connect(function()
-            local newName = NameInput.Text
-            if newName == "" or newName == "Point name" then newName = data.name end
-
-            for j, d in ipairs(WalkPointsData) do
-                if d.name == newName and j ~= i then return end
-            end
-
+            local newName = "Point " .. i
             WalkPointsData[i].name = newName
             UpdateWalkPointsList()
             UpdateWalkVisuals()
@@ -2587,24 +2687,110 @@ end)
 
 -- ===== MAIN HANDLERS =====
 local menuOpen = false
-MainButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    MenuPanel.Visible = menuOpen
-    if menuOpen then
-        UpdatePointsList()
-        UpdateWalkPointsList()
-        UpdatePointInfo()
-        PlatformInfo.Text = "Platforms: " .. #Platforms
-        UpdatePlayersList()
-        lastPlayerUpdate = tick()
-        UpdateXRaySlider()
-        if SPIEnabled then UpdateSPI() end
+local isCollapsed = false
+local collapseAnimating = false
+local animationConnection = nil
+
+local function AnimateCollapse(targetCollapsed)
+    if collapseAnimating then return end
+    collapseAnimating = true
+
+    if animationConnection then
+        animationConnection:Disconnect()
+        animationConnection = nil
     end
-end)
+
+    local startSize = MenuPanel.Size
+    local targetSize, targetPosition
+
+    if targetCollapsed then
+        targetSize = UDim2.new(0, 0, 0, 0)
+        targetPosition = UDim2.new(
+            MainButton.Position.X.Scale,
+            MainButton.Position.X.Offset + (MainButton.Size.X.Offset / 2),
+            MainButton.Position.Y.Scale,
+            MainButton.Position.Y.Offset + (MainButton.Size.Y.Offset / 2)
+        )
+    else
+        targetSize = UDim2.new(0, 750, 0, 650)
+        targetPosition = UDim2.new(0.5, -375, 0.5, -325)
+    end
+
+    local startPos = MenuPanel.Position
+    local startTime = tick()
+    local duration = 0.5
+
+    animationConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / duration, 1)
+
+        local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+
+        local currentWidth = startSize.X.Offset + (targetSize.X.Offset - startSize.X.Offset) * eased
+        local currentHeight = startSize.Y.Offset + (targetSize.Y.Offset - startSize.Y.Offset) * eased
+
+        MenuPanel.Size = UDim2.new(0, currentWidth, 0, currentHeight)
+
+        local posX = startPos.X.Offset + (targetPosition.X.Offset - startPos.X.Offset) * eased
+        local posY = startPos.Y.Offset + (targetPosition.Y.Offset - startPos.Y.Offset) * eased
+        MenuPanel.Position = UDim2.new(
+            startPos.X.Scale + (targetPosition.X.Scale - startPos.X.Scale) * eased,
+            posX,
+            startPos.Y.Scale + (targetPosition.Y.Scale - startPos.Y.Scale) * eased,
+            posY
+        )
+
+        local scale = 1 - (1 - (currentWidth / 750)) * 0.5
+        MainButton.Size = UDim2.new(0, 50 * (1 + (1 - scale) * 0.5), 0, 50 * (1 + (1 - scale) * 0.5))
+
+        if progress >= 1 then
+            MenuPanel.Size = targetSize
+            MenuPanel.Position = targetPosition
+            MenuPanel.Visible = not targetCollapsed
+
+            if targetCollapsed then
+                MenuPanel.BackgroundTransparency = 1
+            else
+                MenuPanel.BackgroundTransparency = 0.5
+            end
+
+            isCollapsed = targetCollapsed
+            menuOpen = not targetCollapsed
+            collapseAnimating = false
+            animationConnection:Disconnect()
+            animationConnection = nil
+        end
+    end)
+end
+
+local function ToggleMenu()
+    if collapseAnimating then return end
+
+    if menuOpen and not isCollapsed then
+        AnimateCollapse(true)
+    elseif not menuOpen or isCollapsed then
+        MenuPanel.BackgroundTransparency = 0.5
+        MenuPanel.Visible = true
+        AnimateCollapse(false)
+        if not isCollapsed then
+            UpdatePointsList()
+            UpdateWalkPointsList()
+            UpdatePointInfo()
+            PlatformInfo.Text = "Platforms: " .. #Platforms
+            UpdatePlayersList()
+            lastPlayerUpdate = tick()
+            UpdateXRaySlider()
+            if SPIEnabled then UpdateSPI() end
+        end
+    end
+end
+
+MainButton.MouseButton1Click:Connect(ToggleMenu)
 
 CloseBtn.MouseButton1Click:Connect(function()
-    menuOpen = false
-    MenuPanel.Visible = false
+    if not collapseAnimating then
+        AnimateCollapse(true)
+    end
 end)
 
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
@@ -2993,8 +3179,7 @@ do
         desc.TextColor3 = Library.Theme.Accent
         desc.TextScaled = true
         desc.Font = Enum.Font.SourceSans
-        desc.TextXAlignment = Enum.TextXAlignment.Left
-        desc.Parent = mainFrame
+        desc.TextXAlignment = Enum.TextXAlignment.Left        desc.Parent = mainFrame
 
         local toggleBtn = Instance.new("TextButton")
         toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
@@ -3107,8 +3292,7 @@ do
             savedCameraCFrame = camera.CFrame
             savedCameraFocus = camera.Focus
 
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                savedCharacterCFrame = char.HumanoidRootPart.CFrame
+            if char and char:FindFirstChild("HumanoidRootPart") then                savedCharacterCFrame = char.HumanoidRootPart.CFrame
                 freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
             else
                 freecamPosition = Vector3.new(0, 10, 0)
@@ -3420,18 +3604,11 @@ local function CreateFinalLoadingScreen()
     progressFill.Parent = progressBar
 
     local text = "GG+"
-    local currentText = ""
-    local charIndex = 1
     local startTime = tick()
     local duration = 5
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
-    local isFading = false
-
-    local textScale = 10000
-    local targetScale = 1
-    local scaleDuration = 1
 
     local connection
 
@@ -3444,25 +3621,20 @@ local function CreateFinalLoadingScreen()
         local timeLeft = math.max(0, math.ceil(duration - elapsed))
         timeLabel.Text = "Remaining: " .. timeLeft .. " sec"
 
-        if elapsed <= 1 then
-            local scaleProgress = elapsed / 1
-            local eased = 1 - (1 - scaleProgress) * (1 - scaleProgress)
-            textScale = 10000 - (10000 - 1) * eased
-            textLabel.TextScaled = false
-            textLabel.TextSize = math.max(1, textScale)
-        else
-            textLabel.TextScaled = true
-            textLabel.TextSize = 0
+        local revealProgress = math.min(elapsed * 1.5, 1)
+        local charsToShow = math.max(1, math.floor(revealProgress * #text))
+        local displayText = string.sub(text, 1, charsToShow)
+        
+        if #displayText < #text then
+            displayText = displayText .. string.rep("_", #text - #displayText)
         end
+        
+        textLabel.Text = displayText
+        textLabel.TextScaled = true
+        textLabel.TextSize = 0
 
-        if elapsed < 0.01 then
-            textLabel.Text = "GG+"
-        end
-
-        if charIndex <= #text then
-            local dots = math.floor(elapsed * 2) % 4
-            subtitle.Text = "Loading" .. string.rep(".", dots)
-        end
+        local dots = math.floor(elapsed * 2) % 4
+        subtitle.Text = "Loading" .. string.rep(".", dots)
 
         if elapsed > 0.5 and not line1Shown then
             line1Shown = true
@@ -3489,10 +3661,10 @@ local function CreateFinalLoadingScreen()
             animationComplete = true
             subtitle.Text = "READY!"
             timeLabel.Text = "Loading complete!"
+            textLabel.Text = "GG+"
 
             task.wait(0.5)
 
-            isFading = true
             local fadeStart = tick()
             local fadeDuration = 0.8
 
@@ -3958,18 +4130,12 @@ pcall(function()
         for _, child in pairs(freecamTab:GetChildren()) do
             if child:IsA("Frame") and child.BackgroundTransparency < 1 then
                 child.BackgroundTransparency = 0.5
-            end
-
-            for _, subChild in pairs(child:GetChildren()) do
+            end            for _, subChild in pairs(child:GetChildren()) do
                 if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
         end
-    end
-
-    if NameInput then
-        NameInput.BackgroundTransparency = 0.5
     end
 
     for _, tab in pairs(Tabs) do
@@ -4695,6 +4861,10 @@ pcall(function()
     clickerBtn.BackgroundTransparency = 0.3
     clickerBtn.Parent = mainFrame
 
+    local clickerCorner = Instance.new("UICorner")
+    clickerCorner.CornerRadius = UDim.new(0, 36)
+    clickerCorner.Parent = clickerBtn
+
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
     statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
@@ -4903,8 +5073,11 @@ pcall(function()
     clickerBtn.TextColor3 = Library.Theme.Text
     clickerBtn.TextScaled = true
     clickerBtn.Font = Enum.Font.SourceSansBold
-    clickerBtn.BackgroundTransparency = 0.3
-    clickerBtn.Parent = mainFrame
+    clickerBtn.BackgroundTransparency = 0.3    clickerBtn.Parent = mainFrame
+
+    local clickerCorner = Instance.new("UICorner")
+    clickerCorner.CornerRadius = UDim.new(0, 36)
+    clickerCorner.Parent = clickerBtn
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
@@ -4970,23 +5143,36 @@ pcall(function()
     local mouse = game.Players.LocalPlayer:GetMouse()
 
     local function IsMouseOverGui()
-        local mousePos = mouse.X, mouse.Y
-        local guiObjects = {}
+        if MenuPanel and MenuPanel.Visible then
+            local absPos = MenuPanel.AbsolutePosition
+            local absSize = MenuPanel.AbsoluteSize
 
-        for _, gui in pairs(game.CoreGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                for _, obj in pairs(gui:GetDescendants()) do
-                    if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
-                        local absPos = obj.AbsolutePosition
-                        local absSize = obj.AbsoluteSize
-                        if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
-                           mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
-                            return true
-                        end
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+
+            for _, obj in pairs(MenuPanel:GetDescendants()) do
+                if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
+                    local objAbsPos = obj.AbsolutePosition
+                    local objAbsSize = obj.AbsoluteSize
+                    if mouse.X >= objAbsPos.X and mouse.X <= objAbsPos.X + objAbsSize.X and
+                       mouse.Y >= objAbsPos.Y and mouse.Y <= objAbsPos.Y + objAbsSize.Y then
+                        return true
                     end
                 end
             end
         end
+
+        if MainButton and MainButton.Visible then
+            local absPos = MainButton.AbsolutePosition
+            local absSize = MainButton.AbsoluteSize
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+        end
+
         return false
     end
 
@@ -5015,7 +5201,7 @@ pcall(function()
             task.wait(clickDelay / 1000)
         end)
 
-        print("✅ Auto Clicker enabled (does not work when hovering over GUI)")
+        print("✅ Auto Clicker enabled")
     end
 
     local function DisableClicker()
@@ -5144,6 +5330,10 @@ pcall(function()
     clickerBtn.Font = Enum.Font.SourceSansBold
     clickerBtn.BackgroundTransparency = 0.3
     clickerBtn.Parent = mainFrame
+
+    local clickerCorner = Instance.new("UICorner")
+    clickerCorner.CornerRadius = UDim.new(0, 36)
+    clickerCorner.Parent = clickerBtn
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
@@ -5350,8 +5540,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 12)
-
+                corner.CornerRadius = UDim.new(0, 36)
                 obj.BackgroundTransparency = 0.3
             end
         end
@@ -5485,8 +5674,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 24)
-
+                corner.CornerRadius = UDim.new(0, 36)
                 obj.BackgroundTransparency = 0.3
             end
         end
@@ -5719,10 +5907,7 @@ pcall(function()
 
         if #PointsData >= MAX_POINTS then return end
 
-        local name = NameInput.Text
-        if name == "" or name == "Point name" then
-            name = "Point " .. (#PointsData + 1)
-        end
+        local name = "Point " .. (#PointsData + 1)
 
         local pos = hrp.Position
         table.insert(PointsData, {name = name, pos = pos})
@@ -6327,7 +6512,7 @@ pcall(function()
     print("✅ Point names are completely removed")
 end)
 
--- ===== SPEED INDICATOR WITH AUTO-RESPAWN =====
+-- ===== SPEED INDICATOR WITH AUTO-RESPAWN AND COLOR CHANGE (GREEN → RED) =====
 pcall(function()
     local function NukeAllSpeedIndicators()
         for _, gui in pairs(game.CoreGui:GetChildren()) do
@@ -6387,10 +6572,11 @@ pcall(function()
 
         if SpeedIndicatorLabel then
             SpeedIndicatorLabel.Text = "0 m/s"
-            SpeedIndicatorLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+            SpeedIndicatorLabel.TextColor3 = Color3.fromRGB(0, 200, 0)
             SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
             SpeedIndicatorLabel:SetAttribute("StartColor", nil)
             SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+            SpeedIndicatorLabel:SetAttribute("IsResetAnimation", nil)
         end
 
         if SpeedIndicatorGui then
@@ -6399,42 +6585,33 @@ pcall(function()
     end
 
     local function GetSpeedColor(speed)
-        if speed >= 250 then
-            return Color3.fromRGB(10, 0, 0)
-        elseif speed >= 100 then
-            local t = (speed - 100) / 150
-            local r = 255 - t * 245
-            local g = 50 - t * 50
-            local b = 50 - t * 50
-            return Color3.fromRGB(math.max(10, r), math.max(0, g), math.max(0, b))
-        else
-            local colors = {
-                {speed = 0, color = Color3.fromRGB(0, 200, 255)},
-                {speed = 3, color = Color3.fromRGB(0, 200, 255)},
-                {speed = 8, color = Color3.fromRGB(0, 255, 100)},
-                {speed = 18, color = Color3.fromRGB(255, 200, 0)},
-                {speed = 35, color = Color3.fromRGB(255, 150, 0)},
-                {speed = 60, color = Color3.fromRGB(255, 50, 50)},
-                {speed = 100, color = Color3.fromRGB(255, 0, 0)},
-            }
-            
-            if speed <= colors[1].speed then return colors[1].color end
-            if speed >= colors[#colors].speed then return colors[#colors].color end
-            
-            for i = 1, #colors - 1 do
-                local low = colors[i]
-                local high = colors[i + 1]
-                if speed >= low.speed and speed <= high.speed then
-                    local t = (speed - low.speed) / (high.speed - low.speed)
-                    t = t * t * (3 - 2 * t)
-                    return Color3.new(
-                        low.color.R + (high.color.R - low.color.R) * t,
-                        low.color.G + (high.color.G - low.color.G) * t,
-                        low.color.B + (high.color.B - low.color.B) * t
-                    )
-                end
-            end
-            return colors[1].color
+        if speed <= 3 then
+            return Color3.fromRGB(0, 200, 0)
+        end
+        
+        local t = (speed - 3) / 147
+        t = math.min(t, 1)
+        t = t * t * (3 - 2 * t)
+        
+        local r = 0 + t * 255
+        local g = 200 - t * 200
+        local b = 0
+        
+        return Color3.fromRGB(
+            math.floor(math.max(0, math.min(255, r))),
+            math.floor(math.max(0, math.min(255, g))),
+            math.floor(math.max(0, math.min(255, b)))
+        )
+    end
+
+    local function ResetColorToGreenInstant()
+        if SpeedIndicatorLabel then
+            local greenColor = Color3.fromRGB(0, 200, 0)
+            SpeedIndicatorLabel.TextColor3 = greenColor
+            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+            SpeedIndicatorLabel:SetAttribute("IsResetAnimation", nil)
         end
     end
 
@@ -6456,7 +6633,7 @@ pcall(function()
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = "0 m/s"
-        label.TextColor3 = Color3.fromRGB(0, 200, 255)
+        label.TextColor3 = Color3.fromRGB(0, 200, 0)
         label.TextScaled = true
         label.Font = Enum.Font.SourceSansBold
         label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -6551,49 +6728,59 @@ pcall(function()
                     end
 
                     if SpeedIndicatorLabel then
+                        local currentColor = SpeedIndicatorLabel.TextColor3
+                        local isCurrentlyRed = currentColor.R > 100 and currentColor.G < 100
+                        
+                        if displaySpeed < 150 and isCurrentlyRed then
+                            ResetColorToGreenInstant()
+                        end
+                        
                         local targetColor = GetSpeedColor(displaySpeed)
 
-                        if not SpeedIndicatorLabel:GetAttribute("AnimStartTime") then
-                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
-                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
-                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                        if not SpeedIndicatorLabel:GetAttribute("IsResetAnimation") then
+                            if not SpeedIndicatorLabel:GetAttribute("AnimStartTime") then
+                                SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                                SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                                SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local currentTarget = SpeedIndicatorLabel:GetAttribute("TargetColor")
+                            if currentTarget and (currentTarget.R ~= targetColor.R or
+                               currentTarget.G ~= targetColor.G or
+                               currentTarget.B ~= targetColor.B) then
+                                SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
+                                SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
+                                SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
+                            end
+
+                            local animStart = SpeedIndicatorLabel:GetAttribute("AnimStartTime") or tick()
+                            local elapsed = tick() - animStart
+                            local duration = 1.0
+                            local progress = math.min(elapsed / duration, 1)
+
+                            local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
+
+                            local startColor = SpeedIndicatorLabel:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 0)
+                            local targetColorAttr = SpeedIndicatorLabel:GetAttribute("TargetColor") or targetColor
+                            local currentColorAnimated = Color3.new(
+                                startColor.R + (targetColorAttr.R - startColor.R) * eased,
+                                startColor.G + (targetColorAttr.G - startColor.G) * eased,
+                                startColor.B + (targetColorAttr.B - startColor.B) * eased
+                            )
+
+                            SpeedIndicatorLabel.TextColor3 = currentColorAnimated
+
+                            if progress >= 1 then
+                                SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
+                                SpeedIndicatorLabel:SetAttribute("StartColor", nil)
+                                SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
+                            end
                         end
-
-                        local currentTarget = SpeedIndicatorLabel:GetAttribute("TargetColor")
-                        if currentTarget and (currentTarget.R ~= targetColor.R or
-                           currentTarget.G ~= targetColor.G or
-                           currentTarget.B ~= targetColor.B) then
-                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", tick())
-                            SpeedIndicatorLabel:SetAttribute("StartColor", SpeedIndicatorLabel.TextColor3)
-                            SpeedIndicatorLabel:SetAttribute("TargetColor", targetColor)
-                        end
-
-                        local animStart = SpeedIndicatorLabel:GetAttribute("AnimStartTime") or tick()
-                        local elapsed = tick() - animStart
-                        local progress = math.min(elapsed / 1.0, 1)
-
-                        local eased = progress < 0.5 and (2 * progress * progress) or (1 - math.pow(-2 * progress + 2, 2) / 2)
-
-                        local startColor = SpeedIndicatorLabel:GetAttribute("StartColor") or Color3.fromRGB(0, 200, 255)
-                        local targetColorAttr = SpeedIndicatorLabel:GetAttribute("TargetColor") or targetColor
-                        local currentColor = Color3.new(
-                            startColor.R + (targetColorAttr.R - startColor.R) * eased,
-                            startColor.G + (targetColorAttr.G - startColor.G) * eased,
-                            startColor.B + (targetColorAttr.B - startColor.B) * eased
-                        )
-
-                        SpeedIndicatorLabel.TextColor3 = currentColor
 
                         if displaySpeed < 0.3 then
                             SpeedIndicatorLabel.Text = "0 m/s"
                         else
                             SpeedIndicatorLabel.Text = tostring(roundedSpeed) .. " m/s"
-                        end
-
-                        if progress >= 1 then
-                            SpeedIndicatorLabel:SetAttribute("AnimStartTime", nil)
-                            SpeedIndicatorLabel:SetAttribute("StartColor", nil)
-                            SpeedIndicatorLabel:SetAttribute("TargetColor", nil)
                         end
                     end
                 end
@@ -6715,11 +6902,13 @@ pcall(function()
 
     print("========================================")
     print("✅ SPEED INDICATOR UPDATED!")
-    print("📌 No hotkey or button for toggle")
-    print("📌 Only appears when you walk")
-    print("📌 On death: 0 m/s after 2 seconds")
-    print("📌 Color changes: green→red at 100 m/s")
-    print("📌 Color changes: red→almost black at 250 m/s")
+    print("📌 Color changes: green → red smoothly from 0 to 150")
+    print("📌 Speed 0-3: green")
+    print("📌 Speed 3-150: green to red gradient")
+    print("📌 Speed above 150: RED")
+    print("📌 When speed drops below 150: INSTANTLY turns GREEN (NO animation)")
+    print("📌 No hotkey for toggle, shows when moving")
+    print("📌 On death: resets after 2 seconds")
     print("========================================")
 end)
 
@@ -6820,6 +7009,10 @@ pcall(function()
     toggleBtn.Font = Enum.Font.SourceSansBold
     toggleBtn.BackgroundTransparency = 0.3
     toggleBtn.Parent = mainFrame
+
+    local speedToggleCorner = Instance.new("UICorner")
+    speedToggleCorner.CornerRadius = UDim.new(0, 36)
+    speedToggleCorner.Parent = toggleBtn
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
@@ -7051,18 +7244,8 @@ pcall(function()
     print("========================================")
 end)
 
--- ===== FINAL SUMMARY =====
-print("========================================")
-print("✅ ALL CHANGES APPLIED!")
-print("📌 Hitboxes tab REMOVED")
-print("📌 Players tab: ONLY online players with TP button")
-print("📌 Speed indicator: no toggle, auto on death")
-print("📌 Speed color: green→red at 100 m/s")
-print("📌 Speed color: red→almost black at 250 m/s")
-print("========================================")
 -- ===== ROUNDED BUTTONS FOR PLAYERS, CLICKER AND SPEED TABS =====
 pcall(function()
-    -- Обработка кнопок во вкладке Players
     local playersTab = Tabs[7]
     if playersTab then
         for _, obj in pairs(playersTab:GetDescendants()) do
@@ -7078,7 +7261,6 @@ pcall(function()
         end
     end
 
-    -- Обработка кнопок во вкладке Clicker
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
         if TabNames[i] == "Clicker" then
@@ -7094,13 +7276,12 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 12)
+                corner.CornerRadius = UDim.new(0, 36)
                 obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
             end
         end
     end
 
-    -- Обработка кнопок во вкладке Speed
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
         if name == "Speed" then
@@ -7118,7 +7299,7 @@ pcall(function()
                         corner = Instance.new("UICorner")
                         corner.Parent = obj
                     end
-                    corner.CornerRadius = UDim.new(0, 12)
+                    corner.CornerRadius = UDim.new(0, 36)
                     obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
                 end
             end
@@ -7126,12 +7307,13 @@ pcall(function()
     end
 
     print("✅ Rounded corners added to all buttons in Players, Clicker and Speed tabs")
+    print("✅ Clicker and Speed tabs have 3x rounding (36px)")
 end)
+
 -- ===== REMOVE REFRESH BUTTON FROM PLAYERS TAB =====
 pcall(function()
     local playersTab = Tabs[7]
     if playersTab then
-        -- Ищем и удаляем кнопку Refresh
         for _, child in pairs(playersTab:GetDescendants()) do
             if child:IsA("TextButton") and child.Text == "REFRESH" then
                 child:Destroy()
@@ -7139,7 +7321,6 @@ pcall(function()
             end
         end
         
-        -- Также удаляем из PlayersControlPanel если она там
         local controlPanel = playersTab:FindFirstChild("PlayersControlPanel")
         if controlPanel then
             for _, child in pairs(controlPanel:GetDescendants()) do
@@ -7151,6 +7332,7 @@ pcall(function()
         end
     end
 end)
+
 -- ===== MAKE TABS TRANSPARENT 50% =====
 pcall(function()
     for _, btn in ipairs(TabButtons) do
@@ -7160,3 +7342,9 @@ pcall(function()
     end
     print("✅ Tabs are now 50% transparent")
 end)
+
+print("All systems ready! GG+ Admin Panel loaded.")
+
+-- ===== APPLY INITIAL THEME =====
+ApplyThemeColors(Library.Theme)
+print("✅ Initial theme applied")
