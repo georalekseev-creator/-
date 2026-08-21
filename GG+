@@ -111,7 +111,7 @@ local function ShowLoadingAnimation()
 
     local text = "GG+"
     local startTime = tick()
-    local duration = 6
+    local duration = 3 -- Изменено с 6 на 3 секунды
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
@@ -129,7 +129,7 @@ local function ShowLoadingAnimation()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        if not tabsShown and elapsed < 5 then
+        if not tabsShown and elapsed < 3 then -- Изменено с 5 на 3
             if elapsed - lastTabChange > 0.35 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
@@ -140,10 +140,10 @@ local function ShowLoadingAnimation()
                     tabLabel.Text = tabNames[tabIndex]
                 end
             end
-        elseif tabsShown and elapsed < 5 then
+        elseif tabsShown and elapsed < 3 then
         end
 
-        local revealProgress = math.min(elapsed * 1.2, 1)
+        local revealProgress = math.min(elapsed * 1.5, 1) -- Ускорено появление текста
         local charsToShow = math.max(1, math.floor(revealProgress * #text))
         local displayText = string.sub(text, 1, charsToShow)
         
@@ -202,8 +202,6 @@ local function ShowLoadingAnimation()
                     connection:Disconnect()
                     print("Loading animation complete!")
                     
-                    -- Никаких автоматических открытий после загрузки!
-                    -- Ждем 1 секунду и показываем сообщение
                     task.wait(1)
                     print("✅ Panel is ready! Click GG+ button to open menu.")
                 else
@@ -227,7 +225,7 @@ local function ShowLoadingAnimation()
     end)
 
     task.spawn(function()
-        task.wait(12)
+        task.wait(6) -- Уменьшено с 12 до 6 секунд
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -253,7 +251,7 @@ local Library = {
         NoclipActive = Color3.fromRGB(255, 150, 255),
         Platform = Color3.fromRGB(128, 128, 128),
         PlayerOnline = Color3.fromRGB(60, 200, 80),
-        PlayerOffline = Color3.fromRGB(200, 60, 60),
+        PlayerOffline = Color3.fromRGB(200, 200, 0),
         SPI = Color3.fromRGB(255, 100, 200)
     }
 }
@@ -1083,21 +1081,72 @@ PlayersListLayout.Padding = UDim.new(0, 5)
 PlayersListLayout.Parent = PlayersList
 
 local lastPlayerUpdate = 0
-local UPDATE_INTERVAL = 30
+local UPDATE_INTERVAL = 3
 
+-- ИСПРАВЛЕННАЯ ФУНКЦИЯ ТЕЛЕПОРТАЦИИ
 local function TeleportToPlayer(targetPlayer)
     local player = game.Players.LocalPlayer
-    if not player or not player.Character then return end
+    if not player or not player.Character then
+        print("❌ Не найден игрок или персонаж")
+        return
+    end
 
-    if not targetPlayer or not targetPlayer.Character then return end
+    if not targetPlayer then
+        print("❌ Целевой игрок не найден")
+        return
+    end
 
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        print("❌ Нет HumanoidRootPart у игрока")
+        return
+    end
+
+    -- Пытаемся загрузить персонажа целевого игрока
+    if not targetPlayer.Character then
+        targetPlayer:LoadCharacter()
+        task.wait(1)
+    end
+
+    -- Ждем появления персонажа
+    local attempts = 0
+    while attempts < 5 and not targetPlayer.Character do
+        task.wait(0.5)
+        attempts = attempts + 1
+    end
+
+    if not targetPlayer.Character then
+        print("❌ Не удалось загрузить персонажа " .. targetPlayer.Name)
+        return
+    end
+
+    local targetPos = nil
+    
+    -- Пытаемся найти HumanoidRootPart
     local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if targetHrp then
+        targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
+        print("✅ Найден HumanoidRootPart у " .. targetPlayer.Name)
+    else
+        -- Ищем любую часть тела
+        local parts = targetPlayer.Character:GetChildren()
+        for _, part in pairs(parts) do
+            if part:IsA("BasePart") then
+                targetPos = part.Position + Vector3.new(0, 3, 0)
+                print("✅ Найдена часть тела у " .. targetPlayer.Name)
+                break
+            end
+        end
+    end
 
-    if not hrp or not targetHrp then return end
-
-    local targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
-    hrp.CFrame = CFrame.new(targetPos)
+    if targetPos then
+        hrp.CFrame = CFrame.new(targetPos)
+        print("✅ Телепортирован к " .. targetPlayer.Name .. " на позицию " .. tostring(targetPos))
+    else
+        -- Если ничего не нашли, телепортируем в центр карты
+        print("⚠️ Не найдены части тела у " .. targetPlayer.Name .. ", телепортируем в центр")
+        hrp.CFrame = CFrame.new(0, 10, 0)
+    end
 end
 
 local function UpdatePlayersList()
@@ -1114,83 +1163,81 @@ local function UpdatePlayersList()
 
     for _, player in ipairs(players) do
         if player ~= localPlayer then
+            count = count + 1
+
             local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
+
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 2
+            ItemFrame.Parent = PlayersList
+
+            local StatusLabel = Instance.new("TextLabel")
+            StatusLabel.Size = UDim2.new(0.08, 0, 1, 0)
+            StatusLabel.Position = UDim2.new(0, 5, 0, 0)
+            StatusLabel.BackgroundTransparency = 1
+            StatusLabel.Text = "●"
+            StatusLabel.TextColor3 = isOnline and Library.Theme.PlayerOnline or Library.Theme.PlayerOffline
+            StatusLabel.TextScaled = true
+            StatusLabel.Font = Enum.Font.SourceSansBold
+            StatusLabel.Parent = ItemFrame
+
+            local NameLabel = Instance.new("TextLabel")
+            NameLabel.Size = UDim2.new(0.55, 0, 1, 0)
+            NameLabel.Position = UDim2.new(0.1, 0, 0, 0)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Text = player.Name
+            NameLabel.TextColor3 = isOnline and Library.Theme.Text or Color3.fromRGB(200, 200, 200)
+            NameLabel.TextScaled = true
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            NameLabel.Font = Enum.Font.SourceSansBold
+            NameLabel.Parent = ItemFrame
+
+            local IDLabel = Instance.new("TextLabel")
+            IDLabel.Size = UDim2.new(0.2, 0, 1, 0)
+            IDLabel.Position = UDim2.new(0.5, 0, 0, 0)
+            IDLabel.BackgroundTransparency = 1
+            IDLabel.Text = "ID: " .. player.UserId
+            IDLabel.TextColor3 = isOnline and Library.Theme.Text or Color3.fromRGB(200, 200, 200)
+            IDLabel.TextScaled = true
+            IDLabel.TextXAlignment = Enum.TextXAlignment.Left
+            IDLabel.Font = Enum.Font.SourceSans
+            IDLabel.Parent = ItemFrame
+
+            local TeleportPlayerBtn = Instance.new("TextButton")
+            TeleportPlayerBtn.Size = UDim2.new(0.2, -5, 0.7, 0)
+            TeleportPlayerBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPlayerBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+            TeleportPlayerBtn.BorderColor3 = Library.Theme.Border
+            TeleportPlayerBtn.BorderSizePixel = 2
+            TeleportPlayerBtn.Text = "TP"
+            TeleportPlayerBtn.TextColor3 = Library.Theme.Text
+            TeleportPlayerBtn.TextScaled = true
+            TeleportPlayerBtn.Font = Enum.Font.SourceSansBold
+            TeleportPlayerBtn.Parent = ItemFrame
             
-            if isOnline then
-                count = count + 1
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(1, 0)
+            tpCorner.Parent = TeleportPlayerBtn
 
-                local ItemFrame = Instance.new("Frame")
-                ItemFrame.Size = UDim2.new(1, -10, 0, 45)
-                ItemFrame.BackgroundColor3 = Library.Theme.Panel
-                ItemFrame.BorderColor3 = Library.Theme.Border
-                ItemFrame.BorderSizePixel = 2
-                ItemFrame.Parent = PlayersList
+            TeleportPlayerBtn.MouseButton1Click:Connect(function()
+                TeleportToPlayer(player)
+            end)
 
-                local StatusLabel = Instance.new("TextLabel")
-                StatusLabel.Size = UDim2.new(0.08, 0, 1, 0)
-                StatusLabel.Position = UDim2.new(0, 5, 0, 0)
-                StatusLabel.BackgroundTransparency = 1
-                StatusLabel.Text = "●"
-                StatusLabel.TextColor3 = Library.Theme.PlayerOnline
-                StatusLabel.TextScaled = true
-                StatusLabel.Font = Enum.Font.SourceSansBold
-                StatusLabel.Parent = ItemFrame
-
-                local NameLabel = Instance.new("TextLabel")
-                NameLabel.Size = UDim2.new(0.55, 0, 1, 0)
-                NameLabel.Position = UDim2.new(0.1, 0, 0, 0)
-                NameLabel.BackgroundTransparency = 1
-                NameLabel.Text = player.Name
-                NameLabel.TextColor3 = Library.Theme.Text
-                NameLabel.TextScaled = true
-                NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-                NameLabel.Font = Enum.Font.SourceSansBold
-                NameLabel.Parent = ItemFrame
-
-                local IDLabel = Instance.new("TextLabel")
-                IDLabel.Size = UDim2.new(0.2, 0, 1, 0)
-                IDLabel.Position = UDim2.new(0.5, 0, 0, 0)
-                IDLabel.BackgroundTransparency = 1
-                IDLabel.Text = "ID: " .. player.UserId
-                IDLabel.TextColor3 = Library.Theme.Text
-                IDLabel.TextScaled = true
-                IDLabel.TextXAlignment = Enum.TextXAlignment.Left
-                IDLabel.Font = Enum.Font.SourceSans
-                IDLabel.Parent = ItemFrame
-
-                local TeleportPlayerBtn = Instance.new("TextButton")
-                TeleportPlayerBtn.Size = UDim2.new(0.2, -5, 0.7, 0)
-                TeleportPlayerBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
-                TeleportPlayerBtn.BackgroundColor3 = Library.Theme.Success
-                TeleportPlayerBtn.BorderColor3 = Library.Theme.Border
-                TeleportPlayerBtn.BorderSizePixel = 2
-                TeleportPlayerBtn.Text = "TP"
-                TeleportPlayerBtn.TextColor3 = Library.Theme.Text
-                TeleportPlayerBtn.TextScaled = true
-                TeleportPlayerBtn.Font = Enum.Font.SourceSansBold
-                TeleportPlayerBtn.Parent = ItemFrame
-                
-                local tpCorner = Instance.new("UICorner")
-                tpCorner.CornerRadius = UDim.new(1, 0)
-                tpCorner.Parent = TeleportPlayerBtn
-
-                TeleportPlayerBtn.MouseButton1Click:Connect(function()
-                    TeleportToPlayer(player)
-                end)
-
-                local function onDoubleClick()
-                    TeleportToPlayer(player)
-                end
-
-                local lastClickTime = 0
-                NameLabel.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        local currentTime = tick()
-                        if currentTime - lastClickTime < 0.3 then onDoubleClick() end
-                        lastClickTime = currentTime
-                    end
-                end)
+            local function onDoubleClick()
+                TeleportToPlayer(player)
             end
+
+            local lastClickTime = 0
+            NameLabel.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local currentTime = tick()
+                    if currentTime - lastClickTime < 0.3 then onDoubleClick() end
+                    lastClickTime = currentTime
+                end
+            end)
         end
     end
 
@@ -1206,6 +1253,19 @@ local function UpdatePlayersListIfNeeded(force)
         lastPlayerUpdate = currentTime
     end
 end
+
+-- Автоматическое обновление при входе/выходе игроков
+game.Players.PlayerAdded:Connect(function()
+    task.wait(0.5)
+    UpdatePlayersList()
+    lastPlayerUpdate = tick()
+end)
+
+game.Players.PlayerRemoving:Connect(function()
+    task.wait(0.5)
+    UpdatePlayersList()
+    lastPlayerUpdate = tick()
+end)
 
 spawn(function()
     while true do
@@ -3073,8 +3133,7 @@ pcall(function()
 end)
 
 pcall(function()
-    for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
+    for _, child in pairs(MenuPanel:GetChildren()) do        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
             child:Destroy()
         end
     end
@@ -3700,7 +3759,7 @@ local function CreateFinalLoadingScreen()
     progressFill.Parent = progressBar
 
     local startTime = tick()
-    local duration = 6
+    local duration = 3 -- 3 секунды для финальной загрузки
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
@@ -3718,7 +3777,7 @@ local function CreateFinalLoadingScreen()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        if not tabsShown and elapsed < 5 then
+        if not tabsShown and elapsed < 3 then
             if elapsed - lastTabChange > 0.35 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
@@ -3729,7 +3788,7 @@ local function CreateFinalLoadingScreen()
                     tabLabel.Text = tabNames[tabIndex]
                 end
             end
-        elseif tabsShown and elapsed < 5 then
+        elseif tabsShown and elapsed < 3 then
         end
 
         local dots = math.floor(elapsed * 2) % 4
@@ -3798,7 +3857,7 @@ local function CreateFinalLoadingScreen()
     end)
 
     task.spawn(function()
-        task.wait(12)
+        task.wait(6)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
