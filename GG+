@@ -25,15 +25,15 @@ local function ShowLoadingAnimation()
     background2.ZIndex = 998
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 300)
-    container.Position = UDim2.new(0.5, -250, 0.5, -150)
+    container.Size = UDim2.new(0, 500, 0, 350)
+    container.Position = UDim2.new(0.5, -250, 0.5, -175)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 0, 60)
-    textLabel.Position = UDim2.new(0, 0, 0.05, 0)
+    textLabel.Size = UDim2.new(1, 0, 0, 50)
+    textLabel.Position = UDim2.new(0, 0, 0.02, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = ""
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -45,7 +45,7 @@ local function ShowLoadingAnimation()
 
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(1, 0, 0, 30)
-    subtitle.Position = UDim2.new(0, 0, 0.3, 0)
+    subtitle.Position = UDim2.new(0, 0, 0.2, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
     subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
@@ -53,11 +53,22 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
+    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+    local tabLabel = Instance.new("TextLabel")
+    tabLabel.Size = UDim2.new(1, 0, 0, 30)
+    tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
+    tabLabel.BackgroundTransparency = 1
+    tabLabel.Text = ""
+    tabLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    tabLabel.TextScaled = true
+    tabLabel.Font = Enum.Font.SourceSans
+    tabLabel.Parent = container
+
     local timeLabel = Instance.new("TextLabel")
     timeLabel.Size = UDim2.new(1, 0, 0, 30)
-    timeLabel.Position = UDim2.new(0, 0, 0.75, 0)
+    timeLabel.Position = UDim2.new(0, 0, 0.48, 0)
     timeLabel.BackgroundTransparency = 1
-    timeLabel.Text = "Remaining: 5 sec"
+    timeLabel.Text = "0%"
     timeLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
     timeLabel.TextScaled = true
     timeLabel.Font = Enum.Font.SourceSans
@@ -65,7 +76,7 @@ local function ShowLoadingAnimation()
 
     local line1Label = Instance.new("TextLabel")
     line1Label.Size = UDim2.new(1, 0, 0, 30)
-    line1Label.Position = UDim2.new(0, 0, 0.45, 0)
+    line1Label.Position = UDim2.new(0, 0, 0.6, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
     line1Label.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -76,7 +87,7 @@ local function ShowLoadingAnimation()
 
     local line2Label = Instance.new("TextLabel")
     line2Label.Size = UDim2.new(1, 0, 0, 30)
-    line2Label.Position = UDim2.new(0, 0, 0.6, 0)
+    line2Label.Position = UDim2.new(0, 0, 0.72, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
     line2Label.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -86,7 +97,7 @@ local function ShowLoadingAnimation()
     line2Label.Parent = container
 
     local progressBar = Instance.new("Frame")
-    progressBar.Size = UDim2.new(0.8, 0, 0, 4)
+    progressBar.Size = UDim2.new(0.8, 0, 0, 6)
     progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
@@ -99,14 +110,14 @@ local function ShowLoadingAnimation()
     progressFill.Parent = progressBar
 
     local text = "GG+"
-    local currentText = ""
-    local charIndex = 1
     local startTime = tick()
-    local duration = 5
+    local duration = 6
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
-    local isFading = false
+    local tabIndex = 1
+    local lastTabChange = 0
+    local tabsShown = false
 
     local connection
 
@@ -115,33 +126,39 @@ local function ShowLoadingAnimation()
         local progress = math.min(elapsed / duration, 1)
 
         progressFill.Size = UDim2.new(progress, 0, 1, 0)
+        local percent = math.floor(progress * 100)
+        timeLabel.Text = percent .. "%"
 
-        local timeLeft = math.max(0, math.ceil(duration - elapsed))
-        timeLabel.Text = "Remaining: " .. timeLeft .. " sec"
-
-        -- Анимация появления букв GG+
-        if charIndex <= #text then
-            local revealProgress = math.min(elapsed * 1.5, 1)
-            local charsToShow = math.max(1, math.floor(revealProgress * #text))
-            local displayText = string.sub(text, 1, charsToShow)
-            
-            if #displayText < #text then
-                displayText = displayText .. string.rep("_", #text - #displayText)
+        if not tabsShown and elapsed < 5 then
+            if elapsed - lastTabChange > 0.35 then
+                lastTabChange = elapsed
+                tabIndex = tabIndex + 1
+                if tabIndex > #tabNames then 
+                    tabsShown = true
+                    tabLabel.Text = "All systems loaded!"
+                else
+                    tabLabel.Text = tabNames[tabIndex]
+                end
             end
-            
-            textLabel.Text = displayText
-            textLabel.TextScaled = true
-            textLabel.TextSize = 0
-            
-            if charsToShow >= #text then
-                charIndex = #text + 1
-            end
-
-            local dots = math.floor(elapsed * 2) % 4
-            subtitle.Text = "Loading" .. string.rep(".", dots)
+        elseif tabsShown and elapsed < 5 then
         end
 
-        if elapsed > 0.5 and not line1Shown then
+        local revealProgress = math.min(elapsed * 1.2, 1)
+        local charsToShow = math.max(1, math.floor(revealProgress * #text))
+        local displayText = string.sub(text, 1, charsToShow)
+        
+        if #displayText < #text then
+            displayText = displayText .. string.rep("_", #text - #displayText)
+        end
+        
+        textLabel.Text = displayText
+        textLabel.TextScaled = true
+        textLabel.TextSize = 0
+
+        local dots = math.floor(elapsed * 2) % 4
+        subtitle.Text = "Loading" .. string.rep(".", dots)
+
+        if elapsed > 0.8 and not line1Shown then
             line1Shown = true
             spawn(function()
                 for i = 0, 1, 0.05 do
@@ -165,12 +182,14 @@ local function ShowLoadingAnimation()
         if progress >= 1 and not animationComplete then
             animationComplete = true
             subtitle.Text = "READY!"
-            timeLabel.Text = "Loading complete!"
+            timeLabel.Text = "100% - Complete!"
             textLabel.Text = "GG+"
+            if not tabsShown then
+                tabLabel.Text = "All systems loaded!"
+            end
 
-            task.wait(0.5)
+            task.wait(0.8)
 
-            isFading = true
             local fadeStart = tick()
             local fadeDuration = 0.8
 
@@ -182,6 +201,11 @@ local function ShowLoadingAnimation()
                     fadeConnection:Disconnect()
                     connection:Disconnect()
                     print("Loading animation complete!")
+                    
+                    -- Никаких автоматических открытий после загрузки!
+                    -- Ждем 1 секунду и показываем сообщение
+                    task.wait(1)
+                    print("✅ Panel is ready! Click GG+ button to open menu.")
                 else
                     local transparency = fadeProgress
                     background.BackgroundTransparency = transparency
@@ -189,6 +213,7 @@ local function ShowLoadingAnimation()
                     textLabel.TextTransparency = transparency
                     subtitle.TextTransparency = transparency
                     timeLabel.TextTransparency = transparency
+                    tabLabel.TextTransparency = transparency
 
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
                     line1Label.TextTransparency = math.min(lineTransparency, 1)
@@ -202,7 +227,7 @@ local function ShowLoadingAnimation()
     end)
 
     task.spawn(function()
-        task.wait(10)
+        task.wait(12)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -210,9 +235,6 @@ local function ShowLoadingAnimation()
         end
     end)
 end
-
-ShowLoadingAnimation()
-task.wait(0.5)
 
 -- Main Library with Theme Colors
 local Library = {
@@ -236,7 +258,6 @@ local Library = {
     }
 }
 
--- ===== THEME COLOR VARIABLES (for settings) =====
 local function GetThemeColors()
     return {
         Background = Library.Theme.Background,
@@ -258,17 +279,14 @@ local function GetThemeColors()
     }
 end
 
--- ===== FUNCTION TO APPLY THEME COLORS (EXCLUDING BUTTONS, TABS, RESIZE, GG+) =====
 local function ApplyThemeColors(colors)
     local themeColors = colors or Library.Theme
     
-    -- Update MenuPanel
     if MenuPanel then
         MenuPanel.BackgroundColor3 = themeColors.Background
         MenuPanel.BorderColor3 = themeColors.Border
     end
     
-    -- Update TitleFrame
     if TitleFrame then
         TitleFrame.BackgroundColor3 = themeColors.Panel
     end
@@ -277,13 +295,23 @@ local function ApplyThemeColors(colors)
         Title.TextColor3 = themeColors.Text
     end
     
-    -- Update TabBar
     if TabBar then
         TabBar.BackgroundColor3 = themeColors.Panel
         TabBar.BorderColor3 = themeColors.Border
     end
     
-    -- Update all panels
+    if MainButton then
+        MainButton.BackgroundColor3 = themeColors.Panel
+        MainButton.BorderColor3 = themeColors.Border
+    end
+    
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            child.BorderColor3 = Color3.fromRGB(0, 200, 255)
+        end
+    end
+    
     local panels = {
         PointsList, WalkPointsList, PlayersList, NoclipFrame, 
         XRayControlFrame, SPIControlFrame, PlatformFrame, 
@@ -296,18 +324,20 @@ local function ApplyThemeColors(colors)
         end
     end
     
-    -- Update text colors on all labels (skip buttons, resize buttons, GG+)
     for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj ~= MenuPanel and obj.Parent ~= nil then
+            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" then
+                obj.BackgroundColor3 = themeColors.Panel
+                obj.BorderColor3 = themeColors.Border
+            end
+        end
         if obj:IsA("TextLabel") then
-            -- Skip GG+ text
             if obj.Parent ~= MainButton and obj.Name ~= "ButtonLabel" then
-                -- Skip resize button labels
                 local isResize = false
                 if obj.Parent and obj.Parent:IsA("ImageButton") then
                     isResize = true
                 end
                 if not isResize then
-                    -- Don't change colors of ON/OFF/status indicators
                     if obj.TextColor3 ~= Color3.fromRGB(200, 40, 40) and 
                        obj.TextColor3 ~= Color3.fromRGB(0, 200, 100) and
                        obj.TextColor3 ~= Color3.fromRGB(255, 255, 255) then
@@ -316,13 +346,6 @@ local function ApplyThemeColors(colors)
                 end
             end
         end
-        if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj ~= MenuPanel and obj.Parent ~= nil then
-            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" then
-                obj.BackgroundColor3 = themeColors.Panel
-                obj.BorderColor3 = themeColors.Border
-            end
-        end
-        -- Update TextButtons that are NOT tab buttons, NOT GG+, NOT resize buttons
         if obj:IsA("TextButton") then
             local isTabButton = false
             for _, btn in ipairs(TabButtons) do
@@ -332,7 +355,6 @@ local function ApplyThemeColors(colors)
             local isResizeButton = (obj.Parent and obj.Parent:IsA("ImageButton") and obj.Parent.Parent == MenuPanel)
             
             if not isTabButton and not isMainButton and not isResizeButton then
-                -- Only change color if it's not a toggle button (ON/OFF)
                 if obj.Text ~= "ON" and obj.Text ~= "OFF" then
                     obj.TextColor3 = themeColors.Text
                 end
@@ -340,7 +362,6 @@ local function ApplyThemeColors(colors)
         end
     end
     
-    -- Update specific elements
     if PointInfo then PointInfo.TextColor3 = themeColors.Text end
     if WalkStatus then WalkStatus.TextColor3 = themeColors.Text end
     if WalkSpeedLabel then WalkSpeedLabel.TextColor3 = themeColors.Text end
@@ -377,7 +398,7 @@ ScreenGui.Name = "AdminPanel"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- Main Menu Button (now GG+ instead of A_D)
+-- Main Menu Button
 local MainButton = Instance.new("ImageButton")
 MainButton.Name = "MainButton"
 MainButton.Size = UDim2.new(0, 50, 0, 50)
@@ -421,7 +442,7 @@ MenuPanel.Visible = false
 MenuPanel.Parent = ScreenGui
 MenuPanel.ClipsDescendants = true
 
--- Title (now GG+ instead of ADMIN PANEL)
+-- Title
 local TitleFrame = Instance.new("Frame")
 TitleFrame.Size = UDim2.new(1, 0, 0, 50)
 TitleFrame.BackgroundColor3 = Library.Theme.Panel
@@ -480,7 +501,6 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
--- Вкладка Settings УДАЛЕНА
 local TabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
@@ -1139,11 +1159,11 @@ local function UpdatePlayersList()
                 IDLabel.Parent = ItemFrame
 
                 local TeleportPlayerBtn = Instance.new("TextButton")
-                TeleportPlayerBtn.Size = UDim2.new(0.15, -5, 0.7, 0)
-                TeleportPlayerBtn.Position = UDim2.new(0.8, 0, 0.15, 0)
+                TeleportPlayerBtn.Size = UDim2.new(0.2, -5, 0.7, 0)
+                TeleportPlayerBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
                 TeleportPlayerBtn.BackgroundColor3 = Library.Theme.Success
                 TeleportPlayerBtn.BorderColor3 = Library.Theme.Border
-                TeleportPlayerBtn.BorderSizePixel = 1
+                TeleportPlayerBtn.BorderSizePixel = 2
                 TeleportPlayerBtn.Text = "TP"
                 TeleportPlayerBtn.TextColor3 = Library.Theme.Text
                 TeleportPlayerBtn.TextScaled = true
@@ -1151,7 +1171,7 @@ local function UpdatePlayersList()
                 TeleportPlayerBtn.Parent = ItemFrame
                 
                 local tpCorner = Instance.new("UICorner")
-                tpCorner.CornerRadius = UDim.new(0, 10)
+                tpCorner.CornerRadius = UDim.new(1, 0)
                 tpCorner.Parent = TeleportPlayerBtn
 
                 TeleportPlayerBtn.MouseButton1Click:Connect(function()
@@ -2685,14 +2705,21 @@ MenuPanel.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== MAIN HANDLERS =====
+-- =====================================================
+-- ===== FIXED: MENU STATE AND ANIMATION =====
+-- =====================================================
+
+-- Глобальные переменные состояния
 local menuOpen = false
-local isCollapsed = false
+local isCollapsed = true
 local collapseAnimating = false
 local animationConnection = nil
 
+-- ===== FIXED: ANIMATE COLLAPSE =====
 local function AnimateCollapse(targetCollapsed)
-    if collapseAnimating then return end
+    if collapseAnimating then
+        return
+    end
     collapseAnimating = true
 
     if animationConnection then
@@ -2718,7 +2745,7 @@ local function AnimateCollapse(targetCollapsed)
 
     local startPos = MenuPanel.Position
     local startTime = tick()
-    local duration = 0.5
+    local duration = 0.4
 
     animationConnection = game:GetService("RunService").RenderStepped:Connect(function()
         local elapsed = tick() - startTime
@@ -2757,21 +2784,35 @@ local function AnimateCollapse(targetCollapsed)
             isCollapsed = targetCollapsed
             menuOpen = not targetCollapsed
             collapseAnimating = false
-            animationConnection:Disconnect()
-            animationConnection = nil
+            
+            if animationConnection then
+                animationConnection:Disconnect()
+                animationConnection = nil
+            end
+            
+            print("Animation complete! menuOpen=" .. tostring(menuOpen) .. ", isCollapsed=" .. tostring(isCollapsed))
         end
     end)
 end
 
+-- ===== FIXED: TOGGLE MENU (работает с первого нажатия) =====
 local function ToggleMenu()
-    if collapseAnimating then return end
-
+    if collapseAnimating then
+        return
+    end
+    
     if menuOpen and not isCollapsed then
+        -- Свернуть
+        print("Toggling: Collapse")
         AnimateCollapse(true)
     elseif not menuOpen or isCollapsed then
+        -- Развернуть
+        print("Toggling: Expand")
         MenuPanel.BackgroundTransparency = 0.5
         MenuPanel.Visible = true
         AnimateCollapse(false)
+        
+        -- Обновить данные при открытии
         if not isCollapsed then
             UpdatePointsList()
             UpdateWalkPointsList()
@@ -2785,14 +2826,46 @@ local function ToggleMenu()
     end
 end
 
+-- ===== ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЯ (панель свернута) =====
+local function InitializeMenuState()
+    if MenuPanel then
+        MenuPanel.Visible = false
+        MenuPanel.BackgroundTransparency = 1
+        MenuPanel.Size = UDim2.new(0, 0, 0, 0)
+        
+        if MainButton then
+            local mainPos = MainButton.Position
+            MenuPanel.Position = UDim2.new(
+                mainPos.X.Scale,
+                mainPos.X.Offset + (MainButton.Size.X.Offset / 2),
+                mainPos.Y.Scale,
+                mainPos.Y.Offset + (MainButton.Size.Y.Offset / 2)
+            )
+        end
+        
+        menuOpen = false
+        isCollapsed = true
+        collapseAnimating = false
+        
+        if animationConnection then
+            animationConnection:Disconnect()
+            animationConnection = nil
+        end
+        
+        print("✅ Menu initialized: collapsed=" .. tostring(isCollapsed) .. ", open=" .. tostring(menuOpen))
+    end
+end
+
+-- ===== ПОДКЛЮЧЕНИЕ КНОПОК =====
 MainButton.MouseButton1Click:Connect(ToggleMenu)
 
 CloseBtn.MouseButton1Click:Connect(function()
-    if not collapseAnimating then
+    if not collapseAnimating and menuOpen and not isCollapsed then
         AnimateCollapse(true)
     end
 end)
 
+-- ===== MAIN HANDLERS =====
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
@@ -2889,7 +2962,17 @@ print("Alt+P - place platform under feet")
 print("Alt+R - X-Ray (world only, NOT GUI)")
 print("Alt+I - SPI (show players through walls)")
 
--- ===== VISIBLE BLUE RESIZE BUTTONS (ON ALL WALLS) =====
+-- ===== ВЫЗОВ ИНИЦИАЛИЗАЦИИ =====
+InitializeMenuState()
+
+print("========================================")
+print("✅ FIXED: Menu works on FIRST click!")
+print("📌 State: menuOpen=false, isCollapsed=true")
+print("📌 Click GG+ button to expand")
+print("📌 Click GG+ button again to collapse")
+print("========================================")
+
+-- ===== VISIBLE BLUE RESIZE BUTTONS =====
 local RESIZE_BUTTON_SIZE = 10
 local CORNER_BUTTON_SIZE = 15
 
@@ -3179,7 +3262,8 @@ do
         desc.TextColor3 = Library.Theme.Accent
         desc.TextScaled = true
         desc.Font = Enum.Font.SourceSans
-        desc.TextXAlignment = Enum.TextXAlignment.Left        desc.Parent = mainFrame
+        desc.TextXAlignment = Enum.TextXAlignment.Left
+        desc.Parent = mainFrame
 
         local toggleBtn = Instance.new("TextButton")
         toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
@@ -3292,7 +3376,8 @@ do
             savedCameraCFrame = camera.CFrame
             savedCameraFocus = camera.Focus
 
-            if char and char:FindFirstChild("HumanoidRootPart") then                savedCharacterCFrame = char.HumanoidRootPart.CFrame
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                savedCharacterCFrame = char.HumanoidRootPart.CFrame
                 freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
             else
                 freecamPosition = Vector3.new(0, 10, 0)
@@ -3530,17 +3615,17 @@ local function CreateFinalLoadingScreen()
     background2.ZIndex = 998
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 300)
-    container.Position = UDim2.new(0.5, -250, 0.5, -150)
+    container.Size = UDim2.new(0, 500, 0, 350)
+    container.Position = UDim2.new(0.5, -250, 0.5, -175)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 0, 60)
-    textLabel.Position = UDim2.new(0, 0, 0.05, 0)
+    textLabel.Size = UDim2.new(1, 0, 0, 50)
+    textLabel.Position = UDim2.new(0, 0, 0.02, 0)
     textLabel.BackgroundTransparency = 1
-    textLabel.Text = ""
+    textLabel.Text = "GG+"
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.TextScaled = true
     textLabel.Font = Enum.Font.SourceSansBold
@@ -3550,7 +3635,7 @@ local function CreateFinalLoadingScreen()
 
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(1, 0, 0, 30)
-    subtitle.Position = UDim2.new(0, 0, 0.3, 0)
+    subtitle.Position = UDim2.new(0, 0, 0.2, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
     subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
@@ -3558,11 +3643,22 @@ local function CreateFinalLoadingScreen()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
+    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+    local tabLabel = Instance.new("TextLabel")
+    tabLabel.Size = UDim2.new(1, 0, 0, 30)
+    tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
+    tabLabel.BackgroundTransparency = 1
+    tabLabel.Text = ""
+    tabLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    tabLabel.TextScaled = true
+    tabLabel.Font = Enum.Font.SourceSans
+    tabLabel.Parent = container
+
     local timeLabel = Instance.new("TextLabel")
     timeLabel.Size = UDim2.new(1, 0, 0, 30)
-    timeLabel.Position = UDim2.new(0, 0, 0.75, 0)
+    timeLabel.Position = UDim2.new(0, 0, 0.48, 0)
     timeLabel.BackgroundTransparency = 1
-    timeLabel.Text = "Remaining: 5 sec"
+    timeLabel.Text = "0%"
     timeLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
     timeLabel.TextScaled = true
     timeLabel.Font = Enum.Font.SourceSans
@@ -3570,7 +3666,7 @@ local function CreateFinalLoadingScreen()
 
     local line1Label = Instance.new("TextLabel")
     line1Label.Size = UDim2.new(1, 0, 0, 30)
-    line1Label.Position = UDim2.new(0, 0, 0.45, 0)
+    line1Label.Position = UDim2.new(0, 0, 0.6, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
     line1Label.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -3581,7 +3677,7 @@ local function CreateFinalLoadingScreen()
 
     local line2Label = Instance.new("TextLabel")
     line2Label.Size = UDim2.new(1, 0, 0, 30)
-    line2Label.Position = UDim2.new(0, 0, 0.6, 0)
+    line2Label.Position = UDim2.new(0, 0, 0.72, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
     line2Label.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -3591,7 +3687,7 @@ local function CreateFinalLoadingScreen()
     line2Label.Parent = container
 
     local progressBar = Instance.new("Frame")
-    progressBar.Size = UDim2.new(0.8, 0, 0, 4)
+    progressBar.Size = UDim2.new(0.8, 0, 0, 6)
     progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
@@ -3603,12 +3699,14 @@ local function CreateFinalLoadingScreen()
     progressFill.BorderSizePixel = 0
     progressFill.Parent = progressBar
 
-    local text = "GG+"
     local startTime = tick()
-    local duration = 5
+    local duration = 6
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
+    local tabIndex = 1
+    local lastTabChange = 0
+    local tabsShown = false
 
     local connection
 
@@ -3617,26 +3715,27 @@ local function CreateFinalLoadingScreen()
         local progress = math.min(elapsed / duration, 1)
 
         progressFill.Size = UDim2.new(progress, 0, 1, 0)
+        local percent = math.floor(progress * 100)
+        timeLabel.Text = percent .. "%"
 
-        local timeLeft = math.max(0, math.ceil(duration - elapsed))
-        timeLabel.Text = "Remaining: " .. timeLeft .. " sec"
-
-        local revealProgress = math.min(elapsed * 1.5, 1)
-        local charsToShow = math.max(1, math.floor(revealProgress * #text))
-        local displayText = string.sub(text, 1, charsToShow)
-        
-        if #displayText < #text then
-            displayText = displayText .. string.rep("_", #text - #displayText)
+        if not tabsShown and elapsed < 5 then
+            if elapsed - lastTabChange > 0.35 then
+                lastTabChange = elapsed
+                tabIndex = tabIndex + 1
+                if tabIndex > #tabNames then 
+                    tabsShown = true
+                    tabLabel.Text = "All systems loaded!"
+                else
+                    tabLabel.Text = tabNames[tabIndex]
+                end
+            end
+        elseif tabsShown and elapsed < 5 then
         end
-        
-        textLabel.Text = displayText
-        textLabel.TextScaled = true
-        textLabel.TextSize = 0
 
         local dots = math.floor(elapsed * 2) % 4
         subtitle.Text = "Loading" .. string.rep(".", dots)
 
-        if elapsed > 0.5 and not line1Shown then
+        if elapsed > 0.8 and not line1Shown then
             line1Shown = true
             spawn(function()
                 for i = 0, 1, 0.05 do
@@ -3660,10 +3759,12 @@ local function CreateFinalLoadingScreen()
         if progress >= 1 and not animationComplete then
             animationComplete = true
             subtitle.Text = "READY!"
-            timeLabel.Text = "Loading complete!"
-            textLabel.Text = "GG+"
+            timeLabel.Text = "100% - Complete!"
+            if not tabsShown then
+                tabLabel.Text = "All systems loaded!"
+            end
 
-            task.wait(0.5)
+            task.wait(0.8)
 
             local fadeStart = tick()
             local fadeDuration = 0.8
@@ -3683,6 +3784,7 @@ local function CreateFinalLoadingScreen()
                     textLabel.TextTransparency = transparency
                     subtitle.TextTransparency = transparency
                     timeLabel.TextTransparency = transparency
+                    tabLabel.TextTransparency = transparency
 
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
                     line1Label.TextTransparency = math.min(lineTransparency, 1)
@@ -3696,7 +3798,7 @@ local function CreateFinalLoadingScreen()
     end)
 
     task.spawn(function()
-        task.wait(10)
+        task.wait(12)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -4130,7 +4232,8 @@ pcall(function()
         for _, child in pairs(freecamTab:GetChildren()) do
             if child:IsA("Frame") and child.BackgroundTransparency < 1 then
                 child.BackgroundTransparency = 0.5
-            end            for _, subChild in pairs(child:GetChildren()) do
+            end
+            for _, subChild in pairs(child:GetChildren()) do
                 if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
                     subChild.BackgroundTransparency = 0.5
                 end
@@ -4635,7 +4738,7 @@ pcall(function()
         end
     end
 
-    print("✅ TP buttons in Players tab are now square")
+    print("✅ TP buttons in Players tab are now 2x smaller and round")
     print("✅ Corner resize buttons are now square")
     print("✅ Wall buttons remain round")
 end)
@@ -4654,55 +4757,11 @@ pcall(function()
                 end
                 corner.CornerRadius = UDim.new(1, 0)
 
-                obj.Size = UDim2.new(0.15, 0, 0.7, 0)
+                obj.Size = UDim2.new(0.2, 0, 0.7, 0)
 
                 obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
                 obj.BorderSizePixel = 2
                 obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
-
-                obj.Text = ""
-
-                local icon = Instance.new("TextLabel")
-                icon.Size = UDim2.new(1, 0, 1, 0)
-                icon.BackgroundTransparency = 1
-                icon.Text = "▶"
-                icon.TextColor3 = Color3.fromRGB(255, 255, 255)
-                icon.TextScaled = true
-                icon.Font = Enum.Font.SourceSansBold
-                icon.Parent = obj
-            end
-        end
-    end
-
-    print("✅ TP buttons in Players tab are now round")
-    print("✅ TP buttons have ▶ icon instead of text")
-end)
-
-pcall(function()
-    local playersTab = Tabs[7]
-    if playersTab then
-        for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("TextButton") and obj.Text == "TP" then
-                obj.BackgroundTransparency = 0.3
-
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(1, 0)
-
-                obj.Size = UDim2.new(0.15, 0, 0.7, 0)
-
-                obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
-                obj.BorderSizePixel = 2
-                obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
-
-                for _, child in pairs(obj:GetChildren()) do
-                    if child:IsA("TextLabel") then
-                        child:Destroy()
-                    end
-                end
 
                 obj.Text = "TP"
                 obj.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -4712,7 +4771,7 @@ pcall(function()
         end
     end
 
-    print("✅ TP buttons in Players tab are now transparent (30%) and round")
+    print("✅ TP buttons in Players tab are now 2x smaller, round and transparent")
 end)
 
 pcall(function()
@@ -4733,6 +4792,7 @@ pcall(function()
     print("✅ Tab buttons are now square (no rounding)")
 end)
 
+-- ===== TAB 11: CLICKER =====
 pcall(function()
     local existingTab = nil
     for i, name in ipairs(TabNames) do
@@ -5010,260 +5070,6 @@ pcall(function()
 
     print("✅ 'Clicker' tab updated - auto clicker added")
     print("📌 Alt+K - toggle auto clicker")
-    print("📌 Slider adjusts click delay (50-1000 ms)")
-end)
-
-pcall(function()
-    local clickerTab = nil
-    for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
-            clickerTab = tab
-            break
-        end
-    end
-
-    if not clickerTab then
-        print("❌ 'Clicker' tab not found")
-        return
-    end
-
-    for _, child in pairs(clickerTab:GetChildren()) do
-        child:Destroy()
-    end
-
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, 0)
-    container.BackgroundTransparency = 1
-    container.Parent = clickerTab
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
-    mainFrame.BackgroundColor3 = Library.Theme.Panel
-    mainFrame.BorderColor3 = Library.Theme.Border
-    mainFrame.BorderSizePixel = 2
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.Parent = container
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "AUTO CLICKER"
-    title.TextColor3 = Library.Theme.Text    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = mainFrame
-
-    local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, 0, 0.15, 0)
-    info.Position = UDim2.new(0, 0, 0.17, 0)
-    info.BackgroundTransparency = 1
-    info.Text = "Auto Clicker does NOT work when hovering over GUI panel"
-    info.TextColor3 = Library.Theme.Accent
-    info.TextScaled = true
-    info.Font = Enum.Font.SourceSans
-    info.Parent = mainFrame
-
-    local clickerBtn = Instance.new("TextButton")
-    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    clickerBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
-    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    clickerBtn.BorderColor3 = Library.Theme.Border
-    clickerBtn.BorderSizePixel = 2
-    clickerBtn.Text = "OFF"
-    clickerBtn.TextColor3 = Library.Theme.Text
-    clickerBtn.TextScaled = true
-    clickerBtn.Font = Enum.Font.SourceSansBold
-    clickerBtn.BackgroundTransparency = 0.3    clickerBtn.Parent = mainFrame
-
-    local clickerCorner = Instance.new("UICorner")
-    clickerCorner.CornerRadius = UDim.new(0, 36)
-    clickerCorner.Parent = clickerBtn
-
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Auto Clicker: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
-    local delayLabel = Instance.new("TextLabel")
-    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-    delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
-    delayLabel.BackgroundTransparency = 1
-    delayLabel.Text = "Delay: 100 ms"
-    delayLabel.TextColor3 = Library.Theme.Text
-    delayLabel.TextScaled = true
-    delayLabel.Font = Enum.Font.SourceSans
-    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
-    delayLabel.Parent = mainFrame
-
-    local delaySlider = Instance.new("Frame")
-    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
-    delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
-    delaySlider.BackgroundColor3 = Library.Theme.Border
-    delaySlider.BorderSizePixel = 0
-    delaySlider.Parent = mainFrame
-
-    local delayFill = Instance.new("Frame")
-    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
-    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    delayFill.BorderSizePixel = 0
-    delayFill.Parent = delaySlider
-
-    local delayButton = Instance.new("TextButton")
-    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
-    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
-    delayButton.BackgroundColor3 = Library.Theme.Text
-    delayButton.BorderColor3 = Library.Theme.Border
-    delayButton.BorderSizePixel = 2
-    delayButton.Text = ""
-    delayButton.Parent = delaySlider
-
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+K"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
-
-    local isClicking = false
-    local clickDelay = 100
-    local clickConnection = nil
-    local mouse = game.Players.LocalPlayer:GetMouse()
-
-    local function IsMouseOverGui()
-        if MenuPanel and MenuPanel.Visible then
-            local absPos = MenuPanel.AbsolutePosition
-            local absSize = MenuPanel.AbsoluteSize
-
-            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
-               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
-                return true
-            end
-
-            for _, obj in pairs(MenuPanel:GetDescendants()) do
-                if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
-                    local objAbsPos = obj.AbsolutePosition
-                    local objAbsSize = obj.AbsoluteSize
-                    if mouse.X >= objAbsPos.X and mouse.X <= objAbsPos.X + objAbsSize.X and
-                       mouse.Y >= objAbsPos.Y and mouse.Y <= objAbsPos.Y + objAbsSize.Y then
-                        return true
-                    end
-                end
-            end
-        end
-
-        if MainButton and MainButton.Visible then
-            local absPos = MainButton.AbsolutePosition
-            local absSize = MainButton.AbsoluteSize
-            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
-               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
-                return true
-            end
-        end
-
-        return false
-    end
-
-    local function DoClick()
-        if not isClicking then return end
-
-        if IsMouseOverGui() then
-            return
-        end
-
-        mouse1click()
-    end
-
-    local function EnableClicker()
-        if isClicking then return end
-        isClicking = true
-
-        clickerBtn.Text = "ON"
-        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Auto Clicker: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            if not isClicking then return end
-            DoClick()
-            task.wait(clickDelay / 1000)
-        end)
-
-        print("✅ Auto Clicker enabled")
-    end
-
-    local function DisableClicker()
-        if not isClicking then return end
-        isClicking = false
-
-        if clickConnection then
-            clickConnection:Disconnect()
-            clickConnection = nil
-        end
-
-        clickerBtn.Text = "OFF"
-        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Auto Clicker: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ Auto Clicker disabled")
-    end
-
-    local function ToggleClicker()
-        if isClicking then
-            DisableClicker()
-        else
-            EnableClicker()
-        end
-    end
-
-    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-            ToggleClicker()
-        end
-    end)
-
-    local isDragging = false
-    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = delaySlider.AbsolutePosition
-            local sliderSize = delaySlider.AbsoluteSize
-            local mouseX = input.Position.X
-
-            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            clickDelay = math.floor(50 + percent * 950)
-            delayFill.Size = UDim2.new(percent, 0, 1, 0)
-            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-            delayLabel.Text = "Delay: " .. clickDelay .. " ms"
-        end
-    end)
-
-    print("✅ 'Clicker' tab updated - auto clicker with GUI hover protection")
-    print("📌 Alt+K - toggle auto clicker")
-    print("📌 Auto Clicker does NOT work when cursor is over GUI panel")
     print("📌 Slider adjusts click delay (50-1000 ms)")
 end)
 
@@ -6017,10 +5823,6 @@ pcall(function()
         PointInfo.TextScaled = true
         PointInfo.Font = Enum.Font.SourceSans
         PointInfo.Parent = PointControl
-
-        local oldSetBtn = SetBtn
-        local oldTeleportBtn = TeleportBtn
-        local oldClearBtn = ClearBtn
 
         SetPoint = function()
             local player = game.Players.LocalPlayer
@@ -7343,8 +7145,11 @@ pcall(function()
     print("✅ Tabs are now 50% transparent")
 end)
 
-print("All systems ready! GG+ Admin Panel loaded.")
-
 -- ===== APPLY INITIAL THEME =====
 ApplyThemeColors(Library.Theme)
-print("✅ Initial theme applied")
+
+print("========================================")
+print("✅ ALL SYSTEMS READY!")
+print("📌 Menu works on FIRST click!")
+print("📌 Click GG+ button to expand/collapse")
+print("========================================")
