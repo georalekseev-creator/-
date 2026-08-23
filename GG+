@@ -111,7 +111,7 @@ local function ShowLoadingAnimation()
 
     local text = "GG+"
     local startTime = tick()
-    local duration = 3 -- Изменено с 6 на 3 секунды
+    local duration = 3
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
@@ -129,7 +129,7 @@ local function ShowLoadingAnimation()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        if not tabsShown and elapsed < 3 then -- Изменено с 5 на 3
+        if not tabsShown and elapsed < 3 then
             if elapsed - lastTabChange > 0.35 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
@@ -143,7 +143,7 @@ local function ShowLoadingAnimation()
         elseif tabsShown and elapsed < 3 then
         end
 
-        local revealProgress = math.min(elapsed * 1.5, 1) -- Ускорено появление текста
+        local revealProgress = math.min(elapsed * 1.5, 1)
         local charsToShow = math.max(1, math.floor(revealProgress * #text))
         local displayText = string.sub(text, 1, charsToShow)
         
@@ -225,7 +225,7 @@ local function ShowLoadingAnimation()
     end)
 
     task.spawn(function()
-        task.wait(6) -- Уменьшено с 12 до 6 секунд
+        task.wait(6)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -524,6 +524,7 @@ for i, name in ipairs(TabNames) do
     btn.TextColor3 = Library.Theme.Text
     btn.TextScaled = true
     btn.Font = Enum.Font.SourceSansBold
+    btn.BackgroundTransparency = 0.7
     btn.Parent = TabScrollingFrame
     TabButtons[i] = btn
 
@@ -1083,7 +1084,6 @@ PlayersListLayout.Parent = PlayersList
 local lastPlayerUpdate = 0
 local UPDATE_INTERVAL = 3
 
--- ИСПРАВЛЕННАЯ ФУНКЦИЯ ТЕЛЕПОРТАЦИИ
 local function TeleportToPlayer(targetPlayer)
     local player = game.Players.LocalPlayer
     if not player or not player.Character then
@@ -1102,13 +1102,11 @@ local function TeleportToPlayer(targetPlayer)
         return
     end
 
-    -- Пытаемся загрузить персонажа целевого игрока
     if not targetPlayer.Character then
         targetPlayer:LoadCharacter()
         task.wait(1)
     end
 
-    -- Ждем появления персонажа
     local attempts = 0
     while attempts < 5 and not targetPlayer.Character do
         task.wait(0.5)
@@ -1122,13 +1120,11 @@ local function TeleportToPlayer(targetPlayer)
 
     local targetPos = nil
     
-    -- Пытаемся найти HumanoidRootPart
     local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if targetHrp then
         targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
         print("✅ Найден HumanoidRootPart у " .. targetPlayer.Name)
     else
-        -- Ищем любую часть тела
         local parts = targetPlayer.Character:GetChildren()
         for _, part in pairs(parts) do
             if part:IsA("BasePart") then
@@ -1143,7 +1139,6 @@ local function TeleportToPlayer(targetPlayer)
         hrp.CFrame = CFrame.new(targetPos)
         print("✅ Телепортирован к " .. targetPlayer.Name .. " на позицию " .. tostring(targetPos))
     else
-        -- Если ничего не нашли, телепортируем в центр карты
         print("⚠️ Не найдены части тела у " .. targetPlayer.Name .. ", телепортируем в центр")
         hrp.CFrame = CFrame.new(0, 10, 0)
     end
@@ -1254,7 +1249,6 @@ local function UpdatePlayersListIfNeeded(force)
     end
 end
 
--- Автоматическое обновление при входе/выходе игроков
 game.Players.PlayerAdded:Connect(function()
     task.wait(0.5)
     UpdatePlayersList()
@@ -2769,13 +2763,11 @@ end)
 -- ===== FIXED: MENU STATE AND ANIMATION =====
 -- =====================================================
 
--- Глобальные переменные состояния
 local menuOpen = false
 local isCollapsed = true
 local collapseAnimating = false
 local animationConnection = nil
 
--- ===== FIXED: ANIMATE COLLAPSE =====
 local function AnimateCollapse(targetCollapsed)
     if collapseAnimating then
         return
@@ -2855,24 +2847,20 @@ local function AnimateCollapse(targetCollapsed)
     end)
 end
 
--- ===== FIXED: TOGGLE MENU (работает с первого нажатия) =====
 local function ToggleMenu()
     if collapseAnimating then
         return
     end
     
     if menuOpen and not isCollapsed then
-        -- Свернуть
         print("Toggling: Collapse")
         AnimateCollapse(true)
     elseif not menuOpen or isCollapsed then
-        -- Развернуть
         print("Toggling: Expand")
         MenuPanel.BackgroundTransparency = 0.5
         MenuPanel.Visible = true
         AnimateCollapse(false)
         
-        -- Обновить данные при открытии
         if not isCollapsed then
             UpdatePointsList()
             UpdateWalkPointsList()
@@ -2886,7 +2874,6 @@ local function ToggleMenu()
     end
 end
 
--- ===== ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЯ (панель свернута) =====
 local function InitializeMenuState()
     if MenuPanel then
         MenuPanel.Visible = false
@@ -2916,7 +2903,6 @@ local function InitializeMenuState()
     end
 end
 
--- ===== ПОДКЛЮЧЕНИЕ КНОПОК =====
 MainButton.MouseButton1Click:Connect(ToggleMenu)
 
 CloseBtn.MouseButton1Click:Connect(function()
@@ -2925,7 +2911,6 @@ CloseBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== MAIN HANDLERS =====
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
@@ -3022,7 +3007,6 @@ print("Alt+P - place platform under feet")
 print("Alt+R - X-Ray (world only, NOT GUI)")
 print("Alt+I - SPI (show players through walls)")
 
--- ===== ВЫЗОВ ИНИЦИАЛИЗАЦИИ =====
 InitializeMenuState()
 
 print("========================================")
@@ -3133,7 +3117,8 @@ pcall(function()
 end)
 
 pcall(function()
-    for _, child in pairs(MenuPanel:GetChildren()) do        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
             child:Destroy()
         end
     end
@@ -3475,12 +3460,18 @@ do
             statusLabel.Text = "Freecam: Enabled"
             statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
 
-            pcall(function()
-                if MenuPanel then
-                    menuOpen = false
-                    MenuPanel.Visible = false
-                end
-            end)
+            -- ===== FIX: СОХРАНЯЕМ СОСТОЯНИЕ МЕНЮ =====
+            if MenuPanel then
+                -- Сохраняем состояние перед скрытием
+                _G.FreecamMenuState = {
+                    wasVisible = MenuPanel.Visible,
+                    wasOpen = menuOpen,
+                    wasCollapsed = isCollapsed
+                }
+                -- Скрываем панель
+                MenuPanel.Visible = false
+                menuOpen = false
+            end
 
             print("✅ Freecam enabled. Character remains visible!")
         end
@@ -3522,6 +3513,21 @@ do
             toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
             statusLabel.Text = "Freecam: Disabled"
             statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+            -- ===== FIX: ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ МЕНЮ =====
+            if MenuPanel then
+                local savedState = _G.FreecamMenuState
+                if savedState then
+                    MenuPanel.Visible = savedState.wasVisible
+                    menuOpen = savedState.wasOpen
+                    isCollapsed = savedState.wasCollapsed
+                    if MenuPanel.Visible then
+                        MenuPanel.BackgroundTransparency = 0.5
+                    end
+                    _G.FreecamMenuState = nil
+                    print("✅ Menu state restored: visible=" .. tostring(menuOpen))
+                end
+            end
 
             print("✅ Freecam disabled. Character restored.")
         end
@@ -3637,6 +3643,7 @@ do
         print("📌 Character does NOT become transparent")
         print("📌 Smooth rotation via CFrame")
         print("📌 F9 - toggle | Alt - cursor | WASD - move")
+        print("📌 Menu state is saved and restored!")
         print("========================================")
     end
 
@@ -3759,7 +3766,7 @@ local function CreateFinalLoadingScreen()
     progressFill.Parent = progressBar
 
     local startTime = tick()
-    local duration = 3 -- 3 секунды для финальной загрузки
+    local duration = 3
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
@@ -3942,8 +3949,7 @@ pcall(function()
         infoLabel.Text = "⚠️ This button does nothing"
         infoLabel.TextColor3 = Library.Theme.Warning
         infoLabel.TextScaled = true
-        infoLabel.Font = Enum.Font.SourceSansBold
-        infoLabel.Parent = container
+        infoLabel.Font = Enum.Font.SourceSansBold        infoLabel.Parent = container
 
         local isFakeOn = false
 
@@ -7211,4 +7217,5 @@ print("========================================")
 print("✅ ALL SYSTEMS READY!")
 print("📌 Menu works on FIRST click!")
 print("📌 Click GG+ button to expand/collapse")
+print("📌 Freecam saves and restores menu state!")
 print("========================================")
