@@ -404,7 +404,7 @@ MainButton.Position = UDim2.new(0, 10, 0, 10)
 MainButton.BackgroundColor3 = Library.Theme.Panel
 MainButton.BorderColor3 = Library.Theme.Border
 MainButton.BorderSizePixel = 2
-MainButton.Image = "rbxassetid://1234567890"
+MainButton.Image = "rbxassetid://0"
 MainButton.ImageColor3 = Library.Theme.Accent
 MainButton.Parent = ScreenGui
 MainButton.ClipsDescendants = true
@@ -428,6 +428,43 @@ Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 Shadow.ImageTransparency = 0.7
 Shadow.Parent = MainButton
 
+-- ===== DRAG SYSTEM FOR MAIN BUTTON (GG+) =====
+local function SetupMainButtonDrag()
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    local isDraggingButton = false
+
+    MainButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            isDraggingButton = true
+            dragStart = input.Position
+            startPos = MainButton.Position
+            input.StopPropagation = true
+        end
+    end)
+
+    MainButton.InputChanged:Connect(function(input)
+        if dragging and isDraggingButton and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            MainButton.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    MainButton.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+            isDraggingButton = false
+        end
+    end)
+end
+
 -- Menu Panel
 local MenuPanel = Instance.new("Frame")
 MenuPanel.Name = "MenuPanel"
@@ -440,6 +477,91 @@ MenuPanel.Visible = false
 MenuPanel.Parent = ScreenGui
 MenuPanel.ClipsDescendants = true
 
+-- ===== DRAG SYSTEM FOR MENU PANEL (FIXED) =====
+local function SetupMenuDrag()
+    local isDraggingPanel = false
+    local dragStartPanel = nil
+    local startPosPanel = nil
+    local dragTarget = nil
+
+    local function CanStartDrag(input)
+        -- Проверяем, не клик ли это по кнопке GG+
+        if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+            return false
+        end
+
+        -- Получаем объект под курсором
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        if not mouse then return false end
+
+        local target = mouse.Target
+        if not target then return false end
+
+        -- Проверяем, не клик ли это по интерактивному элементу
+        local current = target
+        while current and current ~= MenuPanel do
+            -- Проверяем кнопки
+            if current:IsA("TextButton") or current:IsA("ImageButton") then
+                -- Разрешаем перетаскивание, если это сама панель или заголовок
+                if current == TitleFrame or current:IsDescendantOf(TitleFrame) then
+                    return true
+                end
+                -- Запрещаем перетаскивание по другим кнопкам
+                return false
+            end
+            
+            -- Проверяем скроллы и текстовые поля
+            if current:IsA("ScrollingFrame") or current:IsA("TextBox") or current:IsA("Slider") then
+                return false
+            end
+            
+            -- Проверяем, не клик ли это по полосе прокрутки
+            if current:IsA("Frame") and current.Name == "ScrollingFrame" then
+                return false
+            end
+            
+            current = current.Parent
+        end
+
+        -- Разрешаем перетаскивание по пустому месту панели или заголовку
+        return true
+    end
+
+    -- Начинаем перетаскивание при нажатии на панель
+    MenuPanel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if CanStartDrag(input) then
+                isDraggingPanel = true
+                dragStartPanel = input.Position
+                startPosPanel = MenuPanel.Position
+                dragTarget = MenuPanel
+                input.StopPropagation = true
+            end
+        end
+    end)
+
+    -- Движение мыши
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDraggingPanel and input.UserInputType == Enum.UserInputType.MouseMovement and dragTarget then
+            local delta = input.Position - dragStartPanel
+            MenuPanel.Position = UDim2.new(
+                startPosPanel.X.Scale,
+                startPosPanel.X.Offset + delta.X,
+                startPosPanel.Y.Scale,
+                startPosPanel.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    -- Отпускание кнопки мыши
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingPanel = false
+            dragTarget = nil
+        end
+    end)
+end
+
 -- Title
 local TitleFrame = Instance.new("Frame")
 TitleFrame.Size = UDim2.new(1, 0, 0, 50)
@@ -448,12 +570,14 @@ TitleFrame.BorderSizePixel = 0
 TitleFrame.Parent = MenuPanel
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Size = UDim2.new(1, -40, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "GG+"
 Title.TextColor3 = Library.Theme.Text
 Title.TextScaled = true
 Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleFrame
 
 local CloseBtn = Instance.new("ImageButton")
@@ -499,7 +623,8 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
-local TabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+-- Tab names with numbers
+local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
@@ -878,21 +1003,6 @@ NoclipInfo.TextScaled = true
 NoclipInfo.Font = Enum.Font.SourceSans
 NoclipInfo.Parent = NoclipFrame
 
-local HotkeysFrame = Instance.new("Frame")
-HotkeysFrame.Size = UDim2.new(1, 0, 0.2, 0)
-HotkeysFrame.Position = UDim2.new(0, 0, 0.7, 0)
-HotkeysFrame.BackgroundTransparency = 1
-HotkeysFrame.Parent = NoclipTab
-
-local HotkeyLabel = Instance.new("TextLabel")
-HotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-HotkeyLabel.BackgroundTransparency = 1
-HotkeyLabel.Text = "Hotkey: Alt+N"
-HotkeyLabel.TextColor3 = Library.Theme.Accent
-HotkeyLabel.TextScaled = true
-HotkeyLabel.Font = Enum.Font.SourceSansBold
-HotkeyLabel.Parent = HotkeysFrame
-
 -- ===== TAB 6: PLATFORMS =====
 local PlatformTab = Tabs[6]
 
@@ -1017,21 +1127,6 @@ PlatformInfo.TextColor3 = Library.Theme.Text
 PlatformInfo.TextScaled = true
 PlatformInfo.Font = Enum.Font.SourceSans
 PlatformInfo.Parent = PlatformFrame
-
-local HotkeyFramePlatform = Instance.new("Frame")
-HotkeyFramePlatform.Size = UDim2.new(1, 0, 0.08, 0)
-HotkeyFramePlatform.Position = UDim2.new(0, 0, 0.92, 0)
-HotkeyFramePlatform.BackgroundTransparency = 1
-HotkeyFramePlatform.Parent = PlatformTab
-
-local HotkeyLabelPlatform = Instance.new("TextLabel")
-HotkeyLabelPlatform.Size = UDim2.new(1, 0, 1, 0)
-HotkeyLabelPlatform.BackgroundTransparency = 1
-HotkeyLabelPlatform.Text = "Hotkey: Alt+P - place platform under feet"
-HotkeyLabelPlatform.TextColor3 = Library.Theme.Accent
-HotkeyLabelPlatform.TextScaled = true
-HotkeyLabelPlatform.Font = Enum.Font.SourceSansBold
-HotkeyLabelPlatform.Parent = HotkeyFramePlatform
 
 -- ===== TAB 7: TELEPORT TO PLAYERS =====
 local PlayersTab = Tabs[7]
@@ -1466,15 +1561,6 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.R and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-        ToggleXRay()
-    end
-end)
-
-print("✅ X-Ray fixed: affects ONLY world textures, NOT GUI and players")
-
 -- ===== TAB 9: SPI =====
 local SPITab = Tabs[9]
 
@@ -1541,16 +1627,6 @@ SPICountLabel.TextColor3 = Library.Theme.Text
 SPICountLabel.TextScaled = true
 SPICountLabel.Font = Enum.Font.SourceSans
 SPICountLabel.Parent = SPIControlFrame
-
-local SPIHotkeyLabel = Instance.new("TextLabel")
-SPIHotkeyLabel.Size = UDim2.new(1, 0, 0.12, 0)
-SPIHotkeyLabel.Position = UDim2.new(0, 0, 0.88, 0)
-SPIHotkeyLabel.BackgroundTransparency = 1
-SPIHotkeyLabel.Text = "Hotkey: Alt+I"
-SPIHotkeyLabel.TextColor3 = Library.Theme.Accent
-SPIHotkeyLabel.TextScaled = true
-SPIHotkeyLabel.Font = Enum.Font.SourceSansBold
-SPIHotkeyLabel.Parent = SPIControlFrame
 
 local function CreatePlayerHighlight(player)
     if not player or not player.Character then return nil end
@@ -1705,11 +1781,6 @@ local function ToggleSPI()
 end
 
 SPIToggleBtn.MouseButton1Click:Connect(ToggleSPI)
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.I and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ToggleSPI() end
-end)
 
 game.Players.PlayerAdded:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
 game.Players.PlayerRemoving:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
@@ -2664,101 +2735,6 @@ TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint)
 CreatePlatformBtn.MouseButton1Click:Connect(function() PlacePlatformUnderPlayer() end)
 ClearPlatformsBtn.MouseButton1Click:Connect(ClearAllPlatforms)
 
--- ===== INVISIBLE RESIZE HANDLES =====
-local MIN_PANEL_WIDTH = 400
-local MIN_PANEL_HEIGHT = 300
-local MAX_PANEL_WIDTH = 1200
-local MAX_PANEL_HEIGHT = 900
-
-local function createResizeHandle(posX, posY, anchorX, anchorY, cursor)
-    local handle = Instance.new("Frame")
-    handle.Size = UDim2.new(0, 15, 0, 15)
-    handle.Position = UDim2.new(posX, -7.5, posY, -7.5)
-    handle.BackgroundTransparency = 1
-    handle.BorderSizePixel = 0
-    handle.Parent = MenuPanel
-    handle.ZIndex = 100
-
-    local isResizing = false
-    local resizeStart = nil
-    local resizeStartSize = nil
-    local resizeStartPos = nil
-
-    handle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isResizing = true
-            resizeStart = input.Position
-            resizeStartSize = MenuPanel.Size
-            resizeStartPos = MenuPanel.Position
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = Vector2.new(input.Position.X - resizeStart.X, input.Position.Y - resizeStart.Y)
-
-            local newWidth = math.clamp(resizeStartSize.X.Offset + (delta.X * anchorX), MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
-            local newHeight = math.clamp(resizeStartSize.Y.Offset + (delta.Y * anchorY), MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
-
-            MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
-
-            local offsetX = (resizeStartSize.X.Offset - newWidth) * anchorX * 0.5
-            local offsetY = (resizeStartSize.Y.Offset - newHeight) * anchorY * 0.5
-
-            MenuPanel.Position = UDim2.new(
-                resizeStartPos.X.Scale, resizeStartPos.X.Offset + offsetX,
-                resizeStartPos.Y.Scale, resizeStartPos.Y.Offset + offsetY
-            )
-
-            TabContainer.Size = UDim2.new(1, -20, 1, -70)
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
-            isResizing = false
-            resizeStart = nil
-            resizeStartSize = nil
-            resizeStartPos = nil
-        end
-    end)
-end
-
-createResizeHandle(0, 0, -1, -1, "nwse-resize")
-createResizeHandle(0.5, 0, 0, -1, "ns-resize")
-createResizeHandle(1, 0, 1, -1, "nesw-resize")
-createResizeHandle(0, 0.5, -1, 0, "ew-resize")
-createResizeHandle(1, 0.5, 1, 0, "ew-resize")
-createResizeHandle(0, 1, -1, 1, "nesw-resize")
-createResizeHandle(0.5, 1, 0, 1, "ns-resize")
-createResizeHandle(1, 1, 1, 1, "nwse-resize")
-
--- ===== DRAGGING PANEL =====
-local dragging = false
-local dragStart = nil
-local startPos = nil
-
-MenuPanel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MenuPanel.Position
-    end
-end)
-
-MenuPanel.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        MenuPanel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-MenuPanel.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
 -- =====================================================
 -- ===== FIXED: MENU STATE AND ANIMATION =====
 -- =====================================================
@@ -3016,9 +2992,15 @@ print("📌 Click GG+ button to expand")
 print("📌 Click GG+ button again to collapse")
 print("========================================")
 
--- ===== VISIBLE BLUE RESIZE BUTTONS =====
-local RESIZE_BUTTON_SIZE = 10
-local CORNER_BUTTON_SIZE = 15
+-- ===== VISIBLE BLUE RESIZE BUTTONS (ROUND) =====
+local RESIZE_BUTTON_SIZE = 12
+local CORNER_BUTTON_SIZE = 16
+
+-- Минимальные размеры панели
+local MIN_PANEL_WIDTH = 400
+local MIN_PANEL_HEIGHT = 300
+local MAX_PANEL_WIDTH = 1200
+local MAX_PANEL_HEIGHT = 900
 
 local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, resizeY, rotation, isCorner)
     local size = isCorner and CORNER_BUTTON_SIZE or RESIZE_BUTTON_SIZE
@@ -3028,13 +3010,18 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     handle.Size = UDim2.new(0, size, 0, size)
     handle.Position = UDim2.new(posX, -halfSize, posY, -halfSize)
     handle.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
-    handle.BackgroundTransparency = 0
+    handle.BackgroundTransparency = 0.3
     handle.BorderSizePixel = 2
     handle.BorderColor3 = Color3.fromRGB(0, 150, 255)
     handle.Image = "rbxassetid://0"
     handle.Parent = MenuPanel
     handle.ZIndex = 1000
     handle.Rotation = rotation or 0
+
+    -- Делаем кнопку круглой
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = handle
 
     local arrow = Instance.new("TextLabel")
     arrow.Size = UDim2.new(1, 0, 1, 0)
@@ -3103,6 +3090,7 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     return handle
 end
 
+-- Удаляем старые невидимые зоны
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
@@ -3116,148 +3104,13 @@ pcall(function()
     end
 end)
 
+-- Удаляем старые кнопки изменения размера, которые могли остаться
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 0, 0) then
-            child:Destroy()
-        end
-    end
-end)
-
-pcall(function()
-    createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
-    createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
-    createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
-    createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
-    createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
-    createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
-    createVisibleResizeHandle(0.5, 1, 0, 1, 0, 1, 0, false)
-    createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
-end)
-
-local function createInvisibleResizeZone(posX, posY, width, height, anchorX, anchorY, resizeX, resizeY)
-    local zone = Instance.new("Frame")
-    zone.Size = UDim2.new(width, 0, height, 0)
-    zone.Position = UDim2.new(posX, 0, posY, 0)
-    zone.BackgroundTransparency = 1
-    zone.BorderSizePixel = 0
-    zone.Parent = MenuPanel
-    zone.ZIndex = 999
-
-    local isResizing = false
-    local startSize = nil
-    local startPos = nil
-    local startMousePos = nil
-
-    zone.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isResizing = true
-            startSize = MenuPanel.Size
-            startPos = MenuPanel.Position
-            startMousePos = input.Position
-            input.StopPropagation = true
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local deltaX = input.Position.X - startMousePos.X
-            local deltaY = input.Position.Y - startMousePos.Y
-
-            local newWidth = math.clamp(startSize.X.Offset + (deltaX * resizeX), MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
-            local newHeight = math.clamp(startSize.Y.Offset + (deltaY * resizeY), MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
-
-            MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
-
-            local offsetX = startPos.X.Offset
-            local offsetY = startPos.Y.Offset
-
-            if anchorX == -1 then
-                offsetX = startPos.X.Offset + (startSize.X.Offset - newWidth)
-            end
-
-            if anchorY == -1 then
-                offsetY = startPos.Y.Offset + (startSize.Y.Offset - newHeight)
-            end
-
-            MenuPanel.Position = UDim2.new(
-                startPos.X.Scale, offsetX,
-                startPos.Y.Scale, offsetY
-            )
-
-            TabContainer.Size = UDim2.new(1, -20, 1, -70)
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
-            isResizing = false
-            startSize = nil
-            startPos = nil
-            startMousePos = nil
-        end
-    end)
-end
-
-pcall(function()
-    createInvisibleResizeZone(0, 0, 0.04, 0.04, -1, -1, -1, -1)
-    createInvisibleResizeZone(0.46, 0, 0.08, 0.04, 0, -1, 0, -1)
-    createInvisibleResizeZone(0.96, 0, 0.04, 0.04, 1, -1, 1, -1)
-    createInvisibleResizeZone(0, 0.46, 0.04, 0.08, -1, 0, -1, 0)
-    createInvisibleResizeZone(0.96, 0.46, 0.04, 0.08, 1, 0, 1, 0)
-    createInvisibleResizeZone(0, 0.96, 0.04, 0.04, -1, 1, -1, 1)
-    createInvisibleResizeZone(0.46, 0.96, 0.08, 0.04, 0, 1, 0, 1)
-    createInvisibleResizeZone(0.96, 0.96, 0.04, 0.04, 1, 1, 1, 1)
-end)
-
-local function setupDrag()
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
-
-    local dragZone = Instance.new("Frame")
-    dragZone.Size = UDim2.new(1, -60, 0, 50)
-    dragZone.Position = UDim2.new(0, 0, 0, 0)
-    dragZone.BackgroundTransparency = 1
-    dragZone.BorderSizePixel = 0
-    dragZone.Parent = TitleFrame
-    dragZone.ZIndex = 50
-
-    dragZone.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = MenuPanel.Position
-            input.StopPropagation = true
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            MenuPanel.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-end
-
-pcall(setupDrag)
-
-pcall(function()
-    for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
+        if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 150, 255) then
             if child.Size and child.Size.X and child.Size.X.Offset then
-                if child.Size.X.Offset == 0 and child.Size.Y.Offset == 0 then
+                local offset = child.Size.X.Offset
+                if offset == 12 or offset == 14 or offset == 24 or offset == 28 then
                     child:Destroy()
                 end
             end
@@ -3265,9 +3118,24 @@ pcall(function()
     end
 end)
 
-print("Blue resize buttons on all walls")
-print("Normal buttons: 10x10 (3x smaller)")
-print("Corner buttons: 15x15 (2x smaller)")
+-- Создаём КРУГЛЫЕ кнопки изменения размера (все кнопки круглые)
+pcall(function()
+    -- Угловые кнопки (круглые)
+    createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
+    createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
+    createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
+    createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
+    
+    -- Кнопки на стенах (круглые)
+    createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
+    createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
+    createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
+    createVisibleResizeHandle(0.5, 1, 0, 1, 0, 1, 0, false)
+end)
+
+print("Blue resize buttons on all walls (ALL ROUND)")
+print("Normal buttons: 12x12 (round)")
+print("Corner buttons: 16x16 (round)")
 print("Color: blue (0, 100, 255)")
 print("Dragging works only by title")
 
@@ -3460,15 +3328,12 @@ do
             statusLabel.Text = "Freecam: Enabled"
             statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
 
-            -- ===== FIX: СОХРАНЯЕМ СОСТОЯНИЕ МЕНЮ =====
             if MenuPanel then
-                -- Сохраняем состояние перед скрытием
                 _G.FreecamMenuState = {
                     wasVisible = MenuPanel.Visible,
                     wasOpen = menuOpen,
                     wasCollapsed = isCollapsed
                 }
-                -- Скрываем панель
                 MenuPanel.Visible = false
                 menuOpen = false
             end
@@ -3514,7 +3379,6 @@ do
             statusLabel.Text = "Freecam: Disabled"
             statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
 
-            -- ===== FIX: ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ МЕНЮ =====
             if MenuPanel then
                 local savedState = _G.FreecamMenuState
                 if savedState then
@@ -3949,7 +3813,8 @@ pcall(function()
         infoLabel.Text = "⚠️ This button does nothing"
         infoLabel.TextColor3 = Library.Theme.Warning
         infoLabel.TextScaled = true
-        infoLabel.Font = Enum.Font.SourceSansBold        infoLabel.Parent = container
+        infoLabel.Font = Enum.Font.SourceSansBold
+        infoLabel.Parent = container
 
         local isFakeOn = false
 
@@ -4861,14 +4726,14 @@ end)
 pcall(function()
     local existingTab = nil
     for i, name in ipairs(TabNames) do
-        if name == "Clicker" then
+        if name == "11.Clicker" then
             existingTab = i
             break
         end
     end
 
     if not existingTab then
-        table.insert(TabNames, "Clicker")
+        table.insert(TabNames, "11.Clicker")
 
         local newTab = Instance.new("Frame")
         newTab.Size = UDim2.new(1, 0, 1, 0)
@@ -4882,7 +4747,7 @@ pcall(function()
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 2
-        newBtn.Text = "Clicker"
+        newBtn.Text = "11.Clicker"
         newBtn.TextColor3 = Library.Theme.Text
         newBtn.TextScaled = true
         newBtn.Font = Enum.Font.SourceSansBold
@@ -4925,7 +4790,7 @@ end)
 pcall(function()
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
+        if TabNames[i] == "11.Clicker" then
             clickerTab = tab
             break
         end
@@ -5033,21 +4898,6 @@ pcall(function()
     delayButton.Text = ""
     delayButton.Parent = delaySlider
 
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+K"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
-
     local isClicking = false
     local clickDelay = 100
     local clickConnection = nil
@@ -5141,7 +4991,7 @@ end)
 pcall(function()
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
+        if TabNames[i] == "11.Clicker" then
             clickerTab = tab
             break
         end
@@ -5248,21 +5098,6 @@ pcall(function()
     delayButton.BorderSizePixel = 2
     delayButton.Text = ""
     delayButton.Parent = delaySlider
-
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+K"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
 
     local isClicking = false
     local clickDelay = 100
@@ -5397,7 +5232,7 @@ end)
 pcall(function()
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
+        if TabNames[i] == "11.Clicker" then
             clickerTab = tab
             break
         end
@@ -5531,7 +5366,7 @@ end)
 pcall(function()
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
+        if TabNames[i] == "11.Clicker" then
             clickerTab = tab
             break
         end
@@ -5551,124 +5386,6 @@ pcall(function()
         end
     end
     print("✅ Clicker tab button has ×3 rounding")
-end)
-
-pcall(function()
-    local PointVisuals = {}
-
-    local function ClearPointVisuals()
-        for _, obj in pairs(PointVisuals) do
-            if obj and obj.Parent then
-                obj:Destroy()
-            end
-        end
-        PointVisuals = {}
-    end
-
-    local function UpdatePointVisuals()
-        ClearPointVisuals()
-
-        for i, data in ipairs(PointsData) do
-            local pos = data.pos
-
-            local sphere = Instance.new("Part")
-            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
-            sphere.Position = pos
-            sphere.Anchored = true
-            sphere.CanCollide = false
-            sphere.Material = Enum.Material.Neon
-            sphere.BrickColor = BrickColor.new("Bright blue")
-            sphere.Transparency = 0.3
-            sphere.Shape = Enum.PartType.Ball
-            sphere.Parent = workspace
-            table.insert(PointVisuals, sphere)
-
-            local highlight = Instance.new("Highlight")
-            highlight.Parent = sphere
-            highlight.FillColor = Color3.fromRGB(0, 150, 255)
-            highlight.FillTransparency = 0.3
-            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
-            highlight.OutlineTransparency = 0
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            table.insert(PointVisuals, highlight)
-
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "PointNumber"
-            billboard.Size = UDim2.new(0, 60, 0, 60)
-            billboard.StudsOffset = Vector3.new(0, 3, 0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = sphere
-            table.insert(PointVisuals, billboard)
-
-            local bgFrame = Instance.new("Frame")
-            bgFrame.Size = UDim2.new(1, 0, 1, 0)
-            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-            bgFrame.BackgroundTransparency = 0.2
-            bgFrame.BorderSizePixel = 2
-            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
-            bgFrame.Parent = billboard
-
-            local bgCorner = Instance.new("UICorner")
-            bgCorner.CornerRadius = UDim.new(1, 0)
-            bgCorner.Parent = bgFrame
-
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            numLabel.TextStrokeTransparency = 0.3
-            numLabel.Parent = bgFrame
-            table.insert(PointVisuals, numLabel)
-
-            local nameBillboard = Instance.new("BillboardGui")
-            nameBillboard.Name = "PointName"
-            nameBillboard.Size = UDim2.new(0, 200, 0, 40)
-            nameBillboard.StudsOffset = Vector3.new(0, -1, 0)
-            nameBillboard.AlwaysOnTop = true
-            nameBillboard.Parent = sphere
-            table.insert(PointVisuals, nameBillboard)
-
-            local nameLabel = Instance.new("TextLabel")
-            nameLabel.Size = UDim2.new(1, 0, 1, 0)
-            nameLabel.BackgroundTransparency = 1
-            nameLabel.Text = data.name
-            nameLabel.TextColor3 = Color3.fromRGB(200, 230, 255)
-            nameLabel.TextScaled = true
-            nameLabel.Font = Enum.Font.SourceSansBold
-            nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            nameLabel.TextStrokeTransparency = 0.3
-            nameLabel.Parent = nameBillboard
-            table.insert(PointVisuals, nameLabel)
-        end
-    end
-
-    local originalUpdatePointsList = UpdatePointsList
-
-    UpdatePointsList = function()
-        originalUpdatePointsList()
-        UpdatePointVisuals()
-    end
-
-    local originalSetPoint = SetPoint
-    SetPoint = function()
-        originalSetPoint()
-        UpdatePointVisuals()
-    end
-
-    task.wait(0.5)
-    UpdatePointVisuals()
-
-    game.Players.LocalPlayer.CharacterAdded:Connect(function()
-        task.wait(1)
-        UpdatePointVisuals()
-    end)
-
-    print("✅ Points are now visible in the world as glowing spheres with numbers")
-    print("✅ Numbering updates automatically when adding/deleting points")
 end)
 
 pcall(function()
@@ -6783,14 +6500,14 @@ end)
 pcall(function()
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
-        if name == "Speed" then
+        if name == "12.Speed" then
             speedTabIndex = i
             break
         end
     end
 
     if not speedTabIndex then
-        table.insert(TabNames, "Speed")
+        table.insert(TabNames, "12.Speed")
 
         local newTab = Instance.new("Frame")
         newTab.Size = UDim2.new(1, 0, 1, 0)
@@ -6804,7 +6521,7 @@ pcall(function()
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 2
-        newBtn.Text = "Speed"
+        newBtn.Text = "12.Speed"
         newBtn.TextColor3 = Library.Theme.Text
         newBtn.TextScaled = true
         newBtn.Font = Enum.Font.SourceSansBold
@@ -6933,21 +6650,6 @@ pcall(function()
     speedButton.BorderSizePixel = 2
     speedButton.Text = ""
     speedButton.Parent = speedSlider
-
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.8, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+M"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
 
     local SpeedEnabled = false
     local TargetSpeed = 16
@@ -7130,7 +6832,7 @@ pcall(function()
 
     local clickerTab = nil
     for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "Clicker" then
+        if TabNames[i] == "11.Clicker" then
             clickerTab = tab
             break
         end
@@ -7151,7 +6853,7 @@ pcall(function()
 
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
-        if name == "Speed" then
+        if name == "12.Speed" then
             speedTabIndex = i
             break
         end
@@ -7210,6 +6912,10 @@ pcall(function()
     print("✅ Tabs are now 50% transparent")
 end)
 
+-- ===== SETUP DRAG SYSTEMS =====
+SetupMainButtonDrag()
+SetupMenuDrag()
+
 -- ===== APPLY INITIAL THEME =====
 ApplyThemeColors(Library.Theme)
 
@@ -7217,5 +6923,11 @@ print("========================================")
 print("✅ ALL SYSTEMS READY!")
 print("📌 Menu works on FIRST click!")
 print("📌 Click GG+ button to expand/collapse")
+print("📌 Drag GG+ button to move it")
+print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
 print("📌 Freecam saves and restores menu state!")
+print("📌 Resize buttons are now ROUND!")
 print("========================================")
+
+-- Запуск анимации загрузки
+ShowLoadingAnimation()
