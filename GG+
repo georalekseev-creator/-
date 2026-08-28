@@ -53,7 +53,7 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed", "Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 30)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -485,37 +485,29 @@ local function SetupMenuDrag()
     local dragTarget = nil
 
     local function CanStartDrag(input)
-        -- Проверяем, не клик ли это по кнопке GG+
         if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
             return false
         end
 
-        -- Получаем объект под курсором
         local mouse = game.Players.LocalPlayer:GetMouse()
         if not mouse then return false end
 
         local target = mouse.Target
         if not target then return false end
 
-        -- Проверяем, не клик ли это по интерактивному элементу
         local current = target
         while current and current ~= MenuPanel do
-            -- Проверяем кнопки
             if current:IsA("TextButton") or current:IsA("ImageButton") then
-                -- Разрешаем перетаскивание, если это сама панель или заголовок
                 if current == TitleFrame or current:IsDescendantOf(TitleFrame) then
                     return true
                 end
-                -- Запрещаем перетаскивание по другим кнопкам
                 return false
             end
             
-            -- Проверяем скроллы и текстовые поля
             if current:IsA("ScrollingFrame") or current:IsA("TextBox") or current:IsA("Slider") then
                 return false
             end
             
-            -- Проверяем, не клик ли это по полосе прокрутки
             if current:IsA("Frame") and current.Name == "ScrollingFrame" then
                 return false
             end
@@ -523,11 +515,9 @@ local function SetupMenuDrag()
             current = current.Parent
         end
 
-        -- Разрешаем перетаскивание по пустому месту панели или заголовку
         return true
     end
 
-    -- Начинаем перетаскивание при нажатии на панель
     MenuPanel.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             if CanStartDrag(input) then
@@ -540,7 +530,6 @@ local function SetupMenuDrag()
         end
     end)
 
-    -- Движение мыши
     game:GetService("UserInputService").InputChanged:Connect(function(input)
         if isDraggingPanel and input.UserInputType == Enum.UserInputType.MouseMovement and dragTarget then
             local delta = input.Position - dragStartPanel
@@ -553,7 +542,6 @@ local function SetupMenuDrag()
         end
     end)
 
-    -- Отпускание кнопки мыши
     game:GetService("UserInputService").InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDraggingPanel = false
@@ -624,7 +612,7 @@ local TabButtons = {}
 local CurrentTab = 1
 
 -- Tab names with numbers
-local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed"}
+local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
@@ -1182,18 +1170,18 @@ local UPDATE_INTERVAL = 3
 local function TeleportToPlayer(targetPlayer)
     local player = game.Players.LocalPlayer
     if not player or not player.Character then
-        print("❌ Не найден игрок или персонаж")
+        print("❌ Player or character not found")
         return
     end
 
     if not targetPlayer then
-        print("❌ Целевой игрок не найден")
+        print("❌ Target player not found")
         return
     end
 
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then
-        print("❌ Нет HumanoidRootPart у игрока")
+        print("❌ No HumanoidRootPart for player")
         return
     end
 
@@ -1209,7 +1197,7 @@ local function TeleportToPlayer(targetPlayer)
     end
 
     if not targetPlayer.Character then
-        print("❌ Не удалось загрузить персонажа " .. targetPlayer.Name)
+        print("❌ Could not load character for " .. targetPlayer.Name)
         return
     end
 
@@ -1218,13 +1206,13 @@ local function TeleportToPlayer(targetPlayer)
     local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if targetHrp then
         targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
-        print("✅ Найден HumanoidRootPart у " .. targetPlayer.Name)
+        print("✅ Found HumanoidRootPart for " .. targetPlayer.Name)
     else
         local parts = targetPlayer.Character:GetChildren()
         for _, part in pairs(parts) do
             if part:IsA("BasePart") then
                 targetPos = part.Position + Vector3.new(0, 3, 0)
-                print("✅ Найдена часть тела у " .. targetPlayer.Name)
+                print("✅ Found body part for " .. targetPlayer.Name)
                 break
             end
         end
@@ -1232,9 +1220,9 @@ local function TeleportToPlayer(targetPlayer)
 
     if targetPos then
         hrp.CFrame = CFrame.new(targetPos)
-        print("✅ Телепортирован к " .. targetPlayer.Name .. " на позицию " .. tostring(targetPos))
+        print("✅ Teleported to " .. targetPlayer.Name .. " at position " .. tostring(targetPos))
     else
-        print("⚠️ Не найдены части тела у " .. targetPlayer.Name .. ", телепортируем в центр")
+        print("⚠️ No body parts found for " .. targetPlayer.Name .. ", teleporting to center")
         hrp.CFrame = CFrame.new(0, 10, 0)
     end
 end
@@ -2973,7 +2961,7 @@ end)
 print("Admin Panel loaded!")
 print("Tabs are now VERTICALLY positioned on the left")
 print("Arrow switching between tabs removed")
-print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed")
+print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed, Forward")
 print("Alt+C - click-teleport")
 print("Alt+F - flight with run animation (WASD + Space/Ctrl)")
 print("Alt+W - start/pause walk | Alt+X - add walk point")
@@ -2996,7 +2984,6 @@ print("========================================")
 local RESIZE_BUTTON_SIZE = 12
 local CORNER_BUTTON_SIZE = 16
 
--- Минимальные размеры панели
 local MIN_PANEL_WIDTH = 400
 local MIN_PANEL_HEIGHT = 300
 local MAX_PANEL_WIDTH = 1200
@@ -3018,7 +3005,6 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     handle.ZIndex = 1000
     handle.Rotation = rotation or 0
 
-    -- Делаем кнопку круглой
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = handle
@@ -3090,7 +3076,6 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     return handle
 end
 
--- Удаляем старые невидимые зоны
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
@@ -3104,7 +3089,6 @@ pcall(function()
     end
 end)
 
--- Удаляем старые кнопки изменения размера, которые могли остаться
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("ImageButton") and child.BackgroundColor3 == Color3.fromRGB(0, 150, 255) then
@@ -3118,15 +3102,12 @@ pcall(function()
     end
 end)
 
--- Создаём КРУГЛЫЕ кнопки изменения размера (все кнопки круглые)
 pcall(function()
-    -- Угловые кнопки (круглые)
     createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
     createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
     createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
     createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
     
-    -- Кнопки на стенах (круглые)
     createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
     createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
     createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
@@ -3573,7 +3554,7 @@ local function CreateFinalLoadingScreen()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed"}
+    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed", "Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 30)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -6912,6 +6893,258 @@ pcall(function()
     print("✅ Tabs are now 50% transparent")
 end)
 
+-- ===== TAB 13: FORWARD =====
+pcall(function()
+    local forwardTabIndex = nil
+    for i, name in ipairs(TabNames) do
+        if name == "13.Forward" then
+            forwardTabIndex = i
+            break
+        end
+    end
+
+    if not forwardTabIndex then
+        table.insert(TabNames, "13.Forward")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 2
+        newBtn.Text = "13.Forward"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+
+        forwardTabIndex = #Tabs
+    end
+
+    local forwardTab = Tabs[forwardTabIndex]
+    if not forwardTab then return end
+
+    for _, child in pairs(forwardTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = forwardTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "FORWARD TELEPORT"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -20, 0.12, 0)
+    info.Position = UDim2.new(0, 10, 0.18, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Teleports you forward in the direction you are looking"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Parent = mainFrame
+
+    local distanceLabel = Instance.new("TextLabel")
+    distanceLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    distanceLabel.Position = UDim2.new(0.05, 0, 0.4, 0)
+    distanceLabel.BackgroundTransparency = 1
+    distanceLabel.Text = "Distance: 3 m"
+    distanceLabel.TextColor3 = Library.Theme.Text
+    distanceLabel.TextScaled = true
+    distanceLabel.Font = Enum.Font.SourceSansBold
+    distanceLabel.TextXAlignment = Enum.TextXAlignment.Left
+    distanceLabel.Parent = mainFrame
+
+    local distanceSlider = Instance.new("Frame")
+    distanceSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    distanceSlider.Position = UDim2.new(0.35, 0, 0.44, 0)
+    distanceSlider.BackgroundColor3 = Library.Theme.Border
+    distanceSlider.BorderSizePixel = 0
+    distanceSlider.Parent = mainFrame
+
+    local distanceFill = Instance.new("Frame")
+    distanceFill.Size = UDim2.new(0.0408, 0, 1, 0)
+    distanceFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    distanceFill.BorderSizePixel = 0
+    distanceFill.Parent = distanceSlider
+
+    local distanceButton = Instance.new("TextButton")
+    distanceButton.Size = UDim2.new(0, 15, 1.8, 0)
+    distanceButton.Position = UDim2.new(0.0408, -7.5, -0.4, 0)
+    distanceButton.BackgroundColor3 = Library.Theme.Text
+    distanceButton.BorderColor3 = Library.Theme.Border
+    distanceButton.BorderSizePixel = 2
+    distanceButton.Text = ""
+    distanceButton.Parent = distanceSlider
+
+    local forwardBtn = Instance.new("TextButton")
+    forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
+    forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
+    forwardBtn.BackgroundColor3 = Library.Theme.Success
+    forwardBtn.BorderColor3 = Library.Theme.Border
+    forwardBtn.BorderSizePixel = 2
+    forwardBtn.Text = "FORWARD"
+    forwardBtn.TextColor3 = Library.Theme.Text
+    forwardBtn.TextScaled = true
+    forwardBtn.Font = Enum.Font.SourceSansBold
+    forwardBtn.BackgroundTransparency = 0.3
+    forwardBtn.Parent = mainFrame
+
+    local forwardCorner = Instance.new("UICorner")
+    forwardCorner.CornerRadius = UDim.new(0, 36)
+    forwardCorner.Parent = forwardBtn
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.85, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Ready"
+    statusLabel.TextColor3 = Library.Theme.Text
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local forwardDistance = 3
+    local MIN_DISTANCE = 1
+    local MAX_DISTANCE = 50
+
+    local function UpdateSlider()
+        local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
+        distanceFill.Size = UDim2.new(percent, 0, 1, 0)
+        distanceButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
+    end
+
+    local function DoForwardTeleport()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            statusLabel.Text = "Error: No character"
+            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+            return
+        end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            statusLabel.Text = "Error: No HumanoidRootPart"
+            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+            return
+        end
+
+        local camera = workspace.CurrentCamera
+        if not camera then
+            statusLabel.Text = "Error: No camera"
+            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+            return
+        end
+
+        local lookVector = camera.CFrame.LookVector
+        local newPos = hrp.Position + lookVector * forwardDistance
+
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+        raycastParams.FilterDescendantsInstances = {player.Character}
+
+        local origin = newPos + Vector3.new(0, 5, 0)
+        local direction = Vector3.new(0, -10, 0)
+        local rayResult = workspace:Raycast(origin, direction, raycastParams)
+
+        local adjustedPos = newPos
+
+        if rayResult then
+            local normal = rayResult.Normal
+            local distanceToGround = 1.5
+
+            if normal.Y > 0.5 then
+                adjustedPos = newPos + Vector3.new(0, distanceToGround, 0)
+            elseif math.abs(normal.Y) < 0.5 then
+                adjustedPos = newPos + normal * distanceToGround
+            end
+        end
+
+        hrp.CFrame = CFrame.new(adjustedPos)
+
+        statusLabel.Text = "Teleported " .. math.floor(forwardDistance) .. "m forward"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        spawn(function()
+            task.wait(2)
+            if statusLabel then
+                statusLabel.Text = "Ready"
+                statusLabel.TextColor3 = Library.Theme.Text
+            end
+        end)
+
+        print("✅ Teleported " .. forwardDistance .. " meters forward")
+    end
+
+    forwardBtn.MouseButton1Click:Connect(DoForwardTeleport)
+
+    local isDragging = false
+    distanceButton.MouseButton1Down:Connect(function() isDragging = true end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = distanceSlider.AbsolutePosition
+            local sliderSize = distanceSlider.AbsoluteSize
+            local mouseX = input.Position.X
+
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            forwardDistance = math.floor(MIN_DISTANCE + percent * (MAX_DISTANCE - MIN_DISTANCE))
+            UpdateSlider()
+        end
+    end)
+
+    UpdateSlider()
+
+    print("========================================")
+    print("✅ 'FORWARD' TAB ADDED!")
+    print("📌 Button 'FORWARD' - teleports you forward")
+    print("📌 Slider sets distance (1-50 meters)")
+    print("📌 Default: 3 meters")
+    print("📌 Teleports in camera direction")
+    print("========================================")
+end)
+
 -- ===== SETUP DRAG SYSTEMS =====
 SetupMainButtonDrag()
 SetupMenuDrag()
@@ -6927,6 +7160,7 @@ print("📌 Drag GG+ button to move it")
 print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
 print("📌 Freecam saves and restores menu state!")
 print("📌 Resize buttons are now ROUND!")
+print("📌 'Forward' tab added - teleport forward with slider (1-50m)")
 print("========================================")
 
 -- Запуск анимации загрузки
