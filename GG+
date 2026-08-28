@@ -53,7 +53,8 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed", "Forward"}
+    -- Названия вкладок с нумерацией (как в меню)
+    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 30)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -111,11 +112,11 @@ local function ShowLoadingAnimation()
 
     local text = "GG+"
     local startTime = tick()
-    local duration = 3
+    local duration = 5.0
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
-    local tabIndex = 1
+    local tabIndex = 0
     local lastTabChange = 0
     local tabsShown = false
 
@@ -129,18 +130,22 @@ local function ShowLoadingAnimation()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        if not tabsShown and elapsed < 3 then
-            if elapsed - lastTabChange > 0.35 then
+        -- Показываем названия вкладок с нумерацией по порядку
+        if not tabsShown and elapsed < 4.5 then
+            if elapsed - lastTabChange > 0.34 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
-                if tabIndex > #tabNames then 
-                    tabsShown = true
-                    tabLabel.Text = "All systems loaded!"
-                else
+                if tabIndex <= #tabNames then
                     tabLabel.Text = tabNames[tabIndex]
+                else
+                    tabsShown = true
+                    -- Показываем 13-ю вкладку на 1.5 секунды раньше (сразу после 12-й)
+                    tabLabel.Text = "13.Forward"
                 end
             end
-        elseif tabsShown and elapsed < 3 then
+        elseif tabsShown and elapsed < 4.5 then
+            -- Оставляем текст "13.Forward"
+            tabLabel.Text = "13.Forward"
         end
 
         local revealProgress = math.min(elapsed * 1.5, 1)
@@ -185,7 +190,7 @@ local function ShowLoadingAnimation()
             timeLabel.Text = "100% - Complete!"
             textLabel.Text = "GG+"
             if not tabsShown then
-                tabLabel.Text = "All systems loaded!"
+                tabLabel.Text = "13.Forward"
             end
 
             task.wait(0.8)
@@ -225,7 +230,7 @@ local function ShowLoadingAnimation()
     end)
 
     task.spawn(function()
-        task.wait(6)
+        task.wait(6.5)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -3554,7 +3559,7 @@ local function CreateFinalLoadingScreen()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"Points", "Click-TP", "Fly", "Walk", "Noclip", "Platforms", "Players", "X-Ray", "SPI", "Freecam", "Clicker", "Speed", "Forward"}
+    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 30)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -3611,11 +3616,11 @@ local function CreateFinalLoadingScreen()
     progressFill.Parent = progressBar
 
     local startTime = tick()
-    local duration = 3
+    local duration = 5.0
     local animationComplete = false
     local line1Shown = false
     local line2Shown = false
-    local tabIndex = 1
+    local tabIndex = 0
     local lastTabChange = 0
     local tabsShown = false
 
@@ -3629,18 +3634,22 @@ local function CreateFinalLoadingScreen()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        if not tabsShown and elapsed < 3 then
-            if elapsed - lastTabChange > 0.35 then
+        -- Показываем названия вкладок с нумерацией по порядку
+        if not tabsShown and elapsed < 4.5 then
+            if elapsed - lastTabChange > 0.34 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
-                if tabIndex > #tabNames then 
-                    tabsShown = true
-                    tabLabel.Text = "All systems loaded!"
-                else
+                if tabIndex <= #tabNames then
                     tabLabel.Text = tabNames[tabIndex]
+                else
+                    tabsShown = true
+                    -- Показываем 13-ю вкладку на 1.5 секунды раньше (сразу после 12-й)
+                    tabLabel.Text = "13.Forward"
                 end
             end
-        elseif tabsShown and elapsed < 3 then
+        elseif tabsShown and elapsed < 4.5 then
+            -- Оставляем текст "13.Forward"
+            tabLabel.Text = "13.Forward"
         end
 
         local dots = math.floor(elapsed * 2) % 4
@@ -3672,7 +3681,7 @@ local function CreateFinalLoadingScreen()
             subtitle.Text = "READY!"
             timeLabel.Text = "100% - Complete!"
             if not tabsShown then
-                tabLabel.Text = "All systems loaded!"
+                tabLabel.Text = "13.Forward"
             end
 
             task.wait(0.8)
@@ -3709,7 +3718,7 @@ local function CreateFinalLoadingScreen()
     end)
 
     task.spawn(function()
-        task.wait(6)
+        task.wait(6.5)
         if loadingGui and loadingGui.Parent then
             loadingGui:Destroy()
             if connection then connection:Disconnect() end
@@ -3968,8 +3977,7 @@ pcall(function()
     end
 
     local function enableXRay()
-        if xrayEnabled then return end
-        xrayEnabled = true
+        if xrayEnabled then return end        xrayEnabled = true
 
         originalTransparencies = {}
 
@@ -6989,6 +6997,7 @@ pcall(function()
     distanceLabel.TextXAlignment = Enum.TextXAlignment.Left
     distanceLabel.Parent = mainFrame
 
+    -- Slider БЕЗ скругления (как во вкладке Fly)
     local distanceSlider = Instance.new("Frame")
     distanceSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
     distanceSlider.Position = UDim2.new(0.35, 0, 0.44, 0)
@@ -7011,6 +7020,7 @@ pcall(function()
     distanceButton.Text = ""
     distanceButton.Parent = distanceSlider
 
+    -- Кнопка FORWARD с СКРУГЛЕНИЕМ как во вкладке Fly (36px)
     local forwardBtn = Instance.new("TextButton")
     forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
     forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
@@ -7142,6 +7152,9 @@ pcall(function()
     print("📌 Slider sets distance (1-50 meters)")
     print("📌 Default: 3 meters")
     print("📌 Teleports in camera direction")
+    print("📌 Slider has NO rounded corners (like Fly tab)")
+    print("📌 BUTTON has rounded corners (36px like Fly tab)")
+    print("📌 ALL buttons in Forward tab have rounded corners (36px)")
     print("========================================")
 end)
 
@@ -7161,6 +7174,10 @@ print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
 print("📌 Freecam saves and restores menu state!")
 print("📌 Resize buttons are now ROUND!")
 print("📌 'Forward' tab added - teleport forward with slider (1-50m)")
+print("📌 Loading screen shows tab names WITH numbers (1.Points...13.Forward)")
+print("📌 13.Forward appears 1.5 seconds earlier")
+print("📌 Forward button has rounding (36px) like in Fly tab")
+print("📌 ALL buttons in Forward tab have rounded corners (36px)")
 print("========================================")
 
 -- Запуск анимации загрузки
