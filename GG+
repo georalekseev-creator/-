@@ -1,4 +1,4 @@
--- Admin Panel - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + Invisible Resize Zones
+-- Admin Panel - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -25,8 +25,8 @@ local function ShowLoadingAnimation()
     background2.ZIndex = 998
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 350)
-    container.Position = UDim2.new(0.5, -250, 0.5, -175)
+    container.Size = UDim2.new(0, 500, 0, 380)
+    container.Position = UDim2.new(0.5, -250, 0.5, -190)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
@@ -45,7 +45,7 @@ local function ShowLoadingAnimation()
 
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(1, 0, 0, 30)
-    subtitle.Position = UDim2.new(0, 0, 0.2, 0)
+    subtitle.Position = UDim2.new(0, 0, 0.18, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
     subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
@@ -53,7 +53,6 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    -- Названия вкладок с нумерацией (как в меню)
     local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 30)
@@ -65,9 +64,20 @@ local function ShowLoadingAnimation()
     tabLabel.Font = Enum.Font.SourceSans
     tabLabel.Parent = container
 
+    local allLoadedLabel = Instance.new("TextLabel")
+    allLoadedLabel.Size = UDim2.new(1, 0, 0, 30)
+    allLoadedLabel.Position = UDim2.new(0, 0, 0.44, 0)
+    allLoadedLabel.BackgroundTransparency = 1
+    allLoadedLabel.Text = ""
+    allLoadedLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+    allLoadedLabel.TextScaled = true
+    allLoadedLabel.Font = Enum.Font.SourceSansBold
+    allLoadedLabel.TextTransparency = 1
+    allLoadedLabel.Parent = container
+
     local timeLabel = Instance.new("TextLabel")
     timeLabel.Size = UDim2.new(1, 0, 0, 30)
-    timeLabel.Position = UDim2.new(0, 0, 0.48, 0)
+    timeLabel.Position = UDim2.new(0, 0, 0.56, 0)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = "0%"
     timeLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
@@ -77,7 +87,7 @@ local function ShowLoadingAnimation()
 
     local line1Label = Instance.new("TextLabel")
     line1Label.Size = UDim2.new(1, 0, 0, 30)
-    line1Label.Position = UDim2.new(0, 0, 0.6, 0)
+    line1Label.Position = UDim2.new(0, 0, 0.68, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
     line1Label.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -88,7 +98,7 @@ local function ShowLoadingAnimation()
 
     local line2Label = Instance.new("TextLabel")
     line2Label.Size = UDim2.new(1, 0, 0, 30)
-    line2Label.Position = UDim2.new(0, 0, 0.72, 0)
+    line2Label.Position = UDim2.new(0, 0, 0.78, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
     line2Label.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -99,7 +109,7 @@ local function ShowLoadingAnimation()
 
     local progressBar = Instance.new("Frame")
     progressBar.Size = UDim2.new(0.8, 0, 0, 6)
-    progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
+    progressBar.Position = UDim2.new(0.1, 0, 0.87, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
     progressBar.Parent = container
@@ -118,7 +128,8 @@ local function ShowLoadingAnimation()
     local line2Shown = false
     local tabIndex = 0
     local lastTabChange = 0
-    local tabsShown = false
+    local allTabsShown = false
+    local allLoadedShown = false
 
     local connection
 
@@ -130,22 +141,29 @@ local function ShowLoadingAnimation()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        -- Показываем названия вкладок с нумерацией по порядку
-        if not tabsShown and elapsed < 4.5 then
+        if elapsed < 4.5 then
             if elapsed - lastTabChange > 0.34 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
                 if tabIndex <= #tabNames then
                     tabLabel.Text = tabNames[tabIndex]
-                else
-                    tabsShown = true
-                    -- Показываем 13-ю вкладку на 1.5 секунды раньше (сразу после 12-й)
-                    tabLabel.Text = "13.Forward"
                 end
             end
-        elseif tabsShown and elapsed < 4.5 then
-            -- Оставляем текст "13.Forward"
-            tabLabel.Text = "13.Forward"
+        else
+            if not allTabsShown then
+                allTabsShown = true
+                tabLabel.Text = "13.Forward"
+                
+                allLoadedLabel.Text = "All tabs loaded!"
+                allLoadedLabel.TextTransparency = 1
+                allLoadedShown = true
+                spawn(function()
+                    for i = 0, 1, 0.03 do
+                        allLoadedLabel.TextTransparency = 1 - i
+                        task.wait(0.02)
+                    end
+                end)
+            end
         end
 
         local revealProgress = math.min(elapsed * 1.5, 1)
@@ -188,9 +206,14 @@ local function ShowLoadingAnimation()
             animationComplete = true
             subtitle.Text = "READY!"
             timeLabel.Text = "100% - Complete!"
-            textLabel.Text = "GG+"
-            if not tabsShown then
+            if not allTabsShown then
                 tabLabel.Text = "13.Forward"
+            end
+            
+            if not allLoadedShown then
+                allLoadedLabel.Text = "All tabs loaded!"
+                allLoadedLabel.TextTransparency = 0
+                allLoadedShown = true
             end
 
             task.wait(0.8)
@@ -217,6 +240,7 @@ local function ShowLoadingAnimation()
                     subtitle.TextTransparency = transparency
                     timeLabel.TextTransparency = transparency
                     tabLabel.TextTransparency = transparency
+                    allLoadedLabel.TextTransparency = transparency
 
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
                     line1Label.TextTransparency = math.min(lineTransparency, 1)
@@ -616,7 +640,6 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
--- Tab names with numbers
 local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
@@ -2985,9 +3008,9 @@ print("📌 Click GG+ button to expand")
 print("📌 Click GG+ button again to collapse")
 print("========================================")
 
--- ===== VISIBLE BLUE RESIZE BUTTONS (ROUND) =====
-local RESIZE_BUTTON_SIZE = 12
-local CORNER_BUTTON_SIZE = 16
+-- ===== VISIBLE BLUE RESIZE BUTTONS - ALL FULL ROUND! =====
+local RESIZE_BUTTON_SIZE = 14
+local CORNER_BUTTON_SIZE = 18
 
 local MIN_PANEL_WIDTH = 400
 local MIN_PANEL_HEIGHT = 300
@@ -3002,14 +3025,15 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     handle.Size = UDim2.new(0, size, 0, size)
     handle.Position = UDim2.new(posX, -halfSize, posY, -halfSize)
     handle.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
-    handle.BackgroundTransparency = 0.3
+    handle.BackgroundTransparency = 0.25
     handle.BorderSizePixel = 2
-    handle.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    handle.BorderColor3 = Color3.fromRGB(0, 200, 255)
     handle.Image = "rbxassetid://0"
     handle.Parent = MenuPanel
     handle.ZIndex = 1000
     handle.Rotation = rotation or 0
 
+    -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = handle
@@ -3108,20 +3132,22 @@ pcall(function()
 end)
 
 pcall(function()
+    -- Угловые кнопки - ПОЛНЫЙ КРУГ!
     createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
     createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
     createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
     createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
     
+    -- Кнопки по стенкам - ПОЛНЫЙ КРУГ!
     createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
     createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
     createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
     createVisibleResizeHandle(0.5, 1, 0, 1, 0, 1, 0, false)
 end)
 
-print("Blue resize buttons on all walls (ALL ROUND)")
-print("Normal buttons: 12x12 (round)")
-print("Corner buttons: 16x16 (round)")
+print("Blue resize buttons on all walls - ALL FULL ROUND!")
+print("Normal buttons: 14x14 (full round)")
+print("Corner buttons: 18x18 (full round)")
 print("Color: blue (0, 100, 255)")
 print("Dragging works only by title")
 
@@ -3155,8 +3181,7 @@ do
         local desc = Instance.new("TextLabel")
         desc.Size = UDim2.new(1, -20, 0.15, 0)
         desc.Position = UDim2.new(0, 10, 0.17, 0)
-        desc.BackgroundTransparency = 1
-        desc.Text = "Smooth rotation without jerking, character visible"
+        desc.BackgroundTransparency = 1        desc.Text = "Smooth rotation without jerking, character visible"
         desc.TextColor3 = Library.Theme.Accent
         desc.TextScaled = true
         desc.Font = Enum.Font.SourceSans
@@ -3531,8 +3556,8 @@ local function CreateFinalLoadingScreen()
     background2.ZIndex = 998
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 350)
-    container.Position = UDim2.new(0.5, -250, 0.5, -175)
+    container.Size = UDim2.new(0, 500, 0, 380)
+    container.Position = UDim2.new(0.5, -250, 0.5, -190)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
@@ -3551,7 +3576,7 @@ local function CreateFinalLoadingScreen()
 
     local subtitle = Instance.new("TextLabel")
     subtitle.Size = UDim2.new(1, 0, 0, 30)
-    subtitle.Position = UDim2.new(0, 0, 0.2, 0)
+    subtitle.Position = UDim2.new(0, 0, 0.18, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
     subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
@@ -3570,9 +3595,20 @@ local function CreateFinalLoadingScreen()
     tabLabel.Font = Enum.Font.SourceSans
     tabLabel.Parent = container
 
+    local allLoadedLabel = Instance.new("TextLabel")
+    allLoadedLabel.Size = UDim2.new(1, 0, 0, 30)
+    allLoadedLabel.Position = UDim2.new(0, 0, 0.44, 0)
+    allLoadedLabel.BackgroundTransparency = 1
+    allLoadedLabel.Text = ""
+    allLoadedLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+    allLoadedLabel.TextScaled = true
+    allLoadedLabel.Font = Enum.Font.SourceSansBold
+    allLoadedLabel.TextTransparency = 1
+    allLoadedLabel.Parent = container
+
     local timeLabel = Instance.new("TextLabel")
     timeLabel.Size = UDim2.new(1, 0, 0, 30)
-    timeLabel.Position = UDim2.new(0, 0, 0.48, 0)
+    timeLabel.Position = UDim2.new(0, 0, 0.56, 0)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = "0%"
     timeLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
@@ -3582,7 +3618,7 @@ local function CreateFinalLoadingScreen()
 
     local line1Label = Instance.new("TextLabel")
     line1Label.Size = UDim2.new(1, 0, 0, 30)
-    line1Label.Position = UDim2.new(0, 0, 0.6, 0)
+    line1Label.Position = UDim2.new(0, 0, 0.68, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
     line1Label.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -3593,7 +3629,7 @@ local function CreateFinalLoadingScreen()
 
     local line2Label = Instance.new("TextLabel")
     line2Label.Size = UDim2.new(1, 0, 0, 30)
-    line2Label.Position = UDim2.new(0, 0, 0.72, 0)
+    line2Label.Position = UDim2.new(0, 0, 0.78, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
     line2Label.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -3604,7 +3640,7 @@ local function CreateFinalLoadingScreen()
 
     local progressBar = Instance.new("Frame")
     progressBar.Size = UDim2.new(0.8, 0, 0, 6)
-    progressBar.Position = UDim2.new(0.1, 0, 0.85, 0)
+    progressBar.Position = UDim2.new(0.1, 0, 0.87, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
     progressBar.Parent = container
@@ -3622,7 +3658,8 @@ local function CreateFinalLoadingScreen()
     local line2Shown = false
     local tabIndex = 0
     local lastTabChange = 0
-    local tabsShown = false
+    local allTabsShown = false
+    local allLoadedShown = false
 
     local connection
 
@@ -3634,22 +3671,29 @@ local function CreateFinalLoadingScreen()
         local percent = math.floor(progress * 100)
         timeLabel.Text = percent .. "%"
 
-        -- Показываем названия вкладок с нумерацией по порядку
-        if not tabsShown and elapsed < 4.5 then
+        if elapsed < 4.5 then
             if elapsed - lastTabChange > 0.34 then
                 lastTabChange = elapsed
                 tabIndex = tabIndex + 1
                 if tabIndex <= #tabNames then
                     tabLabel.Text = tabNames[tabIndex]
-                else
-                    tabsShown = true
-                    -- Показываем 13-ю вкладку на 1.5 секунды раньше (сразу после 12-й)
-                    tabLabel.Text = "13.Forward"
                 end
             end
-        elseif tabsShown and elapsed < 4.5 then
-            -- Оставляем текст "13.Forward"
-            tabLabel.Text = "13.Forward"
+        else
+            if not allTabsShown then
+                allTabsShown = true
+                tabLabel.Text = "13.Forward"
+                
+                allLoadedLabel.Text = "All tabs loaded!"
+                allLoadedLabel.TextTransparency = 1
+                allLoadedShown = true
+                spawn(function()
+                    for i = 0, 1, 0.03 do
+                        allLoadedLabel.TextTransparency = 1 - i
+                        task.wait(0.02)
+                    end
+                end)
+            end
         end
 
         local dots = math.floor(elapsed * 2) % 4
@@ -3680,8 +3724,14 @@ local function CreateFinalLoadingScreen()
             animationComplete = true
             subtitle.Text = "READY!"
             timeLabel.Text = "100% - Complete!"
-            if not tabsShown then
+            if not allTabsShown then
                 tabLabel.Text = "13.Forward"
+            end
+            
+            if not allLoadedShown then
+                allLoadedLabel.Text = "All tabs loaded!"
+                allLoadedLabel.TextTransparency = 0
+                allLoadedShown = true
             end
 
             task.wait(0.8)
@@ -3705,6 +3755,7 @@ local function CreateFinalLoadingScreen()
                     subtitle.TextTransparency = transparency
                     timeLabel.TextTransparency = transparency
                     tabLabel.TextTransparency = transparency
+                    allLoadedLabel.TextTransparency = transparency
 
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
                     line1Label.TextTransparency = math.min(lineTransparency, 1)
@@ -4397,28 +4448,16 @@ pcall(function()
             child.BorderSizePixel = 2
             child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isCorner = false
-            if (posX < 0.05 and posY < 0.05) or
-               (posX > 0.95 and posY < 0.05) or
-               (posX < 0.05 and posY > 0.95) or
-               (posX > 0.95 and posY > 0.95) then
-                isCorner = true
-            end
-
-            if not isCorner then
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(1, 0)
-                corner.Parent = child
-            end
+            -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = child
         end
     end
 
     print("✅ Arrows removed from all resize buttons")
     print("✅ Resize buttons doubled in size")
-    print("✅ Wall buttons - round, corner buttons - square")
+    print("✅ ALL buttons are now FULL ROUND!")
 end)
 
 pcall(function()
@@ -4432,15 +4471,15 @@ pcall(function()
 
             local currentSize = child.Size
             if currentSize.X.Offset == 24 then
-                child.Size = UDim2.new(0, 12, 0, 12)
-            elseif currentSize.X.Offset == 28 then
                 child.Size = UDim2.new(0, 14, 0, 14)
+            elseif currentSize.X.Offset == 28 then
+                child.Size = UDim2.new(0, 16, 0, 16)
             elseif currentSize.X.Offset == 12 then
-                child.Size = UDim2.new(0, 6, 0, 6)
+                child.Size = UDim2.new(0, 14, 0, 14)
             elseif currentSize.X.Offset == 14 then
-                child.Size = UDim2.new(0, 7, 0, 7)
+                child.Size = UDim2.new(0, 16, 0, 16)
             else
-                child.Size = UDim2.new(0, currentSize.X.Offset / 2, 0, currentSize.Y.Offset / 2)
+                child.Size = UDim2.new(0, 14, 0, 14)
             end
 
             child.Position = UDim2.new(
@@ -4450,33 +4489,21 @@ pcall(function()
                 -child.Size.Y.Offset / 2
             )
 
-            child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-            child.BackgroundTransparency = 0.3
+            child.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+            child.BackgroundTransparency = 0.25
             child.BorderSizePixel = 2
             child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isCorner = false
-            if (posX < 0.05 and posY < 0.05) or
-               (posX > 0.95 and posY < 0.05) or
-               (posX < 0.05 and posY > 0.95) or
-               (posX > 0.95 and posY > 0.95) then
-                isCorner = true
-            end
-
-            if not isCorner then
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(1, 0)
-                corner.Parent = child
-            end
+            -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = child
         end
     end
 
-    print("✅ Resize buttons halved in size")
+    print("✅ Resize buttons resized: 14x14 and 16x16")
     print("✅ Arrows removed")
-    print("✅ Wall buttons - round, corner buttons - square")
+    print("✅ ALL buttons are now FULL ROUND (1,0)")
 end)
 
 pcall(function()
@@ -4492,15 +4519,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-
-                local currentRadius = corner.CornerRadius
-                if currentRadius.Offset == 0 then
-                    corner.CornerRadius = UDim.new(0, 12)
-                elseif currentRadius.Offset > 0 then
-                    corner.CornerRadius = UDim.new(0, currentRadius.Offset * 3)
-                else
-                    corner.CornerRadius = UDim.new(0.3, 0)
-                end
+                corner.CornerRadius = UDim.new(1, 0)
             end
         end
     end
@@ -4540,22 +4559,7 @@ pcall(function()
                 corner.Parent = child
             end
 
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isCorner = false
-            if (posX < 0.05 and posY < 0.05) or
-               (posX > 0.95 and posY < 0.05) or
-               (posX < 0.05 and posY > 0.95) or
-               (posX > 0.95 and posY > 0.95) then
-                isCorner = true
-            end
-
-            if isCorner then
-                corner.CornerRadius = UDim.new(0, 8)
-            else
-                corner.CornerRadius = UDim.new(1, 0)
-            end
+            corner.CornerRadius = UDim.new(1, 0)
         end
     end
 
@@ -4567,13 +4571,13 @@ pcall(function()
             corner = Instance.new("UICorner")
             corner.Parent = CloseBtn
         end
-        corner.CornerRadius = UDim.new(0, 10)
+        corner.CornerRadius = UDim.new(1, 0)
     end
 
     print("✅ All buttons became 30% transparent")
-    print("✅ All buttons have rounded corners (rounded 3x more)")
+    print("✅ ALL buttons are now FULL ROUND (1,0)")
     print("✅ Main GG+ button - round")
-    print("✅ Resize buttons on walls - round, in corners - rounded")
+    print("✅ Resize buttons on walls and corners - ALL FULL ROUND!")
 end)
 
 pcall(function()
@@ -4593,73 +4597,34 @@ pcall(function()
                 obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
                 obj.BorderSizePixel = 2
                 obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
+                
+                local newCorner = Instance.new("UICorner")
+                newCorner.CornerRadius = UDim.new(1, 0)
+                newCorner.Parent = obj
             end
         end
     end
 
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("ImageButton") then
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isCorner = false
-            if (posX < 0.05 and posY < 0.05) or
-               (posX > 0.95 and posY < 0.05) or
-               (posX < 0.05 and posY > 0.95) or
-               (posX > 0.95 and posY > 0.95) then
-                isCorner = true
+            local corner = child:FindFirstChild("UICorner")
+            if not corner then
+                corner = Instance.new("UICorner")
+                corner.Parent = child
             end
+            corner.CornerRadius = UDim.new(1, 0)
 
-            if isCorner then
-                local corner = child:FindFirstChild("UICorner")
-                if corner then
-                    corner:Destroy()
-                end
+            child.BackgroundTransparency = 0.3
+            child.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+            child.BorderSizePixel = 2
+            child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-                child.BackgroundTransparency = 0.3
-                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                child.BorderSizePixel = 2
-                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
-
-                child.Image = "rbxassetid://0"
-            end
-        end
-    end
-
-    for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("ImageButton") then
-            local posX = child.Position.X.Scale
-            local posY = child.Position.Y.Scale
-
-            local isOnWall = false
-            if (posY < 0.05 and posX > 0.05 and posX < 0.95) or
-               (posY > 0.95 and posX > 0.05 and posX < 0.95) or
-               (posX < 0.05 and posY > 0.05 and posY < 0.95) or
-               (posX > 0.95 and posY > 0.05 and posY < 0.95) then
-                isOnWall = true
-            end
-
-            if isOnWall then
-                local corner = child:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = child
-                end
-                corner.CornerRadius = UDim.new(1, 0)
-
-                child.BackgroundTransparency = 0.3
-                child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                child.BorderSizePixel = 2
-                child.BorderColor3 = Color3.fromRGB(0, 200, 255)
-
-                child.Image = "rbxassetid://0"
-            end
+            child.Image = "rbxassetid://0"
         end
     end
 
     print("✅ TP buttons in Players tab are now 2x smaller and round")
-    print("✅ Corner resize buttons are now square")
-    print("✅ Wall buttons remain round")
+    print("✅ ALL resize buttons are now FULL ROUND!")
 end)
 
 pcall(function()
@@ -4690,7 +4655,7 @@ pcall(function()
         end
     end
 
-    print("✅ TP buttons in Players tab are now 2x smaller, round and transparent")
+    print("✅ TP buttons in Players tab are now 2x smaller, FULL ROUND and transparent")
 end)
 
 pcall(function()
@@ -4841,7 +4806,7 @@ pcall(function()
     clickerBtn.Parent = mainFrame
 
     local clickerCorner = Instance.new("UICorner")
-    clickerCorner.CornerRadius = UDim.new(0, 36)
+    clickerCorner.CornerRadius = UDim.new(1, 0)
     clickerCorner.Parent = clickerBtn
 
     local statusLabel = Instance.new("TextLabel")
@@ -5042,7 +5007,7 @@ pcall(function()
     clickerBtn.Parent = mainFrame
 
     local clickerCorner = Instance.new("UICorner")
-    clickerCorner.CornerRadius = UDim.new(0, 36)
+    clickerCorner.CornerRadius = UDim.new(1, 0)
     clickerCorner.Parent = clickerBtn
 
     local statusLabel = Instance.new("TextLabel")
@@ -5235,7 +5200,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 36)
+                corner.CornerRadius = UDim.new(1, 0)
                 obj.BackgroundTransparency = 0.3
             end
         end
@@ -5314,7 +5279,7 @@ pcall(function()
             TeleportPointBtn.Parent = ItemFrame
 
             local tpCorner = Instance.new("UICorner")
-            tpCorner.CornerRadius = UDim.new(0, 8)
+            tpCorner.CornerRadius = UDim.new(1, 0)
             tpCorner.Parent = TeleportPointBtn
 
             TeleportPointBtn.MouseButton1Click:Connect(function() TeleportToPosition(pos) end)
@@ -5333,7 +5298,7 @@ pcall(function()
             DeleteBtn.Parent = ItemFrame
 
             local delCorner = Instance.new("UICorner")
-            delCorner.CornerRadius = UDim.new(0, 8)
+            delCorner.CornerRadius = UDim.new(1, 0)
             delCorner.Parent = DeleteBtn
 
             DeleteBtn.MouseButton1Click:Connect(function()
@@ -5369,12 +5334,12 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 36)
+                corner.CornerRadius = UDim.new(1, 0)
                 obj.BackgroundTransparency = 0.3
             end
         end
     end
-    print("✅ Clicker tab button has ×3 rounding")
+    print("✅ Clicker tab button is now FULL ROUND")
 end)
 
 pcall(function()
@@ -6584,7 +6549,7 @@ pcall(function()
     toggleBtn.Parent = mainFrame
 
     local speedToggleCorner = Instance.new("UICorner")
-    speedToggleCorner.CornerRadius = UDim.new(0, 36)
+    speedToggleCorner.CornerRadius = UDim.new(1, 0)
     speedToggleCorner.Parent = toggleBtn
 
     local statusLabel = Instance.new("TextLabel")
@@ -6639,6 +6604,11 @@ pcall(function()
     speedButton.BorderSizePixel = 2
     speedButton.Text = ""
     speedButton.Parent = speedSlider
+
+    -- Кнопка ползунка - КРУГЛАЯ
+    local speedButtonCorner = Instance.new("UICorner")
+    speedButtonCorner.CornerRadius = UDim.new(1, 0)
+    speedButtonCorner.Parent = speedButton
 
     local SpeedEnabled = false
     local TargetSpeed = 16
@@ -6799,6 +6769,7 @@ pcall(function()
     print("📌 Alt+M - toggle speed modification")
     print("📌 Slider adjusts speed (16 - 300)")
     print("📌 Toggle via button or hotkey")
+    print("📌 Slider button is FULL ROUND")
     print("========================================")
 end)
 
@@ -6813,7 +6784,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 12)
+                corner.CornerRadius = UDim.new(1, 0)
                 obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
             end
         end
@@ -6834,7 +6805,7 @@ pcall(function()
                     corner = Instance.new("UICorner")
                     corner.Parent = obj
                 end
-                corner.CornerRadius = UDim.new(0, 36)
+                corner.CornerRadius = UDim.new(1, 0)
                 obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
             end
         end
@@ -6857,15 +6828,14 @@ pcall(function()
                         corner = Instance.new("UICorner")
                         corner.Parent = obj
                     end
-                    corner.CornerRadius = UDim.new(0, 36)
+                    corner.CornerRadius = UDim.new(1, 0)
                     obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
                 end
             end
         end
     end
 
-    print("✅ Rounded corners added to all buttons in Players, Clicker and Speed tabs")
-    print("✅ Clicker and Speed tabs have 3x rounding (36px)")
+    print("✅ FULL ROUND corners (1,0) added to all buttons in Players, Clicker and Speed tabs")
 end)
 
 -- ===== REMOVE REFRESH BUTTON FROM PLAYERS TAB =====
@@ -6997,7 +6967,6 @@ pcall(function()
     distanceLabel.TextXAlignment = Enum.TextXAlignment.Left
     distanceLabel.Parent = mainFrame
 
-    -- Slider БЕЗ скругления (как во вкладке Fly)
     local distanceSlider = Instance.new("Frame")
     distanceSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
     distanceSlider.Position = UDim2.new(0.35, 0, 0.44, 0)
@@ -7012,15 +6981,20 @@ pcall(function()
     distanceFill.Parent = distanceSlider
 
     local distanceButton = Instance.new("TextButton")
-    distanceButton.Size = UDim2.new(0, 15, 1.8, 0)
-    distanceButton.Position = UDim2.new(0.0408, -7.5, -0.4, 0)
+    distanceButton.Size = UDim2.new(0, 18, 1.8, 0)
+    distanceButton.Position = UDim2.new(0.0408, -9, -0.4, 0)
     distanceButton.BackgroundColor3 = Library.Theme.Text
     distanceButton.BorderColor3 = Library.Theme.Border
     distanceButton.BorderSizePixel = 2
     distanceButton.Text = ""
     distanceButton.Parent = distanceSlider
+    
+    -- Кнопка ползунка - ПОЛНЫЙ КРУГ!
+    local distanceButtonCorner = Instance.new("UICorner")
+    distanceButtonCorner.CornerRadius = UDim.new(1, 0)
+    distanceButtonCorner.Parent = distanceButton
 
-    -- Кнопка FORWARD с СКРУГЛЕНИЕМ как во вкладке Fly (36px)
+    -- Кнопка FORWARD - ПОЛНЫЙ КРУГ!
     local forwardBtn = Instance.new("TextButton")
     forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
     forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
@@ -7035,7 +7009,7 @@ pcall(function()
     forwardBtn.Parent = mainFrame
 
     local forwardCorner = Instance.new("UICorner")
-    forwardCorner.CornerRadius = UDim.new(0, 36)
+    forwardCorner.CornerRadius = UDim.new(1, 0)
     forwardCorner.Parent = forwardBtn
 
     local statusLabel = Instance.new("TextLabel")
@@ -7055,7 +7029,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
-        distanceButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        distanceButton.Position = UDim2.new(percent, -9, -0.4, 0)
         distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
     end
 
@@ -7152,9 +7126,8 @@ pcall(function()
     print("📌 Slider sets distance (1-50 meters)")
     print("📌 Default: 3 meters")
     print("📌 Teleports in camera direction")
-    print("📌 Slider has NO rounded corners (like Fly tab)")
-    print("📌 BUTTON has rounded corners (36px like Fly tab)")
-    print("📌 ALL buttons in Forward tab have rounded corners (36px)")
+    print("📌 Slider button is FULL ROUND (1,0)")
+    print("📌 FORWARD button is FULL ROUND (1,0)")
     print("========================================")
 end)
 
@@ -7172,12 +7145,12 @@ print("📌 Click GG+ button to expand/collapse")
 print("📌 Drag GG+ button to move it")
 print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
 print("📌 Freecam saves and restores menu state!")
-print("📌 Resize buttons are now ROUND!")
+print("📌 ALL resize buttons are now FULL ROUND (including corners!)")
 print("📌 'Forward' tab added - teleport forward with slider (1-50m)")
 print("📌 Loading screen shows tab names WITH numbers (1.Points...13.Forward)")
-print("📌 13.Forward appears 1.5 seconds earlier")
-print("📌 Forward button has rounding (36px) like in Fly tab")
-print("📌 ALL buttons in Forward tab have rounded corners (36px)")
+print("📌 'All tabs loaded!' message appears on English")
+print("📌 Forward button is FULL ROUND (1,0)")
+print("📌 Slider button in Forward tab is FULL ROUND (1,0)")
 print("========================================")
 
 -- Запуск анимации загрузки
