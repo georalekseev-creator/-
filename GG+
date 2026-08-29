@@ -1,4 +1,4 @@
--- Admin Panel - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS
+-- Admin Panel - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!)
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -3008,7 +3008,7 @@ print("📌 Click GG+ button to expand")
 print("📌 Click GG+ button again to collapse")
 print("========================================")
 
--- ===== VISIBLE BLUE RESIZE BUTTONS - ALL FULL ROUND! =====
+-- ===== VISIBLE BLUE RESIZE BUTTONS - ТОЛЬКО ПО УГЛАМ! =====
 local RESIZE_BUTTON_SIZE = 14
 local CORNER_BUTTON_SIZE = 18
 
@@ -3132,24 +3132,36 @@ pcall(function()
 end)
 
 pcall(function()
-    -- Угловые кнопки - ПОЛНЫЙ КРУГ!
+    -- ТОЛЬКО УГЛОВЫЕ КНОПКИ - ПОЛНЫЙ КРУГ!
     createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
     createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
     createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
     createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
     
-    -- Кнопки по стенкам - ПОЛНЫЙ КРУГ!
-    createVisibleResizeHandle(0.5, 0, 0, -1, 0, -1, 0, false)
-    createVisibleResizeHandle(0, 0.5, -1, 0, -1, 0, 90, false)
-    createVisibleResizeHandle(1, 0.5, 1, 0, 1, 0, 90, false)
-    createVisibleResizeHandle(0.5, 1, 0, 1, 0, 1, 0, false)
+    -- КНОПКИ ПО СТЕНКАМ УДАЛЕНЫ! ОСТАЛИСЬ ТОЛЬКО УГЛЫ!
 end)
 
-print("Blue resize buttons on all walls - ALL FULL ROUND!")
-print("Normal buttons: 14x14 (full round)")
+print("Blue resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
 print("Corner buttons: 18x18 (full round)")
 print("Color: blue (0, 100, 255)")
 print("Dragging works only by title")
+print("Кнопки по стенкам УДАЛЕНЫ!")
+
+-- ===== УДАЛЯЕМ ПОЛОСКУ WAVE (волна внизу) =====
+pcall(function()
+    if Wave and Wave.Parent then
+        Wave:Destroy()
+        print("✅ Wave (полоска внизу) УДАЛЕНА!")
+    end
+    
+    -- Также проверяем все дочерние элементы MenuPanel
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("Frame") and child.Name == "Wave" then
+            child:Destroy()
+            print("✅ Wave (полоска внизу) УДАЛЕНА!")
+        end
+    end
+end)
 
 -- ===== TAB 10: FREECAM =====
 do
@@ -3181,7 +3193,8 @@ do
         local desc = Instance.new("TextLabel")
         desc.Size = UDim2.new(1, -20, 0.15, 0)
         desc.Position = UDim2.new(0, 10, 0.17, 0)
-        desc.BackgroundTransparency = 1        desc.Text = "Smooth rotation without jerking, character visible"
+        desc.BackgroundTransparency = 1
+        desc.Text = "Smooth rotation without jerking, character visible"
         desc.TextColor3 = Library.Theme.Accent
         desc.TextScaled = true
         desc.Font = Enum.Font.SourceSans
@@ -4028,7 +4041,8 @@ pcall(function()
     end
 
     local function enableXRay()
-        if xrayEnabled then return end        xrayEnabled = true
+        if xrayEnabled then return end
+        xrayEnabled = true
 
         originalTransparencies = {}
 
@@ -7145,7 +7159,10 @@ print("📌 Click GG+ button to expand/collapse")
 print("📌 Drag GG+ button to move it")
 print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
 print("📌 Freecam saves and restores menu state!")
-print("📌 ALL resize buttons are now FULL ROUND (including corners!)")
+print("📌 Resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
+print("📌 ALL resize buttons are FULL ROUND (including corners!)")
+print("📌 Кнопки по стенкам УДАЛЕНЫ!")
+print("📌 Полоска WAVE внизу УДАЛЕНА!")
 print("📌 'Forward' tab added - teleport forward with slider (1-50m)")
 print("📌 Loading screen shows tab names WITH numbers (1.Points...13.Forward)")
 print("📌 'All tabs loaded!' message appears on English")
