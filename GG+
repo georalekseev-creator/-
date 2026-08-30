@@ -1,4 +1,4 @@
--- Admin Panel - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!)
+-- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!)
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -848,11 +848,16 @@ SpeedFill.Parent = SpeedSlider
 local SpeedButton = Instance.new("TextButton")
 SpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
 SpeedButton.Position = UDim2.new(0.375, -7.5, -0.4, 0)
-SpeedButton.BackgroundColor3 = Library.Theme.Text
+SpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SpeedButton.BorderColor3 = Library.Theme.Border
 SpeedButton.BorderSizePixel = 2
 SpeedButton.Text = ""
 SpeedButton.Parent = SpeedSlider
+SpeedButton.BackgroundTransparency = 0
+
+local SpeedButtonCorner = Instance.new("UICorner")
+SpeedButtonCorner.CornerRadius = UDim.new(1, 0)
+SpeedButtonCorner.Parent = SpeedButton
 
 -- ===== TAB 4: AUTO-WALK =====
 local WalkTab = Tabs[4]
@@ -946,11 +951,16 @@ WalkSpeedFill.Parent = WalkSpeedSlider
 local WalkSpeedButton = Instance.new("TextButton")
 WalkSpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
 WalkSpeedButton.Position = UDim2.new(0.3, -7.5, -0.4, 0)
-WalkSpeedButton.BackgroundColor3 = Library.Theme.Text
+WalkSpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WalkSpeedButton.BorderColor3 = Library.Theme.Border
 WalkSpeedButton.BorderSizePixel = 2
 WalkSpeedButton.Text = ""
 WalkSpeedButton.Parent = WalkSpeedSlider
+WalkSpeedButton.BackgroundTransparency = 0
+
+local WalkSpeedButtonCorner = Instance.new("UICorner")
+WalkSpeedButtonCorner.CornerRadius = UDim.new(1, 0)
+WalkSpeedButtonCorner.Parent = WalkSpeedButton
 
 local WalkPointsList = Instance.new("ScrollingFrame")
 WalkPointsList.Size = UDim2.new(1, 0, 0.4, 0)
@@ -1067,11 +1077,16 @@ LengthFill.Parent = LengthSlider
 local LengthButton = Instance.new("TextButton")
 LengthButton.Size = UDim2.new(0, 15, 1.8, 0)
 LengthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
-LengthButton.BackgroundColor3 = Library.Theme.Text
+LengthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 LengthButton.BorderColor3 = Library.Theme.Border
 LengthButton.BorderSizePixel = 2
 LengthButton.Text = ""
 LengthButton.Parent = LengthSlider
+LengthButton.BackgroundTransparency = 0
+
+local LengthButtonCorner = Instance.new("UICorner")
+LengthButtonCorner.CornerRadius = UDim.new(1, 0)
+LengthButtonCorner.Parent = LengthButton
 
 local PlatformWidth = 25
 
@@ -1101,11 +1116,16 @@ WidthFill.Parent = WidthSlider
 local WidthButton = Instance.new("TextButton")
 WidthButton.Size = UDim2.new(0, 15, 1.8, 0)
 WidthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
-WidthButton.BackgroundColor3 = Library.Theme.Text
+WidthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WidthButton.BorderColor3 = Library.Theme.Border
 WidthButton.BorderSizePixel = 2
 WidthButton.Text = ""
 WidthButton.Parent = WidthSlider
+WidthButton.BackgroundTransparency = 0
+
+local WidthButtonCorner = Instance.new("UICorner")
+WidthButtonCorner.CornerRadius = UDim.new(1, 0)
+WidthButtonCorner.Parent = WidthButton
 
 local MinSize = 1
 local MaxSize = 50
@@ -1516,11 +1536,16 @@ XRayFill.Parent = XRaySlider
 local XRaySliderButton = Instance.new("TextButton")
 XRaySliderButton.Size = UDim2.new(0, 15, 1.8, 0)
 XRaySliderButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-XRaySliderButton.BackgroundColor3 = Library.Theme.Text
+XRaySliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 XRaySliderButton.BorderColor3 = Library.Theme.Border
 XRaySliderButton.BorderSizePixel = 2
 XRaySliderButton.Text = ""
 XRaySliderButton.Parent = XRaySlider
+XRaySliderButton.BackgroundTransparency = 0
+
+local XRaySliderButtonCorner = Instance.new("UICorner")
+XRaySliderButtonCorner.CornerRadius = UDim.new(1, 0)
+XRaySliderButtonCorner.Parent = XRaySliderButton
 
 local function UpdateXRaySlider()
     local percent = XRayTransparency / 100
@@ -1863,12 +1888,17 @@ local ClickTeleportEnabled = false
 local MAX_POINTS = 1000
 local MAX_WALK_SPEED = 300
 
+-- Переменные для Fly с авто-включением после смерти
 local FlyEnabled = false
+local FlyWasEnabledBeforeDeath = false
 local FlyConnection = nil
 local FlyBodyVelocity = nil
 local FlyBodyGyro = nil
 local FlyAnimationTrack = nil
 local FlyAnimator = nil
+local FlyRestartTimer = nil
+local PlayerDiedRecently = false
+local FLY_RESTART_DELAY = 2
 
 local WalkEnabled = false
 local WalkSpeed = 16
@@ -1889,7 +1919,253 @@ local NoclipConnection = nil
 local WaitForTeleport = false
 local TeleportWaitStart = 0
 
+-- ===== FLY WITH AUTO-RESTART AFTER DEATH (2 SECOND DELAY) =====
+local function ToggleFly()
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character then return end
+
+    local character = player.Character
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChild("Humanoid")
+
+    if not hrp or not humanoid then return end
+
+    FlyEnabled = not FlyEnabled
+    FlyWasEnabledBeforeDeath = FlyEnabled
+
+    if FlyEnabled then
+        if PlayerDiedRecently then
+            FlyEnabled = false
+            FlyWasEnabledBeforeDeath = false
+            print("⏳ Fly disabled during death cooldown")
+            return
+        end
+        
+        FlyToggleBtn.Text = "ON"
+        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        FlyIndicator.Text = "Fly: Enabled"
+        FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        humanoid.PlatformStand = false
+
+        local animator = humanoid:FindFirstChild("Animator")
+        if animator then
+            local walkAnim = nil
+            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move")) then
+                    walkAnim = track
+                    break
+                end
+            end
+
+            if not walkAnim then
+                local animation = Instance.new("Animation")
+                animation.AnimationId = "rbxassetid://507766686"
+                walkAnim = animator:LoadAnimation(animation)
+            end
+
+            if walkAnim then
+                walkAnim:Play()
+                walkAnim:AdjustSpeed(1.5)
+                FlyAnimationTrack = walkAnim
+                FlyAnimator = animator
+            end
+        end
+
+        FlyBodyVelocity = Instance.new("BodyVelocity")
+        FlyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        FlyBodyVelocity.Parent = hrp
+
+        FlyBodyGyro = Instance.new("BodyGyro")
+        FlyBodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+        FlyBodyGyro.CFrame = hrp.CFrame
+        FlyBodyGyro.Parent = hrp
+
+        FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
+
+            local moveDirection = Vector3.new()
+            local camera = workspace.CurrentCamera
+
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
+
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
+
+            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
+
+            FlyBodyVelocity.Velocity = moveDirection
+
+            if humanoid and FlyAnimationTrack then
+                local isMoving = moveDirection.Magnitude > 0.5
+                if isMoving then
+                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
+                    local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
+                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
+                else
+                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
+                end
+            end
+
+            if moveDirection.Magnitude > 0.1 then
+                local lookAt = hrp.Position + moveDirection.Unit
+                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
+            end
+        end)
+
+    else
+        FlyToggleBtn.Text = "OFF"
+        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        FlyIndicator.Text = "Fly: Disabled"
+        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
+        FlyAnimator = nil
+
+        if humanoid then humanoid.PlatformStand = false end
+
+        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
+        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
+        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
+    end
+end
+
+local function RestartFlyAfterDeath()
+    if FlyRestartTimer then
+        task.cancel(FlyRestartTimer)
+        FlyRestartTimer = nil
+    end
+    
+    if FlyWasEnabledBeforeDeath then
+        print("⏳ Fly will restart in 2 seconds...")
+        FlyRestartTimer = task.spawn(function()
+            task.wait(FLY_RESTART_DELAY)
+            PlayerDiedRecently = false
+            if FlyWasEnabledBeforeDeath and not FlyEnabled then
+                local player = game.Players.LocalPlayer
+                if player and player.Character then
+                    print("✅ Restarting Fly after death...")
+                    FlyEnabled = true
+                    FlyWasEnabledBeforeDeath = true
+                    FlyToggleBtn.Text = "ON"
+                    FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+                    FlyIndicator.Text = "Fly: Enabled"
+                    FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
+                    
+                    local character = player.Character
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if hrp and humanoid then
+                        humanoid.PlatformStand = false
+                        
+                        local animator = humanoid:FindFirstChild("Animator")
+                        if animator then
+                            local walkAnim = nil
+                            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                                if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move")) then
+                                    walkAnim = track
+                                    break
+                                end
+                            end
+                            if not walkAnim then
+                                local animation = Instance.new("Animation")
+                                animation.AnimationId = "rbxassetid://507766686"
+                                walkAnim = animator:LoadAnimation(animation)
+                            end
+                            if walkAnim then
+                                walkAnim:Play()
+                                walkAnim:AdjustSpeed(1.5)
+                                FlyAnimationTrack = walkAnim
+                                FlyAnimator = animator
+                            end
+                        end
+                        
+                        FlyBodyVelocity = Instance.new("BodyVelocity")
+                        FlyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+                        FlyBodyVelocity.Parent = hrp
+                        
+                        FlyBodyGyro = Instance.new("BodyGyro")
+                        FlyBodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+                        FlyBodyGyro.CFrame = hrp.CFrame
+                        FlyBodyGyro.Parent = hrp
+                        
+                        FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
+                            
+                            local moveDirection = Vector3.new()
+                            local camera = workspace.CurrentCamera
+                            
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
+                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
+                            
+                            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
+                            
+                            FlyBodyVelocity.Velocity = moveDirection
+                            
+                            if humanoid and FlyAnimationTrack then
+                                local isMoving = moveDirection.Magnitude > 0.5
+                                if isMoving then
+                                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
+                                    local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
+                                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
+                                else
+                                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
+                                end
+                            end
+                            
+                            if moveDirection.Magnitude > 0.1 then
+                                local lookAt = hrp.Position + moveDirection.Unit
+                                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
+                            end
+                        end)
+                        
+                        print("✅ Fly restarted successfully after death!")
+                    end
+                end
+            end
+            FlyRestartTimer = nil
+        end)
+    else
+        PlayerDiedRecently = false
+    end
+end
+
 local function onCharacterDied()
+    if FlyEnabled then
+        FlyWasEnabledBeforeDeath = true
+        print("💀 Player died with Fly ON - will restart in 2 seconds")
+    else
+        FlyWasEnabledBeforeDeath = false
+        print("💀 Player died with Fly OFF - will NOT restart")
+    end
+    
+    if FlyEnabled then
+        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
+        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
+        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
+        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
+        FlyEnabled = false
+        FlyToggleBtn.Text = "OFF"
+        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        FlyIndicator.Text = "Fly: Disabled"
+        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
+        
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then humanoid.PlatformStand = false end
+        end
+    end
+    
+    PlayerDiedRecently = true
+    
     if WalkEnabled and #WalkPointsData > 0 then
         CurrentWalkIndex = 1
         SmoothVelocity = Vector3.new(0, 0, 0)
@@ -1909,6 +2185,8 @@ local function onCharacterDied()
             end
         end
     end
+    
+    RestartFlyAfterDeath()
 end
 
 local function SetNoclip(state)
@@ -1943,6 +2221,14 @@ local function setupDeathDetection()
     if not player then return end
 
     player.CharacterAdded:Connect(function(newCharacter)
+        PlayerDiedRecently = false
+        if FlyWasEnabledBeforeDeath and not FlyEnabled then
+            task.wait(FLY_RESTART_DELAY)
+            if FlyWasEnabledBeforeDeath and not FlyEnabled then
+                ToggleFly()
+            end
+        end
+        
         local humanoid = newCharacter:WaitForChild("Humanoid")
         if humanoid then humanoid.Died:Connect(function() onCharacterDied() end) end
     end)
@@ -2268,111 +2554,6 @@ local function ClearWalkPoints()
     WalkStatus.TextColor3 = Library.Theme.Warning
 end
 
-local function ToggleFly()
-    local player = game.Players.LocalPlayer
-    if not player or not player.Character then return end
-
-    local character = player.Character
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChild("Humanoid")
-
-    if not hrp or not humanoid then return end
-
-    FlyEnabled = not FlyEnabled
-
-    if FlyEnabled then
-        FlyToggleBtn.Text = "ON"
-        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        FlyIndicator.Text = "Fly: Enabled"
-        FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        humanoid.PlatformStand = false
-
-        local animator = humanoid:FindFirstChild("Animator")
-        if animator then
-            local walkAnim = nil
-            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move")) then
-                    walkAnim = track
-                    break
-                end
-            end
-
-            if not walkAnim then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://507766686"
-                walkAnim = animator:LoadAnimation(animation)
-            end
-
-            if walkAnim then
-                walkAnim:Play()
-                walkAnim:AdjustSpeed(1.5)
-                FlyAnimationTrack = walkAnim
-                FlyAnimator = animator
-            end
-        end
-
-        FlyBodyVelocity = Instance.new("BodyVelocity")
-        FlyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-        FlyBodyVelocity.Parent = hrp
-
-        FlyBodyGyro = Instance.new("BodyGyro")
-        FlyBodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
-        FlyBodyGyro.CFrame = hrp.CFrame
-        FlyBodyGyro.Parent = hrp
-
-        FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
-            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
-
-            local moveDirection = Vector3.new()
-            local camera = workspace.CurrentCamera
-
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
-
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-
-            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
-
-            FlyBodyVelocity.Velocity = moveDirection
-
-            if humanoid and FlyAnimationTrack then
-                local isMoving = moveDirection.Magnitude > 0.5
-                if isMoving then
-                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
-                    local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
-                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
-                else
-                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
-                end
-            end
-
-            if moveDirection.Magnitude > 0.1 then
-                local lookAt = hrp.Position + moveDirection.Unit
-                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
-            end
-        end)
-
-    else
-        FlyToggleBtn.Text = "OFF"
-        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        FlyIndicator.Text = "Fly: Disabled"
-        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
-        FlyAnimator = nil
-
-        if humanoid then humanoid.PlatformStand = false end
-
-        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
-        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
-        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
-    end
-end
-
 local function StopWalking()
     WalkEnabled = false
     WaitingAtEnd = false
@@ -2645,6 +2826,14 @@ for i, btn in ipairs(TabButtons) do
         if i == 7 then UpdatePlayersList(); lastPlayerUpdate = tick() end
         if i == 8 then UpdateXRaySlider() end
         if i == 9 then if SPIEnabled then UpdateSPI() end end
+        if i == 13 then
+            task.spawn(function()
+                task.wait(0.1)
+                UpdateForwardVisuals()
+            end)
+        else
+            ClearForwardVisuals()
+        end
     end)
 end
 
@@ -3033,7 +3222,6 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     handle.ZIndex = 1000
     handle.Rotation = rotation or 0
 
-    -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = handle
@@ -3132,13 +3320,10 @@ pcall(function()
 end)
 
 pcall(function()
-    -- ТОЛЬКО УГЛОВЫЕ КНОПКИ - ПОЛНЫЙ КРУГ!
     createVisibleResizeHandle(0, 0, -1, -1, -1, -1, 0, true)
     createVisibleResizeHandle(1, 0, 1, -1, 1, -1, 0, true)
     createVisibleResizeHandle(0, 1, -1, 1, -1, 1, 0, true)
     createVisibleResizeHandle(1, 1, 1, 1, 1, 1, 0, true)
-    
-    -- КНОПКИ ПО СТЕНКАМ УДАЛЕНЫ! ОСТАЛИСЬ ТОЛЬКО УГЛЫ!
 end)
 
 print("Blue resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
@@ -3154,7 +3339,6 @@ pcall(function()
         print("✅ Wave (полоска внизу) УДАЛЕНА!")
     end
     
-    -- Также проверяем все дочерние элементы MenuPanel
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("Frame") and child.Name == "Wave" then
             child:Destroy()
@@ -3250,11 +3434,16 @@ do
         local speedButton = Instance.new("TextButton")
         speedButton.Size = UDim2.new(0, 15, 1.8, 0)
         speedButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-        speedButton.BackgroundColor3 = Library.Theme.Text
+        speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         speedButton.BorderColor3 = Library.Theme.Border
         speedButton.BorderSizePixel = 2
         speedButton.Text = ""
         speedButton.Parent = speedSlider
+        speedButton.BackgroundTransparency = 0
+
+        local speedButtonCorner = Instance.new("UICorner")
+        speedButtonCorner.CornerRadius = UDim.new(1, 0)
+        speedButtonCorner.Parent = speedButton
 
         local controlsFrame = Instance.new("Frame")
         controlsFrame.Size = UDim2.new(1, -20, 0.25, 0)
@@ -3972,11 +4161,16 @@ pcall(function()
     local transButton = Instance.new("TextButton")
     transButton.Size = UDim2.new(0, 15, 1.8, 0)
     transButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-    transButton.BackgroundColor3 = Library.Theme.Text
+    transButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     transButton.BorderColor3 = Library.Theme.Border
     transButton.BorderSizePixel = 2
     transButton.Text = ""
     transButton.Parent = transSlider
+    transButton.BackgroundTransparency = 0
+
+    local transButtonCorner = Instance.new("UICorner")
+    transButtonCorner.CornerRadius = UDim.new(1, 0)
+    transButtonCorner.Parent = transButton
 
     local hotkeyFrame = Instance.new("Frame")
     hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
@@ -4462,7 +4656,6 @@ pcall(function()
             child.BorderSizePixel = 2
             child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-            -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(1, 0)
             corner.Parent = child
@@ -4508,7 +4701,6 @@ pcall(function()
             child.BorderSizePixel = 2
             child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-            -- ВСЕ кнопки - ПОЛНЫЙ КРУГ!
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(1, 0)
             corner.Parent = child
@@ -4860,11 +5052,16 @@ pcall(function()
     local delayButton = Instance.new("TextButton")
     delayButton.Size = UDim2.new(0, 15, 1.8, 0)
     delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
-    delayButton.BackgroundColor3 = Library.Theme.Text
+    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     delayButton.BorderColor3 = Library.Theme.Border
     delayButton.BorderSizePixel = 2
     delayButton.Text = ""
     delayButton.Parent = delaySlider
+    delayButton.BackgroundTransparency = 0
+
+    local delayButtonCorner = Instance.new("UICorner")
+    delayButtonCorner.CornerRadius = UDim.new(1, 0)
+    delayButtonCorner.Parent = delayButton
 
     local isClicking = false
     local clickDelay = 100
@@ -5061,11 +5258,16 @@ pcall(function()
     local delayButton = Instance.new("TextButton")
     delayButton.Size = UDim2.new(0, 15, 1.8, 0)
     delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
-    delayButton.BackgroundColor3 = Library.Theme.Text
+    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     delayButton.BorderColor3 = Library.Theme.Border
     delayButton.BorderSizePixel = 2
     delayButton.Text = ""
     delayButton.Parent = delaySlider
+    delayButton.BackgroundTransparency = 0
+
+    local delayButtonCorner = Instance.new("UICorner")
+    delayButtonCorner.CornerRadius = UDim.new(1, 0)
+    delayButtonCorner.Parent = delayButton
 
     local isClicking = false
     local clickDelay = 100
@@ -5567,8 +5769,7 @@ pcall(function()
         PointInfo.Name = "PointInfo"
         PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
         PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
-        PointInfo.BackgroundTransparency = 1
-        PointInfo.Text = "Points: 0 / 1000"
+        PointInfo.BackgroundTransparency = 1        PointInfo.Text = "Points: 0 / 1000"
         PointInfo.TextColor3 = Library.Theme.Text
         PointInfo.TextScaled = true
         PointInfo.Font = Enum.Font.SourceSans
@@ -6613,13 +6814,13 @@ pcall(function()
     local speedButton = Instance.new("TextButton")
     speedButton.Size = UDim2.new(0, 15, 1.8, 0)
     speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
-    speedButton.BackgroundColor3 = Library.Theme.Text
+    speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     speedButton.BorderColor3 = Library.Theme.Border
     speedButton.BorderSizePixel = 2
     speedButton.Text = ""
     speedButton.Parent = speedSlider
+    speedButton.BackgroundTransparency = 0
 
-    -- Кнопка ползунка - КРУГЛАЯ
     local speedButtonCorner = Instance.new("UICorner")
     speedButtonCorner.CornerRadius = UDim.new(1, 0)
     speedButtonCorner.Parent = speedButton
@@ -6885,7 +7086,10 @@ pcall(function()
     print("✅ Tabs are now 50% transparent")
 end)
 
--- ===== TAB 13: FORWARD =====
+-- =====================================================
+-- ===== TAB 13: FORWARD (ТЕЛЕПОРТ ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
+-- =====================================================
+
 pcall(function()
     local forwardTabIndex = nil
     for i, name in ipairs(TabNames) do
@@ -6963,7 +7167,7 @@ pcall(function()
     info.Size = UDim2.new(1, -20, 0.12, 0)
     info.Position = UDim2.new(0, 10, 0.18, 0)
     info.BackgroundTransparency = 1
-    info.Text = "Teleports you forward in the direction you are looking"
+    info.Text = "Teleports you forward in the direction your camera is looking"
     info.TextColor3 = Library.Theme.Accent
     info.TextScaled = true
     info.Font = Enum.Font.SourceSans
@@ -6997,18 +7201,17 @@ pcall(function()
     local distanceButton = Instance.new("TextButton")
     distanceButton.Size = UDim2.new(0, 18, 1.8, 0)
     distanceButton.Position = UDim2.new(0.0408, -9, -0.4, 0)
-    distanceButton.BackgroundColor3 = Library.Theme.Text
+    distanceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     distanceButton.BorderColor3 = Library.Theme.Border
     distanceButton.BorderSizePixel = 2
     distanceButton.Text = ""
     distanceButton.Parent = distanceSlider
-    
-    -- Кнопка ползунка - ПОЛНЫЙ КРУГ!
+    distanceButton.BackgroundTransparency = 0
+
     local distanceButtonCorner = Instance.new("UICorner")
     distanceButtonCorner.CornerRadius = UDim.new(1, 0)
     distanceButtonCorner.Parent = distanceButton
 
-    -- Кнопка FORWARD - ПОЛНЫЙ КРУГ!
     local forwardBtn = Instance.new("TextButton")
     forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
     forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
@@ -7040,11 +7243,127 @@ pcall(function()
     local MIN_DISTANCE = 1
     local MAX_DISTANCE = 50
 
+    -- ===== FORWARD VISUALIZATION: RED LINE WITH BALL (ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
+    local ForwardVisuals = {}
+    local ForwardVisualConnection = nil
+    local ForwardVisualEnabled = false
+
+    local function ClearForwardVisuals()
+        for _, obj in pairs(ForwardVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        ForwardVisuals = {}
+        if ForwardVisualConnection then
+            ForwardVisualConnection:Disconnect()
+            ForwardVisualConnection = nil
+        end
+        ForwardVisualEnabled = false
+    end
+
+    local function UpdateForwardVisuals()
+        -- Проверяем что мы находимся на вкладке Forward
+        if CurrentTab ~= forwardTabIndex then
+            ClearForwardVisuals()
+            return
+        end
+        
+        ClearForwardVisuals()
+        
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+        
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local camera = workspace.CurrentCamera
+        if not camera then return end
+        
+        -- Используем направление КАМЕРЫ!
+        local lookVector = camera.CFrame.LookVector
+        local startPos = hrp.Position + Vector3.new(0, 1.5, 0)
+        local endPos = startPos + lookVector * forwardDistance
+        
+        -- Красная линия от игрока до точки телепорта
+        local distance = (endPos - startPos).Magnitude
+        if distance < 0.1 then return end
+        
+        local line = Instance.new("Part")
+        line.Size = Vector3.new(0.2, 0.2, distance)
+        line.Position = (startPos + endPos) / 2
+        line.Anchored = true
+        line.CanCollide = false
+        line.Material = Enum.Material.Neon
+        line.BrickColor = BrickColor.new("Bright red")
+        line.Transparency = 0.3
+        line.Parent = workspace
+        
+        local direction = (endPos - startPos).Unit
+        line.CFrame = CFrame.lookAt((startPos + endPos) / 2, (startPos + endPos) / 2 + direction)
+        table.insert(ForwardVisuals, line)
+        
+        -- Шарик НА КОНЦЕ ЛИНИИ (куда телепортирует)
+        local sphere = Instance.new("Part")
+        sphere.Size = Vector3.new(1.5, 1.5, 1.5)
+        sphere.Position = endPos
+        sphere.Anchored = true
+        sphere.CanCollide = false
+        sphere.Material = Enum.Material.Neon
+        sphere.BrickColor = BrickColor.new("Bright red")
+        sphere.Transparency = 0.2
+        sphere.Shape = Enum.PartType.Ball
+        sphere.Parent = workspace
+        table.insert(ForwardVisuals, sphere)
+        
+        -- Подсветка шарика
+        local highlight = Instance.new("Highlight")
+        highlight.Parent = sphere
+        highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        highlight.FillTransparency = 0.3
+        highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+        highlight.OutlineTransparency = 0
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        table.insert(ForwardVisuals, highlight)
+        
+        -- Текст расстояния НАД шариком
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ForwardDistance"
+        billboard.Size = UDim2.new(0, 60, 0, 25)
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = sphere
+        table.insert(ForwardVisuals, billboard)
+        
+        local distLabel = Instance.new("TextLabel")
+        distLabel.Size = UDim2.new(1, 0, 1, 0)
+        distLabel.BackgroundTransparency = 1
+        distLabel.Text = math.floor(forwardDistance) .. "m"
+        distLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        distLabel.TextScaled = true
+        distLabel.Font = Enum.Font.SourceSansBold
+        distLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        distLabel.TextStrokeTransparency = 0.3
+        distLabel.Parent = billboard
+        table.insert(ForwardVisuals, distLabel)
+        
+        ForwardVisualEnabled = true
+    end
+
+    -- Обновляем визуализацию при изменении расстояния
+    local function UpdateForwardVisualsDelayed()
+        task.spawn(function()
+            task.wait(0.05)
+            UpdateForwardVisuals()
+        end)
+    end
+
     local function UpdateSlider()
         local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
         distanceButton.Position = UDim2.new(percent, -9, -0.4, 0)
         distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
+        UpdateForwardVisualsDelayed()
     end
 
     local function DoForwardTeleport()
@@ -7069,6 +7388,7 @@ pcall(function()
             return
         end
 
+        -- Используем направление КАМЕРЫ!
         local lookVector = camera.CFrame.LookVector
         local newPos = hrp.Position + lookVector * forwardDistance
 
@@ -7106,7 +7426,7 @@ pcall(function()
             end
         end)
 
-        print("✅ Teleported " .. forwardDistance .. " meters forward")
+        print("✅ Teleported " .. forwardDistance .. " meters forward (camera direction)")
     end
 
     forwardBtn.MouseButton1Click:Connect(DoForwardTeleport)
@@ -7132,16 +7452,70 @@ pcall(function()
         end
     end)
 
+    -- Обновляем визуализацию при входе во вкладку
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == forwardTabIndex then
+                task.spawn(function()
+                    task.wait(0.1)
+                    UpdateForwardVisuals()
+                end)
+            else
+                if i ~= forwardTabIndex then
+                    ClearForwardVisuals()
+                end
+            end
+        end)
+    end
+
     UpdateSlider()
+    
+    task.spawn(function()
+        task.wait(0.5)
+        if CurrentTab == forwardTabIndex then
+            UpdateForwardVisuals()
+        end
+    end)
+
+    -- Обновляем при движении камеры (только если вкладка активна)
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if CurrentTab == forwardTabIndex then
+            UpdateForwardVisuals()
+        end
+    end)
+
+    -- Обновляем при изменении позиции игрока (только если вкладка активна)
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if CurrentTab == forwardTabIndex then
+            UpdateForwardVisuals()
+        end
+    end)
+
+    -- Очищаем визуализацию при смерти
+    local player = game.Players.LocalPlayer
+    if player then
+        player.CharacterAdded:Connect(function()
+            task.wait(0.5)
+            if CurrentTab == forwardTabIndex then
+                UpdateForwardVisuals()
+            end
+        end)
+    end
 
     print("========================================")
-    print("✅ 'FORWARD' TAB ADDED!")
+    print("✅ 'FORWARD' TAB ADDED WITH VISUALIZATION!")
     print("📌 Button 'FORWARD' - teleports you forward")
+    print("📌 Teleports in CAMERA direction (NOT character!)")
+    print("📌 Uses camera CFrame LookVector")
     print("📌 Slider sets distance (1-50 meters)")
     print("📌 Default: 3 meters")
-    print("📌 Teleports in camera direction")
     print("📌 Slider button is FULL ROUND (1,0)")
     print("📌 FORWARD button is FULL ROUND (1,0)")
+    print("📌 RED LINE starts from player and goes in camera direction!")
+    print("📌 RED BALL shows the destination point (where you will teleport)!")
+    print("📌 Distance label above the ball!")
+    print("📌 Visible ONLY when Forward tab is active!")
+    print("📌 When you move camera - line and ball rotate with it!")
     print("========================================")
 end)
 
@@ -7163,11 +7537,15 @@ print("📌 Resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
 print("📌 ALL resize buttons are FULL ROUND (including corners!)")
 print("📌 Кнопки по стенкам УДАЛЕНЫ!")
 print("📌 Полоска WAVE внизу УДАЛЕНА!")
-print("📌 'Forward' tab added - teleport forward with slider (1-50m)")
+print("📌 'Forward' tab - RED LINE starts from player follows CAMERA direction!")
+print("📌 Teleports in CAMERA direction (NOT character!)")
+print("📌 RED BALL is where you teleport to, NOT on the player!")
+print("📌 Visible ONLY when Forward tab is active!")
 print("📌 Loading screen shows tab names WITH numbers (1.Points...13.Forward)")
 print("📌 'All tabs loaded!' message appears on English")
 print("📌 Forward button is FULL ROUND (1,0)")
 print("📌 Slider button in Forward tab is FULL ROUND (1,0)")
+print("📌 Fly restarts in 2 SECONDS after death")
 print("========================================")
 
 -- Запуск анимации загрузки
