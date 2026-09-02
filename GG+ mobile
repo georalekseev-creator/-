@@ -1,5 +1,4 @@
--- GG+ - Marine Style with Anchors and Waves + Mobile Edition
--- ===== MOBILE OPTIMIZED VERSION =====
+-- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!)
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -54,7 +53,7 @@ local function ShowLoadingAnimation()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Speed", "12.Forward"}
+    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 6)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -153,7 +152,7 @@ local function ShowLoadingAnimation()
         else
             if not allTabsShown then
                 allTabsShown = true
-                tabLabel.Text = "12.Forward"
+                tabLabel.Text = "13.Forward"
                 
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 1
@@ -208,7 +207,7 @@ local function ShowLoadingAnimation()
             subtitle.Text = "READY!"
             timeLabel.Text = "100% - Complete!"
             if not allTabsShown then
-                tabLabel.Text = "12.Forward"
+                tabLabel.Text = "13.Forward"
             end
             
             if not allLoadedShown then
@@ -232,7 +231,7 @@ local function ShowLoadingAnimation()
                     print("Loading animation complete!")
                     
                     task.wait(1)
-                    print("✅ Panel is ready! Tap GG+ button to open menu.")
+                    print("✅ Panel is ready! Click GG+ button to open menu.")
                 else
                     local transparency = fadeProgress
                     background.BackgroundTransparency = transparency
@@ -420,17 +419,17 @@ local function ApplyThemeColors(colors)
     end
 end
 
--- GUI Creation - MOBILE SIZE (bigger for touch)
+-- GUI Creation
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdminPanel"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- Main Menu Button (Mobile size - bigger for touch)
+-- Main Menu Button (5x меньше)
 local MainButton = Instance.new("ImageButton")
 MainButton.Name = "MainButton"
-MainButton.Size = UDim2.new(0, 20, 0, 20) -- Bigger for mobile
-MainButton.Position = UDim2.new(0, 4, 0, 4)
+MainButton.Size = UDim2.new(0, 10, 0, 10)
+MainButton.Position = UDim2.new(0, 2, 0, 2)
 MainButton.BackgroundColor3 = Library.Theme.Panel
 MainButton.BorderColor3 = Library.Theme.Border
 MainButton.BorderSizePixel = 0.4
@@ -458,7 +457,7 @@ Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 Shadow.ImageTransparency = 0.7
 Shadow.Parent = MainButton
 
--- ===== DRAG SYSTEM FOR MAIN BUTTON (TOUCH SUPPORT) =====
+-- ===== DRAG SYSTEM FOR MAIN BUTTON (GG+) =====
 local function SetupMainButtonDrag()
     local dragging = false
     local dragStart = nil
@@ -466,7 +465,7 @@ local function SetupMainButtonDrag()
     local isDraggingButton = false
 
     MainButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             isDraggingButton = true
             dragStart = input.Position
@@ -476,7 +475,7 @@ local function SetupMainButtonDrag()
     end)
 
     MainButton.InputChanged:Connect(function(input)
-        if dragging and isDraggingButton and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if dragging and isDraggingButton and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
             MainButton.Position = UDim2.new(
                 startPos.X.Scale,
@@ -488,18 +487,18 @@ local function SetupMainButtonDrag()
     end)
 
     MainButton.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
             isDraggingButton = false
         end
     end)
 end
 
--- Menu Panel (Mobile size - bigger)
+-- Menu Panel (5x меньше)
 local MenuPanel = Instance.new("Frame")
 MenuPanel.Name = "MenuPanel"
-MenuPanel.Size = UDim2.new(0, 250, 0, 200) -- Bigger for mobile
-MenuPanel.Position = UDim2.new(0.5, -125, 0.5, -100)
+MenuPanel.Size = UDim2.new(0, 150, 0, 130)
+MenuPanel.Position = UDim2.new(0.5, -75, 0.5, -65)
 MenuPanel.BackgroundColor3 = Library.Theme.Background
 MenuPanel.BorderColor3 = Library.Theme.Border
 MenuPanel.BorderSizePixel = 0.6
@@ -507,7 +506,7 @@ MenuPanel.Visible = false
 MenuPanel.Parent = ScreenGui
 MenuPanel.ClipsDescendants = true
 
--- ===== DRAG SYSTEM FOR MENU PANEL (TOUCH SUPPORT) =====
+-- ===== DRAG SYSTEM FOR MENU PANEL (FIXED) =====
 local function SetupMenuDrag()
     local isDraggingPanel = false
     local dragStartPanel = nil
@@ -515,7 +514,7 @@ local function SetupMenuDrag()
     local dragTarget = nil
 
     local function CanStartDrag(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+        if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
             return false
         end
 
@@ -549,7 +548,7 @@ local function SetupMenuDrag()
     end
 
     MenuPanel.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             if CanStartDrag(input) then
                 isDraggingPanel = true
                 dragStartPanel = input.Position
@@ -561,7 +560,7 @@ local function SetupMenuDrag()
     end)
 
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDraggingPanel and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragTarget then
+        if isDraggingPanel and input.UserInputType == Enum.UserInputType.MouseMovement and dragTarget then
             local delta = input.Position - dragStartPanel
             MenuPanel.Position = UDim2.new(
                 startPosPanel.X.Scale,
@@ -573,23 +572,23 @@ local function SetupMenuDrag()
     end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDraggingPanel = false
             dragTarget = nil
         end
     end)
 end
 
--- Title (Mobile size)
+-- Title (5x меньше)
 local TitleFrame = Instance.new("Frame")
-TitleFrame.Size = UDim2.new(1, 0, 0, 16)
+TitleFrame.Size = UDim2.new(1, 0, 0, 10)
 TitleFrame.BackgroundColor3 = Library.Theme.Panel
 TitleFrame.BorderSizePixel = 0
 TitleFrame.Parent = MenuPanel
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -12, 1, 0)
-Title.Position = UDim2.new(0, 4, 0, 0)
+Title.Size = UDim2.new(1, -8, 1, 0)
+Title.Position = UDim2.new(0, 2, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "GG+"
 Title.TextColor3 = Library.Theme.Text
@@ -599,8 +598,8 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleFrame
 
 local CloseBtn = Instance.new("ImageButton")
-CloseBtn.Size = UDim2.new(0, 12, 0, 12)
-CloseBtn.Position = UDim2.new(1, -14, 0, 2)
+CloseBtn.Size = UDim2.new(0, 6, 0, 6)
+CloseBtn.Position = UDim2.new(1, -8, 0, 2)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 CloseBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.BorderSizePixel = 0.2
@@ -616,15 +615,15 @@ CloseLabel.TextScaled = true
 CloseLabel.Font = Enum.Font.SourceSansBold
 CloseLabel.Parent = CloseBtn
 
--- Main content with tabs (vertical)
+-- Main content with tabs (vertical) (5x меньше)
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, -4, 1, -20)
-TabContainer.Position = UDim2.new(0, 2, 0, 18)
+TabContainer.Size = UDim2.new(1, -4, 1, -14)
+TabContainer.Position = UDim2.new(0, 2, 0, 12)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MenuPanel
 
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(0, 32, 1, 0)
+TabBar.Size = UDim2.new(0, 24, 1, 0)
 TabBar.Position = UDim2.new(0, 0, 0, 0)
 TabBar.BackgroundColor3 = Library.Theme.Panel
 TabBar.BorderColor3 = Library.Theme.Border
@@ -632,8 +631,8 @@ TabBar.BorderSizePixel = 0.4
 TabBar.Parent = TabContainer
 
 local TabContentContainer = Instance.new("Frame")
-TabContentContainer.Size = UDim2.new(1, -34, 1, 0)
-TabContentContainer.Position = UDim2.new(0, 33, 0, 0)
+TabContentContainer.Size = UDim2.new(1, -26, 1, 0)
+TabContentContainer.Position = UDim2.new(0, 25, 0, 0)
 TabContentContainer.BackgroundTransparency = 1
 TabContentContainer.Parent = TabContainer
 
@@ -641,8 +640,7 @@ local Tabs = {}
 local TabButtons = {}
 local CurrentTab = 1
 
--- УДАЛЕНА вкладка Clicker (11.Clicker)
-local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Speed", "12.Forward"}
+local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -1, 1, -1)
@@ -659,7 +657,7 @@ TabListLayout.Parent = TabScrollingFrame
 
 for i, name in ipairs(TabNames) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -1, 0, 10)
+    btn.Size = UDim2.new(1, -1, 0, 7)
     btn.BackgroundColor3 = (i == 1) and Library.Theme.Accent or Library.Theme.Button
     btn.BorderColor3 = Library.Theme.Border
     btn.BorderSizePixel = 0.4
@@ -679,7 +677,7 @@ for i, name in ipairs(TabNames) do
     Tabs[i] = content
 end
 
-TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 10.6 + 1)
+TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 7.6 + 1)
 
 -- ===== TAB 1: POINTS =====
 local PointsTab = Tabs[1]
@@ -848,8 +846,8 @@ SpeedFill.BorderSizePixel = 0
 SpeedFill.Parent = SpeedSlider
 
 local SpeedButton = Instance.new("TextButton")
-SpeedButton.Size = UDim2.new(0, 6, 2.4, 0)
-SpeedButton.Position = UDim2.new(0.375, -3, -0.4, 0)
+SpeedButton.Size = UDim2.new(0, 3, 1.8, 0)
+SpeedButton.Position = UDim2.new(0.375, -1.5, -0.4, 0)
 SpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SpeedButton.BorderColor3 = Library.Theme.Border
 SpeedButton.BorderSizePixel = 0.4
@@ -951,8 +949,8 @@ WalkSpeedFill.BorderSizePixel = 0
 WalkSpeedFill.Parent = WalkSpeedSlider
 
 local WalkSpeedButton = Instance.new("TextButton")
-WalkSpeedButton.Size = UDim2.new(0, 6, 2.4, 0)
-WalkSpeedButton.Position = UDim2.new(0.3, -3, -0.4, 0)
+WalkSpeedButton.Size = UDim2.new(0, 3, 1.8, 0)
+WalkSpeedButton.Position = UDim2.new(0.3, -1.5, -0.4, 0)
 WalkSpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WalkSpeedButton.BorderColor3 = Library.Theme.Border
 WalkSpeedButton.BorderSizePixel = 0.4
@@ -1077,8 +1075,8 @@ LengthFill.BorderSizePixel = 0
 LengthFill.Parent = LengthSlider
 
 local LengthButton = Instance.new("TextButton")
-LengthButton.Size = UDim2.new(0, 6, 2.4, 0)
-LengthButton.Position = UDim2.new(0.4898, -3, -0.4, 0)
+LengthButton.Size = UDim2.new(0, 3, 1.8, 0)
+LengthButton.Position = UDim2.new(0.4898, -1.5, -0.4, 0)
 LengthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 LengthButton.BorderColor3 = Library.Theme.Border
 LengthButton.BorderSizePixel = 0.4
@@ -1116,8 +1114,8 @@ WidthFill.BorderSizePixel = 0
 WidthFill.Parent = WidthSlider
 
 local WidthButton = Instance.new("TextButton")
-WidthButton.Size = UDim2.new(0, 6, 2.4, 0)
-WidthButton.Position = UDim2.new(0.4898, -3, -0.4, 0)
+WidthButton.Size = UDim2.new(0, 3, 1.8, 0)
+WidthButton.Position = UDim2.new(0.4898, -1.5, -0.4, 0)
 WidthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WidthButton.BorderColor3 = Library.Theme.Border
 WidthButton.BorderSizePixel = 0.4
@@ -1296,7 +1294,7 @@ local function UpdatePlayersList()
             local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
 
             local ItemFrame = Instance.new("Frame")
-            ItemFrame.Size = UDim2.new(1, -2, 0, 12)
+            ItemFrame.Size = UDim2.new(1, -2, 0, 9)
             ItemFrame.BackgroundColor3 = Library.Theme.Panel
             ItemFrame.BorderColor3 = Library.Theme.Border
             ItemFrame.BorderSizePixel = 0.4
@@ -1360,7 +1358,7 @@ local function UpdatePlayersList()
 
             local lastClickTime = 0
             NameLabel.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     local currentTime = tick()
                     if currentTime - lastClickTime < 0.3 then onDoubleClick() end
                     lastClickTime = currentTime
@@ -1370,7 +1368,7 @@ local function UpdatePlayersList()
     end
 
     PlayersCountLabel.Text = "Players: " .. count
-    local totalHeight = count * 13 + 2
+    local totalHeight = count * 10 + 2
     PlayersList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
 
@@ -1536,8 +1534,8 @@ XRayFill.BorderSizePixel = 0
 XRayFill.Parent = XRaySlider
 
 local XRaySliderButton = Instance.new("TextButton")
-XRaySliderButton.Size = UDim2.new(0, 6, 2.4, 0)
-XRaySliderButton.Position = UDim2.new(0.5, -3, -0.4, 0)
+XRaySliderButton.Size = UDim2.new(0, 3, 1.8, 0)
+XRaySliderButton.Position = UDim2.new(0.5, -1.5, -0.4, 0)
 XRaySliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 XRaySliderButton.BorderColor3 = Library.Theme.Border
 XRaySliderButton.BorderSizePixel = 0.4
@@ -1552,7 +1550,7 @@ XRaySliderButtonCorner.Parent = XRaySliderButton
 local function UpdateXRaySlider()
     local percent = XRayTransparency / 100
     XRayFill.Size = UDim2.new(percent, 0, 1, 0)
-    XRaySliderButton.Position = UDim2.new(percent, -3, -0.4, 0)
+    XRaySliderButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
     XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
 end
 
@@ -1579,11 +1577,11 @@ local xrayDragging = false
 XRaySliderButton.MouseButton1Down:Connect(function() xrayDragging = true end)
 
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then xrayDragging = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then xrayDragging = false end
 end)
 
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if xrayDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if xrayDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = XRaySlider.AbsolutePosition
         local sliderSize = XRaySlider.AbsoluteSize
         local mouseX = input.Position.X
@@ -1992,6 +1990,7 @@ local function ToggleFly()
             if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
             if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
             if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
+
             if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
             if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
 
@@ -2348,7 +2347,7 @@ local function UpdatePointsList()
         local pos = data.pos
 
         local ItemFrame = Instance.new("Frame")
-        ItemFrame.Size = UDim2.new(1, -2, 0, 12)
+        ItemFrame.Size = UDim2.new(1, -2, 0, 8)
         ItemFrame.BackgroundColor3 = Library.Theme.Panel
         ItemFrame.BorderColor3 = Library.Theme.Border
         ItemFrame.BorderSizePixel = 0.2
@@ -2408,7 +2407,7 @@ local function UpdatePointsList()
     end
 
     local count = #PointsData
-    PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 13 + 2)
+    PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 9 + 2)
 end
 
 local function UpdatePointInfo()
@@ -2450,7 +2449,7 @@ local function UpdateWalkPointsList()
         local pos = data.pos
 
         local ItemFrame = Instance.new("Frame")
-        ItemFrame.Size = UDim2.new(1, -2, 0, 10)
+        ItemFrame.Size = UDim2.new(1, -2, 0, 7)
         ItemFrame.BackgroundColor3 = Library.Theme.Panel
         ItemFrame.BorderColor3 = Library.Theme.Border
         ItemFrame.BorderSizePixel = 0.2
@@ -2515,7 +2514,7 @@ local function UpdateWalkPointsList()
     end
 
     local count = #WalkPointsData
-    WalkPointsList.CanvasSize = UDim2.new(0, 0, 0, count * 11 + 2)
+    WalkPointsList.CanvasSize = UDim2.new(0, 0, 0, count * 8 + 2)
     UpdateWalkVisuals()
 end
 
@@ -2828,7 +2827,7 @@ for i, btn in ipairs(TabButtons) do
         if i == 7 then UpdatePlayersList(); lastPlayerUpdate = tick() end
         if i == 8 then UpdateXRaySlider() end
         if i == 9 then if SPIEnabled then UpdateSPI() end end
-        if i == 12 then
+        if i == 13 then
             task.spawn(function()
                 task.wait(0.1)
                 UpdateForwardVisuals()
@@ -2858,10 +2857,10 @@ end)
 local draggingSlider = false
 SpeedButton.MouseButton1Down:Connect(function() draggingSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingSlider = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = false end
 end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = SpeedSlider.AbsolutePosition
         local sliderSize = SpeedSlider.AbsoluteSize
         local mouseX = input.Position.X
@@ -2869,7 +2868,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         FlySpeed = math.floor(10 + percent * 240)
         SpeedFill.Size = UDim2.new(percent, 0, 1, 0)
-        SpeedButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        SpeedButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         SpeedLabel.Text = "Speed: " .. FlySpeed
     end
 end)
@@ -2877,10 +2876,10 @@ end)
 local draggingWalkSlider = false
 WalkSpeedButton.MouseButton1Down:Connect(function() draggingWalkSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingWalkSlider = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingWalkSlider = false end
 end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingWalkSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if draggingWalkSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = WalkSpeedSlider.AbsolutePosition
         local sliderSize = WalkSpeedSlider.AbsoluteSize
         local mouseX = input.Position.X
@@ -2888,7 +2887,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         WalkSpeed = math.floor(10 + percent * (MAX_WALK_SPEED - 10))
         WalkSpeedFill.Size = UDim2.new(percent, 0, 1, 0)
-        WalkSpeedButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        WalkSpeedButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         WalkSpeedLabel.Text = "Speed: " .. WalkSpeed
     end
 end)
@@ -2896,10 +2895,10 @@ end)
 local draggingLengthSlider = false
 LengthButton.MouseButton1Down:Connect(function() draggingLengthSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingLengthSlider = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingLengthSlider = false end
 end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingLengthSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if draggingLengthSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = LengthSlider.AbsolutePosition
         local sliderSize = LengthSlider.AbsoluteSize
         local mouseX = input.Position.X
@@ -2907,7 +2906,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformLength = math.floor(MinSize + percent * (MaxSize - MinSize))
         LengthFill.Size = UDim2.new(percent, 0, 1, 0)
-        LengthButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        LengthButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         LengthLabel.Text = "Length: " .. PlatformLength .. " m"
     end
 end)
@@ -2915,10 +2914,10 @@ end)
 local draggingWidthSlider = false
 WidthButton.MouseButton1Down:Connect(function() draggingWidthSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingWidthSlider = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingWidthSlider = false end
 end)
 game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingWidthSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if draggingWidthSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
         local sliderPos = WidthSlider.AbsolutePosition
         local sliderSize = WidthSlider.AbsoluteSize
         local mouseX = input.Position.X
@@ -2926,7 +2925,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformWidth = math.floor(MinSize + percent * (MaxSize - MinSize))
         WidthFill.Size = UDim2.new(percent, 0, 1, 0)
-        WidthButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        WidthButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         WidthLabel.Text = "Width: " .. PlatformWidth .. " m"
     end
 end)
@@ -2974,8 +2973,8 @@ local function AnimateCollapse(targetCollapsed)
             MainButton.Position.Y.Offset + (MainButton.Size.Y.Offset / 2)
         )
     else
-        targetSize = UDim2.new(0, 250, 0, 200)
-        targetPosition = UDim2.new(0.5, -125, 0.5, -100)
+        targetSize = UDim2.new(0, 150, 0, 130)
+        targetPosition = UDim2.new(0.5, -75, 0.5, -65)
     end
 
     local startPos = MenuPanel.Position
@@ -3002,8 +3001,8 @@ local function AnimateCollapse(targetCollapsed)
             posY
         )
 
-        local scale = 1 - (1 - (currentWidth / 250)) * 0.5
-        MainButton.Size = UDim2.new(0, 20 * (1 + (1 - scale) * 0.5), 0, 20 * (1 + (1 - scale) * 0.5))
+        local scale = 1 - (1 - (currentWidth / 150)) * 0.5
+        MainButton.Size = UDim2.new(0, 10 * (1 + (1 - scale) * 0.5), 0, 10 * (1 + (1 - scale) * 0.5))
 
         if progress >= 1 then
             MenuPanel.Size = targetSize
@@ -3097,7 +3096,7 @@ end)
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
-    if ClickTeleportEnabled and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+    if ClickTeleportEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
         local mouse = game.Players.LocalPlayer:GetMouse()
         local target = mouse.Target
 
@@ -3179,9 +3178,7 @@ end)
 
 print("Admin Panel loaded!")
 print("Tabs are now VERTICALLY positioned on the left")
-print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Speed, Forward")
-print("🔹 MOBILE OPTIMIZED - bigger buttons and touch support!")
-print("🔹 Clicker tab REMOVED!")
+print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed, Forward")
 print("Alt+C - click-teleport")
 print("Alt+F - flight with run animation (WASD + Space/Ctrl)")
 print("Alt+W - start/pause walk | Alt+X - add walk point")
@@ -3194,22 +3191,20 @@ print("Alt+I - SPI (show players through walls)")
 InitializeMenuState()
 
 print("========================================")
-print("✅ MOBILE OPTIMIZED VERSION!")
-print("📌 Menu panel: 250x200 (bigger for touch)")
-print("📌 GG+ button: 20x20 (bigger for touch)")
-print("📌 All buttons and sliders enlarged for finger input")
-print("📌 Touch support for all interactions")
-print("📌 Clicker tab REMOVED!")
+print("✅ ALL ELEMENTS ARE 5x SMALLER!")
+print("📌 Menu panel: 150x130")
+print("📌 GG+ button: 10x10")
+print("📌 All buttons, frames and text are scaled down")
 print("========================================")
 
 -- ===== VISIBLE BLUE RESIZE BUTTONS - ТОЛЬКО ПО УГЛАМ! =====
-local RESIZE_BUTTON_SIZE = 4
-local CORNER_BUTTON_SIZE = 5
+local RESIZE_BUTTON_SIZE = 2.8
+local CORNER_BUTTON_SIZE = 3.6
 
-local MIN_PANEL_WIDTH = 120
-local MIN_PANEL_HEIGHT = 90
-local MAX_PANEL_WIDTH = 320
-local MAX_PANEL_HEIGHT = 240
+local MIN_PANEL_WIDTH = 80
+local MIN_PANEL_HEIGHT = 60
+local MAX_PANEL_WIDTH = 240
+local MAX_PANEL_HEIGHT = 180
 
 local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, resizeY, rotation, isCorner)
     local size = isCorner and CORNER_BUTTON_SIZE or RESIZE_BUTTON_SIZE
@@ -3247,7 +3242,7 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     local startMousePos = nil
 
     handle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isResizing = true
             startSize = MenuPanel.Size
             startPos = MenuPanel.Position
@@ -3257,7 +3252,7 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
     end)
 
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement then
             local deltaX = input.Position.X - startMousePos.X
             local deltaY = input.Position.Y - startMousePos.Y
 
@@ -3282,12 +3277,12 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
                 startPos.Y.Scale, offsetY
             )
 
-            TabContainer.Size = UDim2.new(1, -4, 1, -20)
+            TabContainer.Size = UDim2.new(1, -4, 1, -14)
         end
     end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and isResizing then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isResizing then
             isResizing = false
             startSize = nil
             startPos = nil
@@ -3332,7 +3327,7 @@ pcall(function()
 end)
 
 print("Blue resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
-print("Corner buttons: 5x5 (full round)")
+print("Corner buttons: 3.6x3.6 (full round)")
 print("Color: blue (0, 100, 255)")
 print("Dragging works only by title")
 print("Кнопки по стенкам УДАЛЕНЫ!")
@@ -3437,8 +3432,8 @@ do
         speedFill.Parent = speedSlider
 
         local speedButton = Instance.new("TextButton")
-        speedButton.Size = UDim2.new(0, 6, 2.4, 0)
-        speedButton.Position = UDim2.new(0.5, -3, -0.4, 0)
+        speedButton.Size = UDim2.new(0, 3, 1.8, 0)
+        speedButton.Position = UDim2.new(0.5, -1.5, -0.4, 0)
         speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         speedButton.BorderColor3 = Library.Theme.Border
         speedButton.BorderSizePixel = 0.4
@@ -3491,7 +3486,7 @@ do
         local function updateSpeedSlider()
             local percent = (baseSpeed - 1) / 199
             speedFill.Size = UDim2.new(percent, 0, 1, 0)
-            speedButton.Position = UDim2.new(percent, -3, -0.4, 0)
+            speedButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
             speedLabel.Text = "Speed: " .. math.floor(baseSpeed)
         end
 
@@ -3628,13 +3623,13 @@ do
         speedButton.MouseButton1Down:Connect(function() draggingSpeed = true end)
 
         game:GetService("UserInputService").InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 draggingSpeed = false
             end
         end)
 
         game:GetService("UserInputService").InputChanged:Connect(function(input)
-            if draggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            if draggingSpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
                 local sliderPos = speedSlider.AbsolutePosition
                 local sliderSize = speedSlider.AbsoluteSize
                 local mouseX = input.Position.X
@@ -3791,7 +3786,7 @@ local function CreateFinalLoadingScreen()
     subtitle.Font = Enum.Font.SourceSans
     subtitle.Parent = container
 
-    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Speed", "12.Forward"}
+    local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, 0, 0, 6)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
@@ -3889,7 +3884,7 @@ local function CreateFinalLoadingScreen()
         else
             if not allTabsShown then
                 allTabsShown = true
-                tabLabel.Text = "12.Forward"
+                tabLabel.Text = "13.Forward"
                 
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 1
@@ -3932,7 +3927,7 @@ local function CreateFinalLoadingScreen()
             subtitle.Text = "READY!"
             timeLabel.Text = "100% - Complete!"
             if not allTabsShown then
-                tabLabel.Text = "12.Forward"
+                tabLabel.Text = "13.Forward"
             end
             
             if not allLoadedShown then
@@ -3960,7 +3955,8 @@ local function CreateFinalLoadingScreen()
                     background2.BackgroundTransparency = transparency
                     textLabel.TextTransparency = transparency
                     subtitle.TextTransparency = transparency
-                    timeLabel.TextTransparency = transparency                    tabLabel.TextTransparency = transparency
+                    timeLabel.TextTransparency = transparency
+                    tabLabel.TextTransparency = transparency
                     allLoadedLabel.TextTransparency = transparency
 
                     local lineTransparency = 1 - (1 - transparency) * (1 - line1Label.TextTransparency)
@@ -4163,8 +4159,8 @@ pcall(function()
     transFill.Parent = transSlider
 
     local transButton = Instance.new("TextButton")
-    transButton.Size = UDim2.new(0, 6, 2.4, 0)
-    transButton.Position = UDim2.new(0.5, -3, -0.4, 0)
+    transButton.Size = UDim2.new(0, 3, 1.8, 0)
+    transButton.Position = UDim2.new(0.5, -1.5, -0.4, 0)
     transButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     transButton.BorderColor3 = Library.Theme.Border
     transButton.BorderSizePixel = 0.4
@@ -4284,7 +4280,7 @@ pcall(function()
     local function updateSlider()
         local percent = currentTransparency
         transFill.Size = UDim2.new(percent, 0, 1, 0)
-        transButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        transButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         transLabel.Text = math.floor(percent * 100) .. "%"
     end
 
@@ -4301,13 +4297,13 @@ pcall(function()
     transButton.MouseButton1Down:Connect(function() isDragging = true end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDragging = false
         end
     end)
 
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local sliderPos = transSlider.AbsolutePosition
             local sliderSize = transSlider.AbsoluteSize
             local mouseX = input.Position.X
@@ -4602,7 +4598,7 @@ pcall(function()
 
                 child.Image = "rbxassetid://0"
 
-                child.Size = UDim2.new(0, 4, 0, 4)
+                child.Size = UDim2.new(0, 2.4, 0, 2.4)
 
                 child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
                 child.BackgroundTransparency = 0.4
@@ -4614,7 +4610,7 @@ pcall(function()
                 child.BorderSizePixel = 0.2
                 child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-                child.Size = UDim2.new(0, 5, 0, 5)
+                child.Size = UDim2.new(0, 2.8, 0, 2.8)
             end
         end
     end
@@ -4640,12 +4636,12 @@ pcall(function()
             child.Image = "rbxassetid://0"
 
             local currentSize = child.Size
-            if currentSize.X.Offset == 4 then
-                child.Size = UDim2.new(0, 6, 0, 6)
-            elseif currentSize.X.Offset == 5 then
-                child.Size = UDim2.new(0, 7, 0, 7)
+            if currentSize.X.Offset == 2.4 then
+                child.Size = UDim2.new(0, 4.8, 0, 4.8)
+            elseif currentSize.X.Offset == 2.8 then
+                child.Size = UDim2.new(0, 5.6, 0, 5.6)
             else
-                child.Size = UDim2.new(0, currentSize.X.Offset * 1.5, 0, currentSize.Y.Offset * 1.5)
+                child.Size = UDim2.new(0, currentSize.X.Offset * 2, 0, currentSize.Y.Offset * 2)
             end
 
             child.Position = UDim2.new(
@@ -4681,16 +4677,16 @@ pcall(function()
             child.Image = "rbxassetid://0"
 
             local currentSize = child.Size
-            if currentSize.X.Offset == 6 then
-                child.Size = UDim2.new(0, 4, 0, 4)
-            elseif currentSize.X.Offset == 7 then
-                child.Size = UDim2.new(0, 5, 0, 5)
-            elseif currentSize.X.Offset == 4 then
-                child.Size = UDim2.new(0, 4, 0, 4)
-            elseif currentSize.X.Offset == 5 then
-                child.Size = UDim2.new(0, 5, 0, 5)
+            if currentSize.X.Offset == 4.8 then
+                child.Size = UDim2.new(0, 2.8, 0, 2.8)
+            elseif currentSize.X.Offset == 5.6 then
+                child.Size = UDim2.new(0, 3.2, 0, 3.2)
+            elseif currentSize.X.Offset == 2.4 then
+                child.Size = UDim2.new(0, 2.8, 0, 2.8)
+            elseif currentSize.X.Offset == 2.8 then
+                child.Size = UDim2.new(0, 3.2, 0, 3.2)
             else
-                child.Size = UDim2.new(0, 4, 0, 4)
+                child.Size = UDim2.new(0, 2.8, 0, 2.8)
             end
 
             child.Position = UDim2.new(
@@ -4711,7 +4707,7 @@ pcall(function()
         end
     end
 
-    print("✅ Resize buttons resized: 4x4 and 5x5")
+    print("✅ Resize buttons resized: 2.8x2.8 and 3.2x3.2")
     print("✅ Arrows removed")
     print("✅ ALL buttons are now FULL ROUND (1,0)")
 end)
@@ -4879,11 +4875,1394 @@ pcall(function()
             btn.BorderSizePixel = 0.4
             btn.BorderColor3 = Library.Theme.Border
 
-            btn.Size = UDim2.new(1, -1, 0, 10)
+            btn.Size = UDim2.new(1, -1, 0, 7)
         end
     end
 
     print("✅ Tab buttons are now square (no rounding)")
+end)
+
+-- ===== TAB 11: CLICKER =====
+pcall(function()
+    local existingTab = nil
+    for i, name in ipairs(TabNames) do
+        if name == "11.Clicker" then
+            existingTab = i
+            break
+        end
+    end
+
+    if not existingTab then
+        table.insert(TabNames, "11.Clicker")
+
+        local newTab = Instance.new("Frame")
+        newTab.Size = UDim2.new(1, 0, 1, 0)
+        newTab.BackgroundTransparency = 1
+        newTab.Visible = false
+        newTab.Parent = TabContentContainer
+        table.insert(Tabs, newTab)
+
+        local newBtn = Instance.new("TextButton")
+        newBtn.Size = UDim2.new(1, -1, 0, 7)
+        newBtn.BackgroundColor3 = Library.Theme.Button
+        newBtn.BorderColor3 = Library.Theme.Border
+        newBtn.BorderSizePixel = 0.4
+        newBtn.Text = "11.Clicker"
+        newBtn.TextColor3 = Library.Theme.Text
+        newBtn.TextScaled = true
+        newBtn.Font = Enum.Font.SourceSansBold
+        newBtn.Parent = TabScrollingFrame
+        table.insert(TabButtons, newBtn)
+
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 7.6 + 1)
+
+        newBtn.MouseButton1Click:Connect(function()
+            for j, tab in ipairs(Tabs) do
+                tab.Visible = (j == #Tabs)
+                TabButtons[j].BackgroundColor3 = (j == #Tabs) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+
+        local emptyFrame = Instance.new("Frame")
+        emptyFrame.Size = UDim2.new(1, 0, 1, 0)
+        emptyFrame.BackgroundTransparency = 1
+        emptyFrame.Parent = newTab
+
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Size = UDim2.new(1, 0, 1, 0)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.Text = "Clicker tab\n(empty)"
+        messageLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+        messageLabel.TextScaled = true
+        messageLabel.Font = Enum.Font.SourceSansBold
+        messageLabel.TextTransparency = 0.5
+        messageLabel.Parent = emptyFrame
+
+        local corner = newBtn:FindFirstChild("UICorner")
+        if corner then corner:Destroy() end
+        newBtn.BorderSizePixel = 0.4
+        newBtn.BorderColor3 = Library.Theme.Border
+
+        print("✅ Added empty 'Clicker' tab")
+    end
+end)
+
+pcall(function()
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "11.Clicker" then
+            clickerTab = tab
+            break
+        end
+    end
+
+    if not clickerTab then
+        print("❌ 'Clicker' tab not found")
+        return
+    end
+
+    for _, child in pairs(clickerTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = clickerTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -4, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 2, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 0.4
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "AUTO CLICKER"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.12, 0)
+    info.Position = UDim2.new(0, 0, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Automatic left mouse button clicker"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+
+    local clickerBtn = Instance.new("TextButton")
+    clickerBtn.Size = UDim2.new(0.4, -2, 0.2, 0)
+    clickerBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    clickerBtn.BorderColor3 = Library.Theme.Border
+    clickerBtn.BorderSizePixel = 0.4
+    clickerBtn.Text = "OFF"
+    clickerBtn.TextColor3 = Library.Theme.Text
+    clickerBtn.TextScaled = true
+    clickerBtn.Font = Enum.Font.SourceSansBold
+    clickerBtn.BackgroundTransparency = 0.3
+    clickerBtn.Parent = mainFrame
+
+    local clickerCorner = Instance.new("UICorner")
+    clickerCorner.CornerRadius = UDim.new(1, 0)
+    clickerCorner.Parent = clickerBtn
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Auto Clicker: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local delayLabel = Instance.new("TextLabel")
+    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    delayLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
+    delayLabel.BackgroundTransparency = 1
+    delayLabel.Text = "Delay: 100 ms"
+    delayLabel.TextColor3 = Library.Theme.Text
+    delayLabel.TextScaled = true
+    delayLabel.Font = Enum.Font.SourceSans
+    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    delayLabel.Parent = mainFrame
+
+    local delaySlider = Instance.new("Frame")
+    delaySlider.Size = UDim2.new(0.5, -2, 0.05, 0)
+    delaySlider.Position = UDim2.new(0.4, 0, 0.8, 0)
+    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BorderSizePixel = 0
+    delaySlider.Parent = mainFrame
+
+    local delayFill = Instance.new("Frame")
+    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
+    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BorderSizePixel = 0
+    delayFill.Parent = delaySlider
+
+    local delayButton = Instance.new("TextButton")
+    delayButton.Size = UDim2.new(0, 3, 1.8, 0)
+    delayButton.Position = UDim2.new(0.1, -1.5, -0.4, 0)
+    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    delayButton.BorderColor3 = Library.Theme.Border
+    delayButton.BorderSizePixel = 0.4
+    delayButton.Text = ""
+    delayButton.Parent = delaySlider
+    delayButton.BackgroundTransparency = 0
+
+    local delayButtonCorner = Instance.new("UICorner")
+    delayButtonCorner.CornerRadius = UDim.new(1, 0)
+    delayButtonCorner.Parent = delayButton
+
+    local isClicking = false
+    local clickDelay = 100
+    local clickConnection = nil
+    local mouse = game.Players.LocalPlayer:GetMouse()
+
+    local function DoClick()
+        if not isClicking then return end
+        mouse1click()
+    end
+
+    local function EnableClicker()
+        if isClicking then return end
+        isClicking = true
+
+        clickerBtn.Text = "ON"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Auto Clicker: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not isClicking then return end
+            DoClick()
+            task.wait(clickDelay / 1000)
+        end)
+
+        print("✅ Auto Clicker enabled")
+    end
+
+    local function DisableClicker()
+        if not isClicking then return end
+        isClicking = false
+
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+
+        clickerBtn.Text = "OFF"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Auto Clicker: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Auto Clicker disabled")
+    end
+
+    local function ToggleClicker()
+        if isClicking then
+            DisableClicker()
+        else
+            EnableClicker()
+        end
+    end
+
+    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleClicker()
+        end
+    end)
+
+    local isDragging = false
+    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = delaySlider.AbsolutePosition
+            local sliderSize = delaySlider.AbsoluteSize
+            local mouseX = input.Position.X
+
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            clickDelay = math.floor(50 + percent * 950)
+            delayFill.Size = UDim2.new(percent, 0, 1, 0)
+            delayButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
+            delayLabel.Text = "Delay: " .. clickDelay .. " ms"
+        end
+    end)
+
+    print("✅ 'Clicker' tab updated - auto clicker added")
+    print("📌 Alt+K - toggle auto clicker")
+    print("📌 Slider adjusts click delay (50-1000 ms)")
+end)
+
+pcall(function()
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "11.Clicker" then
+            clickerTab = tab
+            break
+        end
+    end
+
+    if not clickerTab then
+        print("❌ 'Clicker' tab not found")
+        return
+    end
+
+    for _, child in pairs(clickerTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = clickerTab
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(1, -4, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 2, 0.15, 0)
+    mainFrame.BackgroundColor3 = Library.Theme.Panel
+    mainFrame.BorderColor3 = Library.Theme.Border
+    mainFrame.BorderSizePixel = 0.4
+    mainFrame.BackgroundTransparency = 0.5
+    mainFrame.Parent = container
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "AUTO CLICKER"
+    title.TextColor3 = Library.Theme.Text
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = mainFrame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, 0, 0.15, 0)
+    info.Position = UDim2.new(0, 0, 0.17, 0)
+    info.BackgroundTransparency = 1
+    info.Text = "Auto Clicker does NOT work when hovering over GUI panel"
+    info.TextColor3 = Library.Theme.Accent
+    info.TextScaled = true
+    info.Font = Enum.Font.SourceSans
+    info.Parent = mainFrame
+
+    local clickerBtn = Instance.new("TextButton")
+    clickerBtn.Size = UDim2.new(0.4, -2, 0.2, 0)
+    clickerBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
+    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    clickerBtn.BorderColor3 = Library.Theme.Border
+    clickerBtn.BorderSizePixel = 0.4
+    clickerBtn.Text = "OFF"
+    clickerBtn.TextColor3 = Library.Theme.Text
+    clickerBtn.TextScaled = true
+    clickerBtn.Font = Enum.Font.SourceSansBold
+    clickerBtn.BackgroundTransparency = 0.3
+    clickerBtn.Parent = mainFrame
+
+    local clickerCorner = Instance.new("UICorner")
+    clickerCorner.CornerRadius = UDim.new(1, 0)
+    clickerCorner.Parent = clickerBtn
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Auto Clicker: Disabled"
+    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.Parent = mainFrame
+
+    local delayLabel = Instance.new("TextLabel")
+    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
+    delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
+    delayLabel.BackgroundTransparency = 1
+    delayLabel.Text = "Delay: 100 ms"
+    delayLabel.TextColor3 = Library.Theme.Text
+    delayLabel.TextScaled = true
+    delayLabel.Font = Enum.Font.SourceSans
+    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    delayLabel.Parent = mainFrame
+
+    local delaySlider = Instance.new("Frame")
+    delaySlider.Size = UDim2.new(0.5, -2, 0.05, 0)
+    delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
+    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BorderSizePixel = 0
+    delaySlider.Parent = mainFrame
+
+    local delayFill = Instance.new("Frame")
+    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
+    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BorderSizePixel = 0
+    delayFill.Parent = delaySlider
+
+    local delayButton = Instance.new("TextButton")
+    delayButton.Size = UDim2.new(0, 3, 1.8, 0)
+    delayButton.Position = UDim2.new(0.1, -1.5, -0.4, 0)
+    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    delayButton.BorderColor3 = Library.Theme.Border
+    delayButton.BorderSizePixel = 0.4
+    delayButton.Text = ""
+    delayButton.Parent = delaySlider
+    delayButton.BackgroundTransparency = 0
+
+    local delayButtonCorner = Instance.new("UICorner")
+    delayButtonCorner.CornerRadius = UDim.new(1, 0)
+    delayButtonCorner.Parent = delayButton
+
+    local isClicking = false
+    local clickDelay = 100
+    local clickConnection = nil
+    local mouse = game.Players.LocalPlayer:GetMouse()
+
+    local function IsMouseOverGui()
+        if MenuPanel and MenuPanel.Visible then
+            local absPos = MenuPanel.AbsolutePosition
+            local absSize = MenuPanel.AbsoluteSize
+
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+
+            for _, obj in pairs(MenuPanel:GetDescendants()) do
+                if obj:IsA("GuiObject") and obj.Visible and obj.AbsoluteSize.X > 0 and obj.AbsoluteSize.Y > 0 then
+                    local objAbsPos = obj.AbsolutePosition
+                    local objAbsSize = obj.AbsoluteSize
+                    if mouse.X >= objAbsPos.X and mouse.X <= objAbsPos.X + objAbsSize.X and
+                       mouse.Y >= objAbsPos.Y and mouse.Y <= objAbsPos.Y + objAbsSize.Y then
+                        return true
+                    end
+                end
+            end
+        end
+
+        if MainButton and MainButton.Visible then
+            local absPos = MainButton.AbsolutePosition
+            local absSize = MainButton.AbsoluteSize
+            if mouse.X >= absPos.X and mouse.X <= absPos.X + absSize.X and
+               mouse.Y >= absPos.Y and mouse.Y <= absPos.Y + absSize.Y then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function DoClick()
+        if not isClicking then return end
+
+        if IsMouseOverGui() then
+            return
+        end
+
+        mouse1click()
+    end
+
+    local function EnableClicker()
+        if isClicking then return end
+        isClicking = true
+
+        clickerBtn.Text = "ON"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        statusLabel.Text = "Auto Clicker: Enabled"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+
+        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not isClicking then return end
+            DoClick()
+            task.wait(clickDelay / 1000)
+        end)
+
+        print("✅ Auto Clicker enabled")
+    end
+
+    local function DisableClicker()
+        if not isClicking then return end
+        isClicking = false
+
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+
+        clickerBtn.Text = "OFF"
+        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        statusLabel.Text = "Auto Clicker: Disabled"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
+
+        print("✅ Auto Clicker disabled")
+    end
+
+    local function ToggleClicker()
+        if isClicking then
+            DisableClicker()
+        else
+            EnableClicker()
+        end
+    end
+
+    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
+            ToggleClicker()
+        end
+    end)
+
+    local isDragging = false
+    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local sliderPos = delaySlider.AbsolutePosition
+            local sliderSize = delaySlider.AbsoluteSize
+            local mouseX = input.Position.X
+
+            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
+            clickDelay = math.floor(50 + percent * 950)
+            delayFill.Size = UDim2.new(percent, 0, 1, 0)
+            delayButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
+            delayLabel.Text = "Delay: " .. clickDelay .. " ms"
+        end
+    end)
+
+    print("✅ 'Clicker' tab updated - auto clicker WORKS")
+    print("📌 Alt+K - toggle auto clicker")
+    print("📌 Auto Clicker does NOT work when cursor is over GUI panel")
+    print("📌 Slider adjusts click delay (50-1000 ms)")
+end)
+
+pcall(function()
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "11.Clicker" then
+            clickerTab = tab
+            break
+        end
+    end
+
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ON" or obj.Text == "OFF") then
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(1, 0)
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+end)
+
+pcall(function()
+    local originalUpdatePointsList = UpdatePointsList
+
+    UpdatePointsList = function()
+        for _, child in pairs(PointsList:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+
+        local newPointsData = {}
+        for i, data in ipairs(PointsData) do
+            table.insert(newPointsData, {name = data.name, pos = data.pos})
+        end
+        PointsData = newPointsData
+
+        for i, data in ipairs(PointsData) do
+            local name = data.name
+            local pos = data.pos
+
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -2, 0, 9)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 0.2
+            ItemFrame.BackgroundTransparency = 0.5
+            ItemFrame.Parent = PointsList
+
+            local circleFrame = Instance.new("Frame")
+            circleFrame.Size = UDim2.new(0, 6, 0, 6)
+            circleFrame.Position = UDim2.new(0, 1, 0.5, -3)
+            circleFrame.BackgroundColor3 = Library.Theme.Accent
+            circleFrame.BorderColor3 = Library.Theme.Border
+            circleFrame.BorderSizePixel = 0.4
+            circleFrame.Parent = ItemFrame
+
+            local circleCorner = Instance.new("UICorner")
+            circleCorner.CornerRadius = UDim.new(1, 0)
+            circleCorner.Parent = circleFrame
+
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.Parent = circleFrame
+
+            local NameLabel = Instance.new("TextLabel")
+            NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
+            NameLabel.Position = UDim2.new(0.12, 0, 0, 0)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Text = name .. "  (X: " .. math.floor(pos.X) .. ", Y: " .. math.floor(pos.Y) .. ", Z: " .. math.floor(pos.Z) .. ")"
+            NameLabel.TextColor3 = Library.Theme.Text
+            NameLabel.TextScaled = true
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            NameLabel.Font = Enum.Font.SourceSans
+            NameLabel.Parent = ItemFrame
+
+            local TeleportPointBtn = Instance.new("TextButton")
+            TeleportPointBtn.Size = UDim2.new(0.13, -1, 0.7, 0)
+            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
+            TeleportPointBtn.BorderColor3 = Library.Theme.Border
+            TeleportPointBtn.BorderSizePixel = 0.2
+            TeleportPointBtn.Text = "TP"
+            TeleportPointBtn.TextColor3 = Library.Theme.Text
+            TeleportPointBtn.TextScaled = true
+            TeleportPointBtn.Font = Enum.Font.SourceSansBold
+            TeleportPointBtn.BackgroundTransparency = 0.3
+            TeleportPointBtn.Parent = ItemFrame
+
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(1, 0)
+            tpCorner.Parent = TeleportPointBtn
+
+            TeleportPointBtn.MouseButton1Click:Connect(function() TeleportToPosition(pos) end)
+
+            local DeleteBtn = Instance.new("TextButton")
+            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
+            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
+            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            DeleteBtn.BorderColor3 = Library.Theme.Border
+            DeleteBtn.BorderSizePixel = 0.2
+            DeleteBtn.Text = "X"
+            DeleteBtn.TextColor3 = Library.Theme.Text
+            DeleteBtn.TextScaled = true
+            DeleteBtn.Font = Enum.Font.SourceSansBold
+            DeleteBtn.BackgroundTransparency = 0.3
+            DeleteBtn.Parent = ItemFrame
+
+            local delCorner = Instance.new("UICorner")
+            delCorner.CornerRadius = UDim.new(1, 0)
+            delCorner.Parent = DeleteBtn
+
+            DeleteBtn.MouseButton1Click:Connect(function()
+                table.remove(PointsData, i)
+                UpdatePointsList()
+                UpdatePointInfo()
+            end)
+        end
+
+        local count = #PointsData
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 10 + 2)
+    end
+
+    UpdatePointsList()
+    print("✅ Points are now displayed with numbers in circles")
+    print("✅ When deleting a point, numbering updates automatically")
+end)
+
+pcall(function()
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "11.Clicker" then
+            clickerTab = tab
+            break
+        end
+    end
+
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") and (obj.Text == "ON" or obj.Text == "OFF") then
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(1, 0)
+                obj.BackgroundTransparency = 0.3
+            end
+        end
+    end
+    print("✅ Clicker tab button is now FULL ROUND")
+end)
+
+pcall(function()
+    local PointVisuals = {}
+
+    local function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+
+    local function UpdatePointVisuals()
+        ClearPointVisuals()
+
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(0.5, 0.5, 0.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 12, 0, 12)
+            billboard.StudsOffset = Vector3.new(0, 0.7, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 0.4
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+
+            local line = Instance.new("Part")
+            local groundPos = Vector3.new(pos.X, pos.Y - 0.6, pos.Z)
+            local distance = (pos - groundPos).Magnitude
+
+            line.Size = Vector3.new(0.02, 0.02, distance)
+            line.Position = (pos + groundPos) / 2
+            line.Anchored = true
+            line.CanCollide = false
+            line.Material = Enum.Material.Neon
+            line.BrickColor = BrickColor.new("Bright blue")
+            line.Transparency = 0.5
+            line.Parent = workspace
+
+            local direction = (groundPos - pos).Unit
+            line.CFrame = CFrame.lookAt((pos + groundPos) / 2, (pos + groundPos) / 2 + direction)
+            table.insert(PointVisuals, line)
+        end
+    end
+
+    local originalUpdatePointsList = UpdatePointsList
+
+    UpdatePointsList = function()
+        originalUpdatePointsList()
+        UpdatePointVisuals()
+    end
+
+    local originalSetPoint = SetPoint
+    SetPoint = function()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        if #PointsData >= MAX_POINTS then return end
+
+        local name = "Point " .. (#PointsData + 1)
+
+        local pos = hrp.Position
+        table.insert(PointsData, {name = name, pos = pos})
+        UpdatePointsList()
+        UpdatePointInfo()
+    end
+
+    task.wait(0.5)
+    UpdatePointVisuals()
+
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+
+    print("✅ Points are visible in the world as glowing spheres with numbers")
+    print("✅ Point names are NOT displayed in the world")
+    print("✅ Adding/deleting points updates everything automatically")
+end)
+
+pcall(function()
+    if NameInput then
+        NameInput:Destroy()
+    end
+
+    local pointsTab = Tabs[1]
+    if pointsTab then
+        local oldControl = pointsTab:FindFirstChild("PointControl")
+        if oldControl then
+            oldControl:Destroy()
+        end
+
+        local PointControl = Instance.new("Frame")
+        PointControl.Name = "PointControl"
+        PointControl.Size = UDim2.new(1, 0, 0.35, 0)
+        PointControl.Position = UDim2.new(0, 0, 0.62, 0)
+        PointControl.BackgroundTransparency = 1
+        PointControl.Parent = pointsTab
+
+        local SetBtn = Instance.new("TextButton")
+        SetBtn.Size = UDim2.new(0.4, -1, 0.35, -1)
+        SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+        SetBtn.BackgroundColor3 = Library.Theme.Success
+        SetBtn.BorderColor3 = Library.Theme.Border
+        SetBtn.BorderSizePixel = 0.4
+        SetBtn.Text = "SET POINT"
+        SetBtn.TextColor3 = Library.Theme.Text
+        SetBtn.TextScaled = true
+        SetBtn.Font = Enum.Font.SourceSansBold
+        SetBtn.BackgroundTransparency = 0.3
+        SetBtn.Parent = PointControl
+
+        local setCorner = Instance.new("UICorner")
+        setCorner.CornerRadius = UDim.new(0, 2.4)
+        setCorner.Parent = SetBtn
+
+        local TeleportBtn = Instance.new("TextButton")
+        TeleportBtn.Size = UDim2.new(0.4, -1, 0.35, -1)
+        TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
+        TeleportBtn.BackgroundColor3 = Library.Theme.Accent
+        TeleportBtn.BorderColor3 = Library.Theme.Border
+        TeleportBtn.BorderSizePixel = 0.4
+        TeleportBtn.Text = "TELEPORT"
+        TeleportBtn.TextColor3 = Library.Theme.Text
+        TeleportBtn.TextScaled = true
+        TeleportBtn.Font = Enum.Font.SourceSansBold
+        TeleportBtn.BackgroundTransparency = 0.3
+        TeleportBtn.Parent = PointControl
+
+        local tpCorner = Instance.new("UICorner")
+        tpCorner.CornerRadius = UDim.new(0, 2.4)
+        tpCorner.Parent = TeleportBtn
+
+        local ClearBtn = Instance.new("TextButton")
+        ClearBtn.Size = UDim2.new(0.4, -1, 0.3, -1)
+        ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
+        ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        ClearBtn.BorderColor3 = Library.Theme.Border        ClearBtn.BorderSizePixel = 0.4
+        ClearBtn.Text = "CLEAR ALL"
+        ClearBtn.TextColor3 = Library.Theme.Text
+        ClearBtn.TextScaled = true
+        ClearBtn.Font = Enum.Font.SourceSansBold
+        ClearBtn.BackgroundTransparency = 0.3
+        ClearBtn.Parent = PointControl
+
+        local clearCorner = Instance.new("UICorner")
+        clearCorner.CornerRadius = UDim.new(0, 2.4)
+        clearCorner.Parent = ClearBtn
+
+        local PointInfo = Instance.new("TextLabel")
+        PointInfo.Name = "PointInfo"
+        PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
+        PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
+        PointInfo.BackgroundTransparency = 1
+        PointInfo.Text = "Points: 0 / 1000"
+        PointInfo.TextColor3 = Library.Theme.Text
+        PointInfo.TextScaled = true
+        PointInfo.Font = Enum.Font.SourceSans
+        PointInfo.Parent = PointControl
+
+        SetPoint = function()
+            local player = game.Players.LocalPlayer
+            if not player or not player.Character then return end
+
+            local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+
+            if #PointsData >= MAX_POINTS then return end
+
+            local name = "Point " .. (#PointsData + 1)
+
+            local pos = hrp.Position
+            table.insert(PointsData, {name = name, pos = pos})
+            UpdatePointsList()
+            UpdatePointInfo()
+        end
+
+        ClearAllPoints = function()
+            PointsData = {}
+            UpdatePointsList()
+            UpdatePointInfo()
+            ClearPointVisuals()
+        end
+
+        SetBtn.MouseButton1Click:Connect(SetPoint)
+        TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint)
+        ClearBtn.MouseButton1Click:Connect(ClearAllPoints)
+    end
+
+    print("✅ Point name input field removed")
+    print("✅ Points are now automatically numbered")
+    print("✅ 'CLEAR ALL' button added")
+end)
+
+pcall(function()
+    local PointVisuals = {}
+
+    local function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+
+    _G.ClearPointVisuals = ClearPointVisuals
+
+    local function UpdatePointVisuals()
+        ClearPointVisuals()
+
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(0.5, 0.5, 0.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 12, 0, 12)
+            billboard.StudsOffset = Vector3.new(0, 0.7, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 0.4
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+        end
+    end
+
+    local originalUpdatePointsList = UpdatePointsList
+
+    UpdatePointsList = function()
+        originalUpdatePointsList()
+        UpdatePointVisuals()
+    end
+
+    local originalUpdatePointInfo = UpdatePointInfo
+    UpdatePointInfo = function()
+        originalUpdatePointInfo()
+        UpdatePointVisuals()
+    end
+
+    task.wait(0.5)
+    UpdatePointVisuals()
+
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+
+    print("✅ Points are visible in the world as glowing spheres with numbers")
+    print("✅ Point names are NOT displayed in the world")
+    print("✅ Adding/deleting points updates everything automatically")
+end)
+
+pcall(function()
+    local pointsTab = Tabs[1]
+    if not pointsTab then return end
+
+    for _, child in pairs(pointsTab:GetChildren()) do
+        child:Destroy()
+    end
+
+    local PointsList = Instance.new("ScrollingFrame")
+    PointsList.Name = "PointsList"
+    PointsList.Size = UDim2.new(1, 0, 0.6, 0)
+    PointsList.BackgroundColor3 = Library.Theme.Panel
+    PointsList.BorderColor3 = Library.Theme.Border
+    PointsList.BorderSizePixel = 0.4
+    PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PointsList.ScrollBarThickness = 1.6
+    PointsList.BackgroundTransparency = 0.5
+    PointsList.Parent = pointsTab
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 1)
+    ListLayout.Parent = PointsList
+
+    local PointControl = Instance.new("Frame")
+    PointControl.Name = "PointControl"
+    PointControl.Size = UDim2.new(1, 0, 0.35, 0)
+    PointControl.Position = UDim2.new(0, 0, 0.62, 0)
+    PointControl.BackgroundTransparency = 1
+    PointControl.Parent = pointsTab
+
+    local SetBtn = Instance.new("TextButton")
+    SetBtn.Name = "SetBtn"
+    SetBtn.Size = UDim2.new(0.4, -1, 0.35, -1)
+    SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+    SetBtn.BackgroundColor3 = Library.Theme.Success
+    SetBtn.BorderColor3 = Library.Theme.Border
+    SetBtn.BorderSizePixel = 0.4
+    SetBtn.Text = "SET POINT"
+    SetBtn.TextColor3 = Library.Theme.Text
+    SetBtn.TextScaled = true
+    SetBtn.Font = Enum.Font.SourceSansBold
+    SetBtn.BackgroundTransparency = 0.3
+    SetBtn.Parent = PointControl
+
+    local setCorner = Instance.new("UICorner")
+    setCorner.CornerRadius = UDim.new(0, 2.4)
+    setCorner.Parent = SetBtn
+
+    local TeleportBtn = Instance.new("TextButton")
+    TeleportBtn.Name = "TeleportBtn"
+    TeleportBtn.Size = UDim2.new(0.4, -1, 0.35, -1)
+    TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
+    TeleportBtn.BackgroundColor3 = Library.Theme.Accent
+    TeleportBtn.BorderColor3 = Library.Theme.Border
+    TeleportBtn.BorderSizePixel = 0.4
+    TeleportBtn.Text = "TELEPORT"
+    TeleportBtn.TextColor3 = Library.Theme.Text
+    TeleportBtn.TextScaled = true
+    TeleportBtn.Font = Enum.Font.SourceSansBold
+    TeleportBtn.BackgroundTransparency = 0.3
+    TeleportBtn.Parent = PointControl
+
+    local tpCorner = Instance.new("UICorner")
+    tpCorner.CornerRadius = UDim.new(0, 2.4)
+    tpCorner.Parent = TeleportBtn
+
+    local ClearBtn = Instance.new("TextButton")
+    ClearBtn.Name = "ClearBtn"
+    ClearBtn.Size = UDim2.new(0.4, -1, 0.3, -1)
+    ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
+    ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    ClearBtn.BorderColor3 = Library.Theme.Border
+    ClearBtn.BorderSizePixel = 0.4
+    ClearBtn.Text = "CLEAR ALL"
+    ClearBtn.TextColor3 = Library.Theme.Text
+    ClearBtn.TextScaled = true
+    ClearBtn.Font = Enum.Font.SourceSansBold
+    ClearBtn.BackgroundTransparency = 0.3
+    ClearBtn.Parent = PointControl
+
+    local clearCorner = Instance.new("UICorner")
+    clearCorner.CornerRadius = UDim.new(0, 2.4)
+    clearCorner.Parent = ClearBtn
+
+    local PointInfo = Instance.new("TextLabel")
+    PointInfo.Name = "PointInfo"
+    PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
+    PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
+    PointInfo.BackgroundTransparency = 1
+    PointInfo.Text = "Points: 0"
+    PointInfo.TextColor3 = Library.Theme.Text
+    PointInfo.TextScaled = true
+    PointInfo.Font = Enum.Font.SourceSans
+    PointInfo.Parent = PointControl
+
+    _G.PointsList = PointsList
+    _G.PointInfo = PointInfo
+
+    print("✅ Points tab recreated without names")
+end)
+
+pcall(function()
+    function UpdatePointsList()
+        local PointsList = _G.PointsList
+        if not PointsList then return end
+
+        for _, child in pairs(PointsList:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+
+            local ItemFrame = Instance.new("Frame")
+            ItemFrame.Size = UDim2.new(1, -2, 0, 9)
+            ItemFrame.BackgroundColor3 = Library.Theme.Panel
+            ItemFrame.BorderColor3 = Library.Theme.Border
+            ItemFrame.BorderSizePixel = 0.2
+            ItemFrame.BackgroundTransparency = 0.5
+            ItemFrame.Parent = PointsList
+
+            local circleFrame = Instance.new("Frame")
+            circleFrame.Size = UDim2.new(0, 8, 0, 8)
+            circleFrame.Position = UDim2.new(0, 1, 0.5, -4)
+            circleFrame.BackgroundColor3 = Library.Theme.Accent
+            circleFrame.BorderColor3 = Library.Theme.Border
+            circleFrame.BorderSizePixel = 0.4
+            circleFrame.Parent = ItemFrame
+
+            local circleCorner = Instance.new("UICorner")
+            circleCorner.CornerRadius = UDim.new(1, 0)
+            circleCorner.Parent = circleFrame
+
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.Parent = circleFrame
+
+            local coordsLabel = Instance.new("TextLabel")
+            coordsLabel.Size = UDim2.new(0.6, 0, 1, 0)
+            coordsLabel.Position = UDim2.new(0.12, 0, 0, 0)
+            coordsLabel.BackgroundTransparency = 1
+            coordsLabel.Text = "X:" .. math.floor(pos.X) .. " Y:" .. math.floor(pos.Y) .. " Z:" .. math.floor(pos.Z)
+            coordsLabel.TextColor3 = Library.Theme.Text
+            coordsLabel.TextScaled = true
+            coordsLabel.TextXAlignment = Enum.TextXAlignment.Left
+            coordsLabel.Font = Enum.Font.SourceSans
+            coordsLabel.Parent = ItemFrame
+
+            local TeleportPointBtn = Instance.new("TextButton")
+            TeleportPointBtn.Size = UDim2.new(0.13, -1, 0.7, 0)
+            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
+            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
+            TeleportPointBtn.BorderColor3 = Library.Theme.Border
+            TeleportPointBtn.BorderSizePixel = 0.2
+            TeleportPointBtn.Text = "TP"
+            TeleportPointBtn.TextColor3 = Library.Theme.Text
+            TeleportPointBtn.TextScaled = true
+            TeleportPointBtn.Font = Enum.Font.SourceSansBold
+            TeleportPointBtn.BackgroundTransparency = 0.3
+            TeleportPointBtn.Parent = ItemFrame
+
+            local tpCorner = Instance.new("UICorner")
+            tpCorner.CornerRadius = UDim.new(0, 1.6)
+            tpCorner.Parent = TeleportPointBtn
+
+            TeleportPointBtn.MouseButton1Click:Connect(function()
+                TeleportToPosition(pos)
+            end)
+
+            local DeleteBtn = Instance.new("TextButton")
+            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
+            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
+            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            DeleteBtn.BorderColor3 = Library.Theme.Border
+            DeleteBtn.BorderSizePixel = 0.2
+            DeleteBtn.Text = "X"
+            DeleteBtn.TextColor3 = Library.Theme.Text
+            DeleteBtn.TextScaled = true
+            DeleteBtn.Font = Enum.Font.SourceSansBold
+            DeleteBtn.BackgroundTransparency = 0.3
+            DeleteBtn.Parent = ItemFrame
+
+            local delCorner = Instance.new("UICorner")
+            delCorner.CornerRadius = UDim.new(0, 1.6)
+            delCorner.Parent = DeleteBtn
+
+            DeleteBtn.MouseButton1Click:Connect(function()
+                table.remove(PointsData, i)
+                UpdatePointsList()
+                UpdatePointInfo()
+                UpdatePointVisuals()
+            end)
+        end
+
+        local count = #PointsData
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 10 + 2)
+    end
+
+    function UpdatePointInfo()
+        local PointInfo = _G.PointInfo
+        if PointInfo then
+            PointInfo.Text = "Points: " .. #PointsData
+        end
+    end
+
+    function SetPoint()
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then return end
+
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        if #PointsData >= MAX_POINTS then return end
+
+        local pos = hrp.Position
+        table.insert(PointsData, {pos = pos})
+        UpdatePointsList()
+        UpdatePointInfo()
+        UpdatePointVisuals()
+    end
+
+    function ClearAllPoints()
+        PointsData = {}
+        UpdatePointsList()
+        UpdatePointInfo()
+        ClearPointVisuals()
+    end
+
+    local pointsTab = Tabs[1]
+    if pointsTab then
+        local control = pointsTab:FindFirstChild("PointControl")
+        if control then
+            local SetBtn = control:FindFirstChild("SetBtn")
+            local TeleportBtn = control:FindFirstChild("TeleportBtn")
+            local ClearBtn = control:FindFirstChild("ClearBtn")
+
+            if SetBtn then SetBtn.MouseButton1Click:Connect(SetPoint) end
+            if TeleportBtn then TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint) end
+            if ClearBtn then ClearBtn.MouseButton1Click:Connect(ClearAllPoints) end
+        end
+    end
+
+    print("✅ Points are saved WITHOUT names")
+    print("✅ In the list only the number in a circle and coordinates are displayed")
+end)
+
+pcall(function()
+    local PointVisuals = {}
+
+    function ClearPointVisuals()
+        for _, obj in pairs(PointVisuals) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        PointVisuals = {}
+    end
+
+    function UpdatePointVisuals()
+        ClearPointVisuals()
+
+        for i, data in ipairs(PointsData) do
+            local pos = data.pos
+
+            local sphere = Instance.new("Part")
+            sphere.Size = Vector3.new(0.5, 0.5, 0.5)
+            sphere.Position = pos
+            sphere.Anchored = true
+            sphere.CanCollide = false
+            sphere.Material = Enum.Material.Neon
+            sphere.BrickColor = BrickColor.new("Bright blue")
+            sphere.Transparency = 0.3
+            sphere.Shape = Enum.PartType.Ball
+            sphere.Parent = workspace
+            table.insert(PointVisuals, sphere)
+
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = sphere
+            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            table.insert(PointVisuals, highlight)
+
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "PointNumber"
+            billboard.Size = UDim2.new(0, 12, 0, 12)
+            billboard.StudsOffset = Vector3.new(0, 0.7, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = sphere
+            table.insert(PointVisuals, billboard)
+
+            local bgFrame = Instance.new("Frame")
+            bgFrame.Size = UDim2.new(1, 0, 1, 0)
+            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+            bgFrame.BackgroundTransparency = 0.2
+            bgFrame.BorderSizePixel = 0.4
+            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            bgFrame.Parent = billboard
+
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(1, 0)
+            bgCorner.Parent = bgFrame
+
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(1, 0, 1, 0)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = tostring(i)
+            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            numLabel.TextScaled = true
+            numLabel.Font = Enum.Font.SourceSansBold
+            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            numLabel.TextStrokeTransparency = 0.3
+            numLabel.Parent = bgFrame
+            table.insert(PointVisuals, numLabel)
+        end
+    end
+
+    task.wait(0.5)
+    UpdatePointVisuals()
+
+    for i, btn in ipairs(TabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            if i == 1 then
+                task.wait(0.1)
+                UpdatePointVisuals()
+            end
+        end)
+    end
+
+    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        UpdatePointVisuals()
+    end)
+
+    print("✅ Only numbers in circles are displayed in the world")
+    print("✅ Point names are completely removed")
 end)
 
 -- ===== SPEED INDICATOR WITH AUTO-RESPAWN AND COLOR CHANGE (GREEN → RED) =====
@@ -5290,14 +6669,14 @@ end)
 pcall(function()
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
-        if name == "11.Speed" then
+        if name == "12.Speed" then
             speedTabIndex = i
             break
         end
     end
 
     if not speedTabIndex then
-        table.insert(TabNames, "11.Speed")
+        table.insert(TabNames, "12.Speed")
 
         local newTab = Instance.new("Frame")
         newTab.Size = UDim2.new(1, 0, 1, 0)
@@ -5307,18 +6686,18 @@ pcall(function()
         table.insert(Tabs, newTab)
 
         local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -1, 0, 10)
+        newBtn.Size = UDim2.new(1, -1, 0, 7)
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 0.4
-        newBtn.Text = "11.Speed"
+        newBtn.Text = "12.Speed"
         newBtn.TextColor3 = Library.Theme.Text
         newBtn.TextScaled = true
         newBtn.Font = Enum.Font.SourceSansBold
         newBtn.Parent = TabScrollingFrame
         table.insert(TabButtons, newBtn)
 
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 10.6 + 1)
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 7.6 + 1)
 
         newBtn.MouseButton1Click:Connect(function()
             for j, tab in ipairs(Tabs) do
@@ -5433,8 +6812,8 @@ pcall(function()
     speedFill.Parent = speedSlider
 
     local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 6, 2.4, 0)
-    speedButton.Position = UDim2.new(0, -3, -0.4, 0)
+    speedButton.Size = UDim2.new(0, 3, 1.8, 0)
+    speedButton.Position = UDim2.new(0, -1.5, -0.4, 0)
     speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     speedButton.BorderColor3 = Library.Theme.Border
     speedButton.BorderSizePixel = 0.4
@@ -5467,7 +6846,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
         speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -3, -0.4, 0)
+        speedButton.Position = UDim2.new(percent, -1.5, -0.4, 0)
         speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
 
         local player = game.Players.LocalPlayer
@@ -5552,13 +6931,13 @@ pcall(function()
     speedButton.MouseButton1Down:Connect(function() isDragging = true end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDragging = false
         end
     end)
 
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local sliderPos = speedSlider.AbsolutePosition
             local sliderSize = speedSlider.AbsoluteSize
             local mouseX = input.Position.X
@@ -5609,7 +6988,7 @@ pcall(function()
     print("========================================")
 end)
 
--- ===== ROUNDED BUTTONS FOR PLAYERS AND SPEED TABS =====
+-- ===== ROUNDED BUTTONS FOR PLAYERS, CLICKER AND SPEED TABS =====
 pcall(function()
     local playersTab = Tabs[7]
     if playersTab then
@@ -5626,9 +7005,30 @@ pcall(function()
         end
     end
 
+    local clickerTab = nil
+    for i, tab in ipairs(Tabs) do
+        if TabNames[i] == "11.Clicker" then
+            clickerTab = tab
+            break
+        end
+    end
+    if clickerTab then
+        for _, obj in pairs(clickerTab:GetDescendants()) do
+            if obj:IsA("TextButton") then
+                local corner = obj:FindFirstChild("UICorner")
+                if not corner then
+                    corner = Instance.new("UICorner")
+                    corner.Parent = obj
+                end
+                corner.CornerRadius = UDim.new(1, 0)
+                obj.BackgroundTransparency = obj.BackgroundTransparency or 0.5
+            end
+        end
+    end
+
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
-        if name == "11.Speed" then
+        if name == "12.Speed" then
             speedTabIndex = i
             break
         end
@@ -5650,7 +7050,7 @@ pcall(function()
         end
     end
 
-    print("✅ FULL ROUND corners (1,0) added to all buttons in Players and Speed tabs")
+    print("✅ FULL ROUND corners (1,0) added to all buttons in Players, Clicker and Speed tabs")
 end)
 
 -- ===== REMOVE REFRESH BUTTON FROM PLAYERS TAB =====
@@ -5687,20 +7087,20 @@ pcall(function()
 end)
 
 -- =====================================================
--- ===== TAB 12: FORWARD (ТЕЛЕПОРТ ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
+-- ===== TAB 13: FORWARD (ТЕЛЕПОРТ ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
 -- =====================================================
 
 pcall(function()
     local forwardTabIndex = nil
     for i, name in ipairs(TabNames) do
-        if name == "12.Forward" then
+        if name == "13.Forward" then
             forwardTabIndex = i
             break
         end
     end
 
     if not forwardTabIndex then
-        table.insert(TabNames, "12.Forward")
+        table.insert(TabNames, "13.Forward")
 
         local newTab = Instance.new("Frame")
         newTab.Size = UDim2.new(1, 0, 1, 0)
@@ -5710,18 +7110,18 @@ pcall(function()
         table.insert(Tabs, newTab)
 
         local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -1, 0, 10)
+        newBtn.Size = UDim2.new(1, -1, 0, 7)
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 0.4
-        newBtn.Text = "12.Forward"
+        newBtn.Text = "13.Forward"
         newBtn.TextColor3 = Library.Theme.Text
         newBtn.TextScaled = true
         newBtn.Font = Enum.Font.SourceSansBold
         newBtn.Parent = TabScrollingFrame
         table.insert(TabButtons, newBtn)
 
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 10.6 + 1)
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 7.6 + 1)
 
         newBtn.MouseButton1Click:Connect(function()
             for j, tab in ipairs(Tabs) do
@@ -5799,8 +7199,8 @@ pcall(function()
     distanceFill.Parent = distanceSlider
 
     local distanceButton = Instance.new("TextButton")
-    distanceButton.Size = UDim2.new(0, 7, 2.4, 0)
-    distanceButton.Position = UDim2.new(0.0408, -3.5, -0.4, 0)
+    distanceButton.Size = UDim2.new(0, 3.6, 1.8, 0)
+    distanceButton.Position = UDim2.new(0.0408, -1.8, -0.4, 0)
     distanceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     distanceButton.BorderColor3 = Library.Theme.Border
     distanceButton.BorderSizePixel = 0.4
@@ -6112,7 +7512,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
-        distanceButton.Position = UDim2.new(percent, -3.5, -0.4, 0)
+        distanceButton.Position = UDim2.new(percent, -1.8, -0.4, 0)
         distanceLabel.Text = "Dist: " .. math.floor(forwardDistance) .. " m"
         UpdateRedBeam()
     end
@@ -6173,8 +7573,7 @@ pcall(function()
             task.wait(2)
             if statusLabel then
                 statusLabel.Text = "Ready"
-                statusLabel.TextColor3 = Library.Theme.Text
-            end
+                statusLabel.TextColor3 = Library.Theme.Text            end
         end)
 
         print("✅ Teleported " .. forwardDistance .. " meters forward (camera direction)")
@@ -6186,13 +7585,13 @@ pcall(function()
     distanceButton.MouseButton1Down:Connect(function() isDragging = true end)
 
     game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDragging = false
         end
     end)
 
     game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local sliderPos = distanceSlider.AbsolutePosition
             local sliderSize = distanceSlider.AbsoluteSize
             local mouseX = input.Position.X
@@ -6224,14 +7623,12 @@ SetupMenuDrag()
 ApplyThemeColors(Library.Theme)
 
 print("========================================")
-print("✅ MOBILE OPTIMIZED VERSION!")
-print("📌 Menu panel: 250x200 (bigger for touch)")
-print("📌 GG+ button: 20x20 (bigger for touch)")
-print("📌 All buttons and sliders enlarged for finger input")
-print("📌 Touch support for all interactions")
-print("📌 Clicker tab REMOVED!")
-print("📌 Menu works on FIRST tap!")
-print("📌 Tap GG+ button to expand/collapse")
+print("✅ ALL SYSTEMS READY - 5x SMALLER VERSION!")
+print("📌 Menu panel: 150x130 (was 750x650)")
+print("📌 GG+ button: 10x10 (was 50x50)")
+print("📌 All buttons, frames and text are scaled down")
+print("📌 Menu works on FIRST click!")
+print("📌 Click GG+ button to expand/collapse")
 print("📌 Drag GG+ button to move it")
 print("📌 Drag ANYWHERE on the panel to move it")
 print("📌 Resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
@@ -6241,3 +7638,76 @@ print("========================================")
 
 -- Запуск анимации загрузки
 ShowLoadingAnimation()
+-- ===== MOBILE OPTIMIZATION - RESIZE FOR SMALL SCREENS =====
+pcall(function()
+    -- Уменьшаем размеры всех элементов на 40% для мобильных экранов
+    local SCALE = 0.4
+    
+    -- Основные размеры
+    if MenuPanel then
+        MenuPanel.Size = UDim2.new(0, 150 * SCALE, 0, 130 * SCALE)
+        MenuPanel.Position = UDim2.new(0.5, -75 * SCALE, 0.5, -65 * SCALE)
+    end
+    
+    if MainButton then
+        MainButton.Size = UDim2.new(0, 10 * SCALE, 0, 10 * SCALE)
+    end
+    
+    -- Уменьшаем все вложенные элементы
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+            obj.TextScaled = true
+        end
+        if obj:IsA("Frame") and obj.Size and obj.Size.X.Offset > 0 then
+            if not obj.Name:find("Slider") and not obj.Name:find("Fill") then
+                -- Уменьшаем размеры фреймов
+                local newWidth = obj.Size.X.Offset * SCALE
+                local newHeight = obj.Size.Y.Offset * SCALE
+                if newWidth > 2 and newHeight > 2 then
+                    obj.Size = UDim2.new(obj.Size.X.Scale, newWidth, obj.Size.Y.Scale, newHeight)
+                end
+            end
+        end
+        if obj:IsA("TextButton") and obj.Size and obj.Size.X.Offset > 0 then
+            local newWidth = obj.Size.X.Offset * SCALE
+            local newHeight = obj.Size.Y.Offset * SCALE
+            if newWidth > 2 and newHeight > 2 then
+                obj.Size = UDim2.new(obj.Size.X.Scale, newWidth, obj.Size.Y.Scale, newHeight)
+            end
+        end
+    end
+    
+    -- Уменьшаем кнопки табов
+    for _, btn in pairs(TabButtons) do
+        if btn then
+            btn.Size = UDim2.new(1, -1, 0, 7 * SCALE)
+            btn.TextScaled = true
+        end
+    end
+    
+    -- Уменьшаем скролл фреймы
+    for _, obj in pairs({PointsList, WalkPointsList, PlayersList}) do
+        if obj then
+            if obj.Size and obj.Size.Y.Offset > 0 then
+                obj.Size = UDim2.new(obj.Size.X.Scale, obj.Size.X.Offset * SCALE, obj.Size.Y.Scale, obj.Size.Y.Offset * SCALE)
+            end
+        end
+    end
+    
+    -- Уменьшаем кнопки изменения размера
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            local size = child.Size.X.Offset * SCALE
+            if size > 0.5 then
+                child.Size = UDim2.new(0, size, 0, size)
+            end
+        end
+    end
+    
+    -- Перемещаем главную кнопку в левый верхний угол для удобства
+    if MainButton then
+        MainButton.Position = UDim2.new(0, 2, 0, 2)
+    end
+    
+    print("✅ Mobile optimization applied - 40% size reduction")
+end)
