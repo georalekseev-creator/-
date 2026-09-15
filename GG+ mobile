@@ -1,4 +1,4 @@
--- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!) + FLY (Solara Edition) - FIXED FLY BUTTON + FREECAM
+-- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!) + FLY (Solara Edition) - FIXED FLY BUTTON + WORKING FREECAM TAB (SQUARE SLIDER, MAX 300, NO INFO, CLICKABLE MENU)
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -417,6 +417,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdminPanel"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 200  -- ВЫШЕ, чем LookGui (50), чтобы меню было кликабельным
 
 -- Main Menu Button
 local MainButton = Instance.new("ImageButton")
@@ -635,10 +636,6 @@ local CurrentTab = 1
 
 local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
 
--- ===== ПЕРЕМЕННЫЕ СОСТОЯНИЯ МЕНЮ (объявлены заранее, чтобы Freecam мог их использовать) =====
-local menuOpen = false
-local isCollapsed = true
-
 local TabScrollingFrame = Instance.new("ScrollingFrame")
 TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
 TabScrollingFrame.Position = UDim2.new(0, 2.5, 0, 2.5)
@@ -803,7 +800,6 @@ do
     local userInputService = game:GetService("UserInputService")
     local runService = game:GetService("RunService")
 
-    -- Forward declaration of the toggle button
     local flyToggleBtn
 
     local function lerpVelocity(current, target, alpha)
@@ -852,7 +848,6 @@ do
     end
 
     local function startFly()
-        -- Update the button immediately to show ON
         if flyToggleBtn then
             flyToggleBtn.Text = "ON"
             flyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
@@ -861,7 +856,6 @@ do
 
         local character = player.Character
         if not character then
-            -- No character, revert button
             if flyToggleBtn then
                 flyToggleBtn.Text = "OFF"
                 flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
@@ -908,7 +902,6 @@ do
             local currentRoot = currentChar and currentChar:FindFirstChild("HumanoidRootPart")
             local currentHumanoid = currentChar and currentChar:FindFirstChildOfClass("Humanoid")
             if not currentRoot or not currentHumanoid then
-                -- Give 0.5 sec to respawn
                 task.wait(0.5)
                 if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
                     stopFly()
@@ -1012,7 +1005,6 @@ do
     flySpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
     flySpeedTitle.Parent = FlyFrame
 
-    -- === SQUARE TRACK, OPAQUE KNOB ===
     local flySpeedSlider = Instance.new("Frame")
     flySpeedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
     flySpeedSlider.Position = UDim2.new(0.4, 0, 0.45, 0)
@@ -1034,7 +1026,7 @@ do
     flySpeedButton.BorderSizePixel = 2
     flySpeedButton.Text = ""
     flySpeedButton.Parent = flySpeedSlider
-    flySpeedButton.BackgroundTransparency = 0  -- OPAQUE!
+    flySpeedButton.BackgroundTransparency = 0
 
     local isDraggingFlySpeed = false
 
@@ -1076,7 +1068,6 @@ do
         end
     end)
 
-    -- FIXED: Fly toggle button logic
     flyToggleBtn.MouseButton1Click:Connect(function()
         if flying then
             stopFly()
@@ -1223,7 +1214,6 @@ WalkSpeedLabel.TextScaled = true
 WalkSpeedLabel.Font = Enum.Font.SourceSans
 WalkSpeedLabel.Parent = WalkFrame
 
--- === SQUARE TRACK, OPAQUE KNOB ===
 local WalkSpeedSlider = Instance.new("Frame")
 WalkSpeedSlider.Size = UDim2.new(0.4, -10, 0.05, 0)
 WalkSpeedSlider.Position = UDim2.new(0.45, 0, 0.87, 0)
@@ -1245,7 +1235,7 @@ WalkSpeedButton.BorderColor3 = Library.Theme.Border
 WalkSpeedButton.BorderSizePixel = 2
 WalkSpeedButton.Text = ""
 WalkSpeedButton.Parent = WalkSpeedSlider
-WalkSpeedButton.BackgroundTransparency = 0  -- OPAQUE!
+WalkSpeedButton.BackgroundTransparency = 0
 
 local WalkPointsList = Instance.new("ScrollingFrame")
 WalkPointsList.Size = UDim2.new(1, 0, 0.4, 0)
@@ -1336,7 +1326,6 @@ LengthLabel.TextScaled = true
 LengthLabel.Font = Enum.Font.SourceSans
 LengthLabel.Parent = PlatformFrame
 
--- === SQUARE TRACK, OPAQUE KNOB ===
 local LengthSlider = Instance.new("Frame")
 LengthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
 LengthSlider.Position = UDim2.new(0.35, 0, 0.17, 0)
@@ -1358,7 +1347,7 @@ LengthButton.BorderColor3 = Library.Theme.Border
 LengthButton.BorderSizePixel = 2
 LengthButton.Text = ""
 LengthButton.Parent = LengthSlider
-LengthButton.BackgroundTransparency = 0  -- OPAQUE!
+LengthButton.BackgroundTransparency = 0
 
 local PlatformWidth = 25
 
@@ -1372,7 +1361,6 @@ WidthLabel.TextScaled = true
 WidthLabel.Font = Enum.Font.SourceSans
 WidthLabel.Parent = PlatformFrame
 
--- === SQUARE TRACK, OPAQUE KNOB ===
 local WidthSlider = Instance.new("Frame")
 WidthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
 WidthSlider.Position = UDim2.new(0.35, 0, 0.32, 0)
@@ -1394,7 +1382,7 @@ WidthButton.BorderColor3 = Library.Theme.Border
 WidthButton.BorderSizePixel = 2
 WidthButton.Text = ""
 WidthButton.Parent = WidthSlider
-WidthButton.BackgroundTransparency = 0  -- OPAQUE!
+WidthButton.BackgroundTransparency = 0
 
 local MinSize = 1
 local MaxSize = 50
@@ -1560,7 +1548,9 @@ local function UpdatePlayersList()
         if player ~= localPlayer then
             count = count + 1
 
-            local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil            local ItemFrame = Instance.new("Frame")
+            local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
+
+            local ItemFrame = Instance.new("Frame")
             ItemFrame.Size = UDim2.new(1, -10, 0, 45)
             ItemFrame.BackgroundColor3 = Library.Theme.Panel
             ItemFrame.BorderColor3 = Library.Theme.Border
@@ -1777,7 +1767,6 @@ XRayTransparencyLabel.TextScaled = true
 XRayTransparencyLabel.Font = Enum.Font.SourceSansBold
 XRayTransparencyLabel.Parent = XRayControlFrame
 
--- === SQUARE TRACK, OPAQUE KNOB ===
 local XRaySlider = Instance.new("Frame")
 XRaySlider.Size = UDim2.new(0.6, -10, 0.05, 0)
 XRaySlider.Position = UDim2.new(0.3, 0, 0.82, 0)
@@ -1799,7 +1788,7 @@ XRaySliderButton.BorderColor3 = Library.Theme.Border
 XRaySliderButton.BorderSizePixel = 2
 XRaySliderButton.Text = ""
 XRaySliderButton.Parent = XRaySlider
-XRaySliderButton.BackgroundTransparency = 0  -- OPAQUE!
+XRaySliderButton.BackgroundTransparency = 0
 
 local function UpdateXRaySlider()
     local percent = XRayTransparency / 100
@@ -2064,305 +2053,6 @@ SPIToggleBtn.MouseButton1Click:Connect(ToggleSPI)
 
 game.Players.PlayerAdded:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
 game.Players.PlayerRemoving:Connect(function() if SPIEnabled then task.wait(0.5); UpdateSPI() end end)
-
--- ===== TAB 10: FREECAM (РАБОЧАЯ, ИЗ ВТОРОГО СКРИПТА, АДАПТИРОВАНА ПОД СТИЛЬ ПЕРВОГО) =====
-do
-    local freecamTab = Tabs[10]
-
-    -- Очищаем вкладку
-    for _, child in pairs(freecamTab:GetChildren()) do
-        child:Destroy()
-    end
-
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, 0)
-    container.BackgroundTransparency = 1
-    container.Parent = freecamTab
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, 0, 0.85, 0)
-    mainFrame.Position = UDim2.new(0, 0, 0.05, 0)
-    mainFrame.BackgroundColor3 = Library.Theme.Panel
-    mainFrame.BorderColor3 = Library.Theme.Border
-    mainFrame.BorderSizePixel = 2
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.Parent = container
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.1, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "FREECAM MODE"
-    title.TextColor3 = Library.Theme.Text
-    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = mainFrame
-
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.15, -5)
-    toggleBtn.Position = UDim2.new(0.3, 0, 0.15, 0)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    toggleBtn.BorderColor3 = Library.Theme.Border
-    toggleBtn.BorderSizePixel = 2
-    toggleBtn.Text = "OFF"
-    toggleBtn.TextColor3 = Library.Theme.Text
-    toggleBtn.TextScaled = true
-    toggleBtn.Font = Enum.Font.SourceSansBold
-    toggleBtn.Parent = mainFrame
-
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0.3, 0, 0.08, 0)
-    speedLabel.Position = UDim2.new(0.05, 0, 0.43, 0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "Speed: 100"
-    speedLabel.TextColor3 = Library.Theme.Text
-    speedLabel.TextScaled = true
-    speedLabel.Font = Enum.Font.SourceSans
-    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    speedLabel.Parent = mainFrame
-
-    -- === SQUARE TRACK, OPAQUE KNOB (как в первом скрипте) ===
-    local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
-    speedSlider.Position = UDim2.new(0.4, 0, 0.45, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
-    speedSlider.BorderSizePixel = 0
-    speedSlider.Parent = mainFrame
-
-    local speedFill = Instance.new("Frame")
-    speedFill.Size = UDim2.new(0.5, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    speedFill.BorderSizePixel = 0
-    speedFill.Parent = speedSlider
-
-    local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
-    speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
-    speedButton.Text = ""
-    speedButton.Parent = speedSlider
-    speedButton.BackgroundTransparency = 0
-
-    local isFreecamActive = false
-    local isCursorLocked = false
-    local savedCameraCFrame, savedCameraFocus, savedCharacterCFrame
-    local baseSpeed = 100
-    local moveSpeed = 100
-    local sensitivity = 0.003
-    local freecamPosition = Vector3.new(0, 10, 0)
-    local cameraRotation = CFrame.new()
-
-    local savedWalkSpeed = 16
-    local savedJumpPower = 50
-    local savedAutoRotate = true
-    local savedPlatformStand = false
-    local savedAnchored = false
-
-    local function updateSpeedSlider()
-        local percent = (baseSpeed - 1) / 199
-        speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-        speedLabel.Text = "Speed: " .. math.floor(baseSpeed)
-    end
-
-    local function enableFreecam()
-        if isFreecamActive then return end
-
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-
-        savedCameraCFrame = camera.CFrame
-        savedCameraFocus = camera.Focus
-
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            savedCharacterCFrame = char.HumanoidRootPart.CFrame
-            freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
-        else
-            freecamPosition = Vector3.new(0, 10, 0)
-        end
-
-        if humanoid then
-            savedWalkSpeed = humanoid.WalkSpeed
-            savedJumpPower = humanoid.JumpPower
-            savedAutoRotate = humanoid.AutoRotate
-            savedPlatformStand = humanoid.PlatformStand
-        end
-
-        cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
-        moveSpeed = baseSpeed
-
-        if humanoid then
-            humanoid.AutoRotate = false
-            humanoid.PlatformStand = false
-            humanoid.WalkSpeed = 16
-            humanoid.JumpPower = 50
-        end
-
-        isFreecamActive = true
-        isCursorLocked = true
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
-
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            savedAnchored = char.HumanoidRootPart.Anchored
-            char.HumanoidRootPart.Anchored = true
-        end
-
-        toggleBtn.Text = "ON"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-
-        if MenuPanel then
-            _G.FreecamMenuState = {
-                wasVisible = MenuPanel.Visible,
-                wasOpen = menuOpen,
-                wasCollapsed = isCollapsed
-            }
-            MenuPanel.Visible = false
-            menuOpen = false
-        end
-    end
-
-    local function disableFreecam()
-        if not isFreecamActive then return end
-
-        local player = game.Players.LocalPlayer
-        local char = player and player.Character
-        local humanoid = char and char:FindFirstChild("Humanoid")
-        local camera = workspace.CurrentCamera
-
-        isFreecamActive = false
-        isCursorLocked = false
-        game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-
-        if savedCameraCFrame then
-            camera.CFrame = savedCameraCFrame
-            camera.Focus = savedCameraFocus
-        end
-
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = savedAnchored or false
-        end
-
-        if humanoid then
-            humanoid.AutoRotate = savedAutoRotate
-            humanoid.PlatformStand = savedPlatformStand
-            humanoid.WalkSpeed = savedWalkSpeed
-            humanoid.JumpPower = savedJumpPower
-        end
-
-        if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = savedCharacterCFrame
-        end
-
-        toggleBtn.Text = "OFF"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-
-        if MenuPanel then
-            local savedState = _G.FreecamMenuState
-            if savedState then
-                MenuPanel.Visible = savedState.wasVisible
-                menuOpen = savedState.wasOpen
-                isCollapsed = savedState.wasCollapsed
-                if MenuPanel.Visible then
-                    MenuPanel.BackgroundTransparency = 0.5
-                end
-                _G.FreecamMenuState = nil
-            end
-        end
-    end
-
-    local function toggleFreecam()
-        if isFreecamActive then disableFreecam() else enableFreecam() end
-    end
-
-    toggleBtn.MouseButton1Click:Connect(toggleFreecam)
-
-    local draggingSpeed = false
-    speedButton.MouseButton1Down:Connect(function() draggingSpeed = true end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            draggingSpeed = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if draggingSpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = speedSlider.AbsolutePosition
-            local sliderSize = speedSlider.AbsoluteSize
-            local percent = math.clamp((input.Position.X - sliderPos.X) / sliderSize.X, 0, 1)
-            baseSpeed = math.floor(1 + percent * 199)
-            updateSpeedSlider()
-            moveSpeed = baseSpeed
-        end
-    end)
-
-    local inputService = game:GetService("UserInputService")
-
-    inputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-
-        if input.KeyCode == Enum.KeyCode.F9 then
-            toggleFreecam()
-        end
-
-        if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
-            if isFreecamActive then
-                if isCursorLocked then
-                    inputService.MouseBehavior = Enum.MouseBehavior.Default
-                    isCursorLocked = false
-                else
-                    inputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-                    isCursorLocked = true
-                end
-            end
-        end
-    end)
-
-    inputService.InputChanged:Connect(function(input)
-        if not isFreecamActive or not isCursorLocked then return end
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            local deltaX = -input.Delta.X * sensitivity
-            local deltaY = -input.Delta.Y * sensitivity
-            cameraRotation = cameraRotation * CFrame.Angles(0, deltaX, 0)
-            cameraRotation = cameraRotation * CFrame.Angles(deltaY, 0, 0)
-            local pos = cameraRotation.Position
-            local look = cameraRotation.LookVector
-            local up = cameraRotation.UpVector
-            cameraRotation = CFrame.lookAt(pos, pos + look, up)
-        end
-    end)
-
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not isFreecamActive then return end
-
-        local camera = workspace.CurrentCamera
-        local moveDirection = Vector3.new(0, 0, 0)
-
-        if inputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + Vector3.new(0, 0, -1) end
-        if inputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection + Vector3.new(0, 0, 1) end
-        if inputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection + Vector3.new(-1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + Vector3.new(1, 0, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-        if inputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-
-        if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
-
-        local moveAmount = moveSpeed * 0.016
-        if moveDirection.Magnitude > 0 then
-            local worldMove = cameraRotation * moveDirection
-            freecamPosition = freecamPosition + worldMove * moveAmount
-        end
-
-        local newCFrame = CFrame.new(freecamPosition) * cameraRotation
-        camera.CFrame = newCFrame
-        camera.Focus = CFrame.new(freecamPosition + cameraRotation.LookVector * 100)
-    end)
-
-    updateSpeedSlider()
-end
 
 -- ===== PLATFORMS DATA =====
 local Platforms = {}
@@ -3206,6 +2896,8 @@ ClearPlatformsBtn.MouseButton1Click:Connect(ClearAllPlatforms)
 -- ===== FIXED: MENU STATE AND ANIMATION =====
 -- =====================================================
 
+local menuOpen = false
+local isCollapsed = true
 local collapseAnimating = false
 local animationConnection = nil
 
@@ -3603,6 +3295,416 @@ pcall(function()
         end
     end
 end)
+
+-- ===== TAB 10: FREECAM (РАБОЧАЯ, МЕНЮ КЛИКАЕТСЯ, КВАДРАТНЫЙ ПОЛЗУНОК, МАКС 300, БЕЗ ПОДСКАЗОК) =====
+do
+    local freecamTab = Tabs[10]
+    if freecamTab then
+        for _, child in pairs(freecamTab:GetChildren()) do
+            child:Destroy()
+        end
+
+        local isMobile = game:GetService("UserInputService").TouchEnabled
+        local userInputService = game:GetService("UserInputService")
+
+        local FC = {}
+
+        FC.isActive = false
+        FC.baseSpeed = 100
+        FC.maxSpeed = 300
+        FC.freecamPosition = Vector3.new(0, 0, 0)
+        FC.cameraRotation = CFrame.new()
+        FC.savedCameraCFrame = nil
+        FC.savedCameraFocus = nil
+        FC.savedCharacterCFrame = nil
+        FC.savedWalkSpeed = nil
+        FC.savedJumpPower = nil
+        FC.savedAutoRotate = nil
+        FC.savedPlatformStand = nil
+        FC.savedAnchored = nil
+
+        local LookGui = nil
+        local lookTouchId = nil
+        local lastPos = nil
+        local sensitivity = 0.005
+
+        local function beginLook(input)
+            if not FC.isActive then return end
+            if input.UserInputType ~= Enum.UserInputType.Touch then return end
+            if lookTouchId ~= nil then return end
+
+            -- Не начинаем обзор, если тач попал по меню
+            if MenuPanel and MenuPanel.Visible then
+                local mp = MenuPanel.AbsolutePosition
+                local ms = MenuPanel.AbsoluteSize
+                local mx, my = input.Position.X, input.Position.Y
+                if mx >= mp.X and mx <= mp.X + ms.X and my >= mp.Y and my <= mp.Y + ms.Y then
+                    return
+                end
+            end
+
+            lookTouchId = input
+            lastPos = Vector2.new(input.Position.X, input.Position.Y)
+        end
+
+        local function moveLook(input)
+            if not FC.isActive then return end
+            if lookTouchId == nil then return end
+            if input ~= lookTouchId then return end
+            if input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+            local curPos = Vector2.new(input.Position.X, input.Position.Y)
+            if lastPos then
+                local delta = curPos - lastPos
+                local dx = -delta.X * sensitivity
+                local dy = -delta.Y * sensitivity
+
+                local MAX_D = 0.35
+                if math.abs(dx) > MAX_D then dx = (dx > 0 and MAX_D or -MAX_D) end
+                if math.abs(dy) > MAX_D then dy = (dy > 0 and MAX_D or -MAX_D) end
+
+                FC.cameraRotation = FC.cameraRotation * CFrame.Angles(0, dx, 0) * CFrame.Angles(dy, 0, 0)
+                local look = FC.cameraRotation.LookVector
+                local up = FC.cameraRotation.UpVector
+                FC.cameraRotation = CFrame.lookAt(Vector3.new(0,0,0), look, up)
+            end
+            lastPos = curPos
+        end
+
+        local function endLook(input)
+            if input == lookTouchId then
+                lookTouchId = nil
+                lastPos = nil
+            end
+        end
+
+        local function createLookLayer()
+            if LookGui then return end
+
+            LookGui = Instance.new("ScreenGui")
+            LookGui.Name = "GGPlusLookLayer"
+            LookGui.Parent = game.CoreGui
+            LookGui.ResetOnSpawn = false
+            LookGui.IgnoreGuiInset = true
+            LookGui.DisplayOrder = 50   -- НИЖЕ, чем AdminPanel (200)
+
+            local topArea = Instance.new("Frame")
+            topArea.Size = UDim2.new(1, 0, 0.55, 0)
+            topArea.Position = UDim2.new(0, 0, 0, 0)
+            topArea.BackgroundTransparency = 1
+            topArea.BorderSizePixel = 0
+            topArea.Active = true
+            topArea.Parent = LookGui
+
+            local rightArea = Instance.new("Frame")
+            rightArea.Size = UDim2.new(1, -230, 0.7, 0)
+            rightArea.Position = UDim2.new(0, 230, 0.15, 0)
+            rightArea.BackgroundTransparency = 1
+            rightArea.BorderSizePixel = 0
+            rightArea.Active = true
+            rightArea.Parent = LookGui
+
+            for _, area in ipairs({topArea, rightArea}) do
+                area.InputBegan:Connect(beginLook)
+                area.InputChanged:Connect(moveLook)
+                area.InputEnded:Connect(endLook)
+            end
+
+            LookGui.Enabled = false
+        end
+
+        -- UI вкладки Freecam
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, 0, 1, 0)
+        container.BackgroundTransparency = 1
+        container.Parent = freecamTab
+
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
+        mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+        mainFrame.BackgroundColor3 = Library.Theme.Panel
+        mainFrame.BorderColor3 = Library.Theme.Border
+        mainFrame.BorderSizePixel = 2
+        mainFrame.BackgroundTransparency = 0.5
+        mainFrame.Parent = container
+
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, 0, 0.15, 0)
+        title.BackgroundTransparency = 1
+        title.Text = "FREECAM MODE"
+        title.TextColor3 = Library.Theme.Text
+        title.TextScaled = true
+        title.Font = Enum.Font.SourceSansBold
+        title.Parent = mainFrame
+
+        local toggleBtn = Instance.new("TextButton")
+        toggleBtn.Size = UDim2.new(0.6, 0, 0.15, 0)
+        toggleBtn.Position = UDim2.new(0.2, 0, 0.18, 0)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        toggleBtn.BorderColor3 = Library.Theme.Border
+        toggleBtn.BorderSizePixel = 2
+        toggleBtn.Text = "OFF"
+        toggleBtn.TextColor3 = Library.Theme.Text
+        toggleBtn.TextScaled = true
+        toggleBtn.Font = Enum.Font.SourceSansBold
+        toggleBtn.BackgroundTransparency = 0.3
+        toggleBtn.Parent = mainFrame
+
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(1, 0)
+        toggleCorner.Parent = toggleBtn
+
+        local speedTitle = Instance.new("TextLabel")
+        speedTitle.Size = UDim2.new(1, -20, 0, 20)
+        speedTitle.Position = UDim2.new(0, 10, 0.42, 0)
+        speedTitle.BackgroundTransparency = 1
+        speedTitle.Text = "Speed: 100"
+        speedTitle.TextColor3 = Library.Theme.Text
+        speedTitle.TextScaled = true
+        speedTitle.Font = Enum.Font.SourceSansBold
+        speedTitle.TextXAlignment = Enum.TextXAlignment.Left
+        speedTitle.Parent = mainFrame
+
+        -- ===== ПОЛЗУНОК БЕЗ СКРУГЛЕНИЙ, МАКСИМУМ 300 =====
+        local speedSlider = Instance.new("Frame")
+        speedSlider.Size = UDim2.new(1, -20, 0.08, 0)
+        speedSlider.Position = UDim2.new(0, 10, 0.55, 0)
+        speedSlider.BackgroundColor3 = Library.Theme.Border
+        speedSlider.BorderSizePixel = 0
+        speedSlider.Parent = mainFrame
+        -- БЕЗ UICorner (квадратный)
+
+        local speedFill = Instance.new("Frame")
+        speedFill.Size = UDim2.new(0, 0, 1, 0)
+        speedFill.BackgroundColor3 = Library.Theme.Accent
+        speedFill.BorderSizePixel = 0
+        speedFill.Parent = speedSlider
+        -- БЕЗ UICorner (квадратный)
+
+        local speedButton = Instance.new("TextButton")
+        speedButton.Size = UDim2.new(0, 14, 1, 0)
+        speedButton.Position = UDim2.new(0, -7, 0, 0)
+        speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        speedButton.BorderColor3 = Library.Theme.Border
+        speedButton.BorderSizePixel = 2
+        speedButton.Text = ""
+        speedButton.Parent = speedSlider
+        -- БЕЗ UICorner (квадратный)
+        -- ====================================================
+
+        local function updateSpeedSlider()
+            local percent = (FC.baseSpeed - 1) / (FC.maxSpeed - 1)
+            speedFill.Size = UDim2.new(percent, 0, 1, 0)
+            speedButton.Position = UDim2.new(percent, -7, 0, 0)
+            speedTitle.Text = "Speed: " .. math.floor(FC.baseSpeed)
+        end
+
+        local function enableFreecam()
+            if FC.isActive then return end
+
+            local player = game.Players.LocalPlayer
+            local char = player and player.Character
+            local humanoid = char and char:FindFirstChild("Humanoid")
+            local camera = workspace.CurrentCamera
+
+            FC.savedCameraCFrame = camera.CFrame
+            FC.savedCameraFocus = camera.Focus
+
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                FC.savedCharacterCFrame = char.HumanoidRootPart.CFrame
+                FC.freecamPosition = FC.savedCameraCFrame.Position
+            else
+                FC.freecamPosition = camera.CFrame.Position
+            end
+
+            if humanoid then
+                FC.savedWalkSpeed = humanoid.WalkSpeed
+                FC.savedJumpPower = humanoid.JumpPower
+                FC.savedAutoRotate = humanoid.AutoRotate
+                FC.savedPlatformStand = humanoid.PlatformStand
+                humanoid.AutoRotate = false
+                humanoid.PlatformStand = false
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+            end
+
+            FC.cameraRotation = CFrame.new(FC.savedCameraCFrame.Position, FC.savedCameraCFrame.Position + FC.savedCameraCFrame.LookVector)
+
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                FC.savedAnchored = char.HumanoidRootPart.Anchored
+                char.HumanoidRootPart.Anchored = true
+            end
+
+            FC.isActive = true
+
+            toggleBtn.Text = "ON"
+            toggleBtn.BackgroundColor3 = Library.Theme.Success
+
+            createLookLayer()
+            if LookGui then LookGui.Enabled = true end
+        end
+
+        local function disableFreecam()
+            if not FC.isActive then return end
+
+            local player = game.Players.LocalPlayer
+            local char = player and player.Character
+            local humanoid = char and char:FindFirstChild("Humanoid")
+            local camera = workspace.CurrentCamera
+
+            FC.isActive = false
+
+            if FC.savedCameraCFrame then
+                camera.CFrame = FC.savedCameraCFrame
+                camera.Focus = FC.savedCameraFocus
+            end
+
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.Anchored = FC.savedAnchored or false
+            end
+
+            if humanoid then
+                humanoid.AutoRotate = FC.savedAutoRotate
+                humanoid.PlatformStand = FC.savedPlatformStand
+                humanoid.WalkSpeed = FC.savedWalkSpeed
+                humanoid.JumpPower = FC.savedJumpPower
+            end
+
+            if FC.savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = FC.savedCharacterCFrame
+            end
+
+            toggleBtn.Text = "OFF"
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+
+            if LookGui then LookGui.Enabled = false end
+        end
+
+        toggleBtn.MouseButton1Click:Connect(function()
+            if FC.isActive then disableFreecam() else enableFreecam() end
+        end)
+
+        -- Слайдер (1..300)
+        local draggingSpeed = false
+        local function updateSpeedFromInput(input)
+            local sliderPos = speedSlider.AbsolutePosition
+            local sliderSize = speedSlider.AbsoluteSize
+            local percent = math.clamp((input.Position.X - sliderPos.X) / sliderSize.X, 0, 1)
+            FC.baseSpeed = math.floor(1 + percent * (FC.maxSpeed - 1))
+            updateSpeedSlider()
+        end
+
+        speedButton.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSpeed = true
+                updateSpeedFromInput(input)
+            end
+        end)
+        userInputService.InputChanged:Connect(function(input)
+            if draggingSpeed and (input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseMovement) then
+                updateSpeedFromInput(input)
+            end
+        end)
+        userInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSpeed = false
+            end
+        end)
+
+        -- ПК: F9 + мышь
+        if userInputService.KeyboardEnabled then
+            userInputService.InputBegan:Connect(function(input, gp)
+                if gp then return end
+                if input.KeyCode == Enum.KeyCode.F9 then
+                    if FC.isActive then disableFreecam() else enableFreecam() end
+                end
+            end)
+            userInputService.InputChanged:Connect(function(input)
+                if not FC.isActive then return end
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local dx = -input.Delta.X * 0.005
+                    local dy = -input.Delta.Y * 0.005
+                    FC.cameraRotation = FC.cameraRotation * CFrame.Angles(0, dx, 0) * CFrame.Angles(dy, 0, 0)
+                    local look = FC.cameraRotation.LookVector
+                    local up = FC.cameraRotation.UpVector
+                    FC.cameraRotation = CFrame.lookAt(Vector3.new(0,0,0), look, up)
+                end
+            end)
+        end
+
+        -- Главный цикл — полёт по направлению взгляда
+        game:GetService("RunService").RenderStepped:Connect(function(dt)
+            if not FC.isActive then return end
+            local camera = workspace.CurrentCamera
+            local moveDirection = Vector3.new(0, 0, 0)
+
+            local camLook = FC.cameraRotation.LookVector
+            local camRight = FC.cameraRotation.RightVector
+            local flatLook = Vector3.new(camLook.X, 0, camLook.Z)
+            local flatRight = Vector3.new(camRight.X, 0, camRight.Z)
+            if flatLook.Magnitude > 0.01 then flatLook = flatLook.Unit end
+            if flatRight.Magnitude > 0.01 then flatRight = flatRight.Unit end
+
+            if isMobile then
+                local player = game.Players.LocalPlayer
+                local char = player and player.Character
+                local humanoid = char and char:FindFirstChild("Humanoid")
+
+                if humanoid then
+                    local md = humanoid.MoveDirection
+                    if md.Magnitude > 0.05 then
+                        local forwardAmt = md:Dot(flatLook)
+                        local rightAmt = md:Dot(flatRight)
+                        moveDirection = moveDirection + camLook * forwardAmt
+                        moveDirection = moveDirection + flatRight * rightAmt
+                    end
+                    if humanoid.Jump then
+                        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                    end
+                end
+            end
+
+            if userInputService.KeyboardEnabled then
+                if userInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + camLook
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - camLook
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - flatRight
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + flatRight
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    moveDirection = moveDirection - Vector3.new(0, 1, 0)
+                end
+            end
+
+            if moveDirection.Magnitude > 0 then
+                moveDirection = moveDirection.Unit
+            end
+
+            local moveAmount = FC.baseSpeed * dt
+            if moveDirection.Magnitude > 0 then
+                FC.freecamPosition = FC.freecamPosition + moveDirection * moveAmount
+            end
+
+            local newCFrame = CFrame.new(FC.freecamPosition) * (FC.cameraRotation - FC.cameraRotation.Position)
+            camera.CFrame = newCFrame
+            camera.Focus = CFrame.new(FC.freecamPosition + newCFrame.LookVector * 100)
+        end)
+
+        updateSpeedSlider()
+    end
+end
 
 -- ===== FIX: MOVING LOADING SCREEN TO THE END =====
 pcall(function()
@@ -5960,7 +6062,8 @@ pcall(function()
     local forwardTabIndex = nil
     for i, name in ipairs(TabNames) do
         if name == "13.Forward" then
-            forwardTabIndex = i            break
+            forwardTabIndex = i
+            break
         end
     end
 
