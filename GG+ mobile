@@ -7,6 +7,8 @@ local function ShowLoadingAnimation()
     loadingGui.Parent = game.CoreGui
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
+    loadingGui.DisplayOrder = 9999
+    loadingGui.IgnoreGuiInset = true
 
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
@@ -15,6 +17,7 @@ local function ShowLoadingAnimation()
     background.BackgroundTransparency = 0
     background.Parent = loadingGui
     background.ZIndex = 999
+    background.Active = true
 
     local background2 = Instance.new("Frame")
     background2.Size = UDim2.new(10, 0, 10, 0)
@@ -23,16 +26,17 @@ local function ShowLoadingAnimation()
     background2.BackgroundTransparency = 0
     background2.Parent = loadingGui
     background2.ZIndex = 998
+    background2.Active = true
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 380)
-    container.Position = UDim2.new(0.5, -250, 0.5, -190)
+    container.Size = UDim2.new(0, 250, 0, 190)
+    container.Position = UDim2.new(0.5, -125, 0.5, -95)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 0, 50)
+    textLabel.Size = UDim2.new(1, 0, 0, 25)
     textLabel.Position = UDim2.new(0, 0, 0.02, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = ""
@@ -44,7 +48,7 @@ local function ShowLoadingAnimation()
     textLabel.Parent = container
 
     local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(1, 0, 0, 30)
+    subtitle.Size = UDim2.new(1, 0, 0, 15)
     subtitle.Position = UDim2.new(0, 0, 0.18, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
@@ -55,7 +59,7 @@ local function ShowLoadingAnimation()
 
     local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
-    tabLabel.Size = UDim2.new(1, 0, 0, 30)
+    tabLabel.Size = UDim2.new(1, 0, 0, 15)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
     tabLabel.BackgroundTransparency = 1
     tabLabel.Text = ""
@@ -65,7 +69,7 @@ local function ShowLoadingAnimation()
     tabLabel.Parent = container
 
     local allLoadedLabel = Instance.new("TextLabel")
-    allLoadedLabel.Size = UDim2.new(1, 0, 0, 30)
+    allLoadedLabel.Size = UDim2.new(1, 0, 0, 15)
     allLoadedLabel.Position = UDim2.new(0, 0, 0.44, 0)
     allLoadedLabel.BackgroundTransparency = 1
     allLoadedLabel.Text = ""
@@ -76,7 +80,7 @@ local function ShowLoadingAnimation()
     allLoadedLabel.Parent = container
 
     local timeLabel = Instance.new("TextLabel")
-    timeLabel.Size = UDim2.new(1, 0, 0, 30)
+    timeLabel.Size = UDim2.new(1, 0, 0, 15)
     timeLabel.Position = UDim2.new(0, 0, 0.56, 0)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = "0%"
@@ -86,7 +90,7 @@ local function ShowLoadingAnimation()
     timeLabel.Parent = container
 
     local line1Label = Instance.new("TextLabel")
-    line1Label.Size = UDim2.new(1, 0, 0, 30)
+    line1Label.Size = UDim2.new(1, 0, 0, 15)
     line1Label.Position = UDim2.new(0, 0, 0.68, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
@@ -97,7 +101,7 @@ local function ShowLoadingAnimation()
     line1Label.Parent = container
 
     local line2Label = Instance.new("TextLabel")
-    line2Label.Size = UDim2.new(1, 0, 0, 30)
+    line2Label.Size = UDim2.new(1, 0, 0, 15)
     line2Label.Position = UDim2.new(0, 0, 0.78, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
@@ -108,7 +112,7 @@ local function ShowLoadingAnimation()
     line2Label.Parent = container
 
     local progressBar = Instance.new("Frame")
-    progressBar.Size = UDim2.new(0.8, 0, 0, 6)
+    progressBar.Size = UDim2.new(0.8, 0, 0, 3)
     progressBar.Position = UDim2.new(0.1, 0, 0.87, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
@@ -353,7 +357,7 @@ local function ApplyThemeColors(colors)
 
     for _, obj in pairs(MenuPanel:GetDescendants()) do
         if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj ~= MenuPanel and obj.Parent ~= nil then
-            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" then
+            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundColor3 = themeColors.Panel
                 obj.BorderColor3 = themeColors.Border
             end
@@ -391,8 +395,6 @@ local function ApplyThemeColors(colors)
 
     if PointInfo then PointInfo.TextColor3 = themeColors.Text end
     if WalkStatus then WalkStatus.TextColor3 = themeColors.Text end
-    if WalkSpeedLabel then WalkSpeedLabel.TextColor3 = themeColors.Text end
-    if SpeedLabel then SpeedLabel.TextColor3 = themeColors.Text end
     if NoclipIndicator then
         if NoclipEnabled then
             NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
@@ -417,12 +419,12 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdminPanel"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 200  -- ВЫШЕ, чем LookGui (50), чтобы меню было кликабельным
+ScreenGui.DisplayOrder = 200
 
--- Main Menu Button
+-- Main Menu Button (2x smaller: 25x25)
 local MainButton = Instance.new("ImageButton")
 MainButton.Name = "MainButton"
-MainButton.Size = UDim2.new(0, 50, 0, 50)
+MainButton.Size = UDim2.new(0, 25, 0, 25)
 MainButton.Position = UDim2.new(0, 10, 0, 10)
 MainButton.BackgroundColor3 = Library.Theme.Panel
 MainButton.BorderColor3 = Library.Theme.Border
@@ -443,8 +445,8 @@ ButtonLabel.Parent = MainButton
 
 local Shadow = Instance.new("ImageLabel")
 Shadow.Name = "Shadow"
-Shadow.Size = UDim2.new(1, 10, 1, 10)
-Shadow.Position = UDim2.new(0, -5, 0, -5)
+Shadow.Size = UDim2.new(1, 5, 1, 5)
+Shadow.Position = UDim2.new(0, -2.5, 0, -2.5)
 Shadow.BackgroundTransparency = 1
 Shadow.Image = "rbxassetid://1316043655"
 Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
@@ -488,11 +490,11 @@ local function SetupMainButtonDrag()
     end)
 end
 
--- Menu Panel
+-- Menu Panel (2x smaller: 375x325)
 local MenuPanel = Instance.new("Frame")
 MenuPanel.Name = "MenuPanel"
-MenuPanel.Size = UDim2.new(0, 750, 0, 650)
-MenuPanel.Position = UDim2.new(0.5, -375, 0.5, -325)
+MenuPanel.Size = UDim2.new(0, 375, 0, 325)
+MenuPanel.Position = UDim2.new(0.5, -187.5, 0.5, -162.5)
 MenuPanel.BackgroundColor3 = Library.Theme.Background
 MenuPanel.BorderColor3 = Library.Theme.Border
 MenuPanel.BorderSizePixel = 3
@@ -573,16 +575,16 @@ local function SetupMenuDrag()
     end)
 end
 
--- Title
+-- Title (2x smaller: 25px height)
 local TitleFrame = Instance.new("Frame")
-TitleFrame.Size = UDim2.new(1, 0, 0, 50)
+TitleFrame.Size = UDim2.new(1, 0, 0, 25)
 TitleFrame.BackgroundColor3 = Library.Theme.Panel
 TitleFrame.BorderSizePixel = 0
 TitleFrame.Parent = MenuPanel
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Size = UDim2.new(1, -20, 1, 0)
+Title.Position = UDim2.new(0, 5, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "GG+"
 Title.TextColor3 = Library.Theme.Text
@@ -592,8 +594,8 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleFrame
 
 local CloseBtn = Instance.new("ImageButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -40, 0, 10)
+CloseBtn.Size = UDim2.new(0, 15, 0, 15)
+CloseBtn.Position = UDim2.new(1, -20, 0, 5)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 CloseBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.BorderSizePixel = 1
@@ -611,13 +613,13 @@ CloseLabel.Parent = CloseBtn
 
 -- Main content with tabs (vertical)
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, -20, 1, -70)
-TabContainer.Position = UDim2.new(0, 10, 0, 60)
+TabContainer.Size = UDim2.new(1, -10, 1, -35)
+TabContainer.Position = UDim2.new(0, 5, 0, 30)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MenuPanel
 
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(0, 120, 1, 0)
+TabBar.Size = UDim2.new(0, 60, 1, 0)
 TabBar.Position = UDim2.new(0, 0, 0, 0)
 TabBar.BackgroundColor3 = Library.Theme.Panel
 TabBar.BorderColor3 = Library.Theme.Border
@@ -625,8 +627,8 @@ TabBar.BorderSizePixel = 2
 TabBar.Parent = TabContainer
 
 local TabContentContainer = Instance.new("Frame")
-TabContentContainer.Size = UDim2.new(1, -130, 1, 0)
-TabContentContainer.Position = UDim2.new(0, 125, 0, 0)
+TabContentContainer.Size = UDim2.new(1, -65, 1, 0)
+TabContentContainer.Position = UDim2.new(0, 62.5, 0, 0)
 TabContentContainer.BackgroundTransparency = 1
 TabContentContainer.Parent = TabContainer
 
@@ -637,21 +639,21 @@ local CurrentTab = 1
 local TabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
 
 local TabScrollingFrame = Instance.new("ScrollingFrame")
-TabScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
-TabScrollingFrame.Position = UDim2.new(0, 2.5, 0, 2.5)
+TabScrollingFrame.Size = UDim2.new(1, -2.5, 1, -2.5)
+TabScrollingFrame.Position = UDim2.new(0, 1.25, 0, 1.25)
 TabScrollingFrame.BackgroundTransparency = 1
 TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabScrollingFrame.ScrollBarThickness = 6
+TabScrollingFrame.ScrollBarThickness = 3
 TabScrollingFrame.Parent = TabBar
 
 local TabListLayout = Instance.new("UIListLayout")
 TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabListLayout.Padding = UDim.new(0, 3)
+TabListLayout.Padding = UDim.new(0, 1.5)
 TabListLayout.Parent = TabScrollingFrame
 
 for i, name in ipairs(TabNames) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -5, 0, 35)
+    btn.Size = UDim2.new(1, -2.5, 0, 17.5)
     btn.BackgroundColor3 = (i == 1) and Library.Theme.Accent or Library.Theme.Button
     btn.BorderColor3 = Library.Theme.Border
     btn.BorderSizePixel = 2
@@ -671,7 +673,7 @@ for i, name in ipairs(TabNames) do
     Tabs[i] = content
 end
 
-TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 19 + 2.5)
 
 -- ===== TAB 1: POINTS =====
 local PointsTab = Tabs[1]
@@ -682,12 +684,12 @@ PointsList.BackgroundColor3 = Library.Theme.Panel
 PointsList.BorderColor3 = Library.Theme.Border
 PointsList.BorderSizePixel = 2
 PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
-PointsList.ScrollBarThickness = 8
+PointsList.ScrollBarThickness = 4
 PointsList.Parent = PointsTab
 
 local ListLayout = Instance.new("UIListLayout")
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ListLayout.Padding = UDim.new(0, 5)
+ListLayout.Padding = UDim.new(0, 2.5)
 ListLayout.Parent = PointsList
 
 local PointControl = Instance.new("Frame")
@@ -697,7 +699,7 @@ PointControl.BackgroundTransparency = 1
 PointControl.Parent = PointsTab
 
 local SetBtn = Instance.new("TextButton")
-SetBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
+SetBtn.Size = UDim2.new(0.4, -2.5, 0.3, -2.5)
 SetBtn.Position = UDim2.new(0, 0, 0.4, 0)
 SetBtn.BackgroundColor3 = Library.Theme.Success
 SetBtn.BorderColor3 = Library.Theme.Border
@@ -709,8 +711,8 @@ SetBtn.Font = Enum.Font.SourceSansBold
 SetBtn.Parent = PointControl
 
 local TeleportBtn = Instance.new("TextButton")
-TeleportBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
-TeleportBtn.Position = UDim2.new(0.55, 5, 0.4, 0)
+TeleportBtn.Size = UDim2.new(0.4, -2.5, 0.3, -2.5)
+TeleportBtn.Position = UDim2.new(0.55, 2.5, 0.4, 0)
 TeleportBtn.BackgroundColor3 = Library.Theme.Accent
 TeleportBtn.BorderColor3 = Library.Theme.Border
 TeleportBtn.BorderSizePixel = 2
@@ -751,7 +753,7 @@ ClickTitle.Font = Enum.Font.SourceSansBold
 ClickTitle.Parent = ClickTeleportFrame
 
 local ClickToggleBtn = Instance.new("TextButton")
-ClickToggleBtn.Size = UDim2.new(0.4, -10, 0.4, -5)
+ClickToggleBtn.Size = UDim2.new(0.4, -5, 0.4, -2.5)
 ClickToggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
 ClickToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 ClickToggleBtn.BorderColor3 = Library.Theme.Border
@@ -983,7 +985,7 @@ do
     FlyTitle.Parent = FlyFrame
 
     flyToggleBtn = Instance.new("TextButton")
-    flyToggleBtn.Size = UDim2.new(0.4, -10, 0.15, -5)
+    flyToggleBtn.Size = UDim2.new(0.4, -5, 0.15, -2.5)
     flyToggleBtn.Position = UDim2.new(0.3, 0, 0.15, 0)
     flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
     flyToggleBtn.BorderColor3 = Library.Theme.Border
@@ -994,6 +996,7 @@ do
     flyToggleBtn.Font = Enum.Font.SourceSansBold
     flyToggleBtn.Parent = FlyFrame
 
+    -- ===== VERнутая надпись скорости =====
     local flySpeedTitle = Instance.new("TextLabel")
     flySpeedTitle.Size = UDim2.new(0.3, 0, 0.08, 0)
     flySpeedTitle.Position = UDim2.new(0.05, 0, 0.43, 0)
@@ -1005,28 +1008,37 @@ do
     flySpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
     flySpeedTitle.Parent = FlyFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local flySpeedSlider = Instance.new("Frame")
-    flySpeedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    flySpeedSlider.Name = "OrionSliderTrack"
+    flySpeedSlider.Size = UDim2.new(0.55, -5, 0, 3)
     flySpeedSlider.Position = UDim2.new(0.4, 0, 0.45, 0)
-    flySpeedSlider.BackgroundColor3 = Library.Theme.Border
+    flySpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     flySpeedSlider.BorderSizePixel = 0
+    flySpeedSlider.BackgroundTransparency = 0
     flySpeedSlider.Parent = FlyFrame
 
     local flySpeedFill = Instance.new("Frame")
+    flySpeedFill.Name = "OrionSliderFill"
     flySpeedFill.Size = UDim2.new(0.3, 0, 1, 0)
-    flySpeedFill.BackgroundColor3 = Color3.fromRGB(80, 180, 255)
+    flySpeedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     flySpeedFill.BorderSizePixel = 0
+    flySpeedFill.BackgroundTransparency = 0
     flySpeedFill.Parent = flySpeedSlider
 
     local flySpeedButton = Instance.new("TextButton")
-    flySpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    flySpeedButton.Position = UDim2.new(0.3, -7.5, -0.4, 0)
+    flySpeedButton.Name = "OrionSliderButton"
+    flySpeedButton.Size = UDim2.new(0, 7, 0, 7)
+    flySpeedButton.Position = UDim2.new(0.3, -3.5, 0.5, -3.5)
     flySpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    flySpeedButton.BorderColor3 = Library.Theme.Border
-    flySpeedButton.BorderSizePixel = 2
+    flySpeedButton.BorderSizePixel = 0
     flySpeedButton.Text = ""
     flySpeedButton.Parent = flySpeedSlider
     flySpeedButton.BackgroundTransparency = 0
+
+    local flySpeedCorner = Instance.new("UICorner")
+    flySpeedCorner.CornerRadius = UDim.new(1, 0)
+    flySpeedCorner.Parent = flySpeedButton
 
     local isDraggingFlySpeed = false
 
@@ -1037,7 +1049,7 @@ do
             1
         )
         flySpeedFill.Size = UDim2.new(ratio, 0, 1, 0)
-        flySpeedButton.Position = UDim2.new(ratio, -7.5, -0.4, 0)
+        flySpeedButton.Position = UDim2.new(ratio, -3.5, 0.5, -3.5)
         flySpeedTitle.Text = "Speed: " .. math.floor(FLY_CONFIG.flySpeed)
     end
 
@@ -1159,7 +1171,7 @@ WalkTitle.Font = Enum.Font.SourceSansBold
 WalkTitle.Parent = WalkFrame
 
 local WalkSetBtn = Instance.new("TextButton")
-WalkSetBtn.Size = UDim2.new(0.3, -5, 0.3, -5)
+WalkSetBtn.Size = UDim2.new(0.3, -2.5, 0.3, -2.5)
 WalkSetBtn.Position = UDim2.new(0.02, 0, 0.3, 0)
 WalkSetBtn.BackgroundColor3 = Library.Theme.Success
 WalkSetBtn.BorderColor3 = Library.Theme.Border
@@ -1171,7 +1183,7 @@ WalkSetBtn.Font = Enum.Font.SourceSansBold
 WalkSetBtn.Parent = WalkFrame
 
 local WalkStartBtn = Instance.new("TextButton")
-WalkStartBtn.Size = UDim2.new(0.3, -5, 0.3, -5)
+WalkStartBtn.Size = UDim2.new(0.3, -2.5, 0.3, -2.5)
 WalkStartBtn.Position = UDim2.new(0.35, 0, 0.3, 0)
 WalkStartBtn.BackgroundColor3 = Library.Theme.WalkActive
 WalkStartBtn.BorderColor3 = Library.Theme.Border
@@ -1183,7 +1195,7 @@ WalkStartBtn.Font = Enum.Font.SourceSansBold
 WalkStartBtn.Parent = WalkFrame
 
 local WalkClearBtn = Instance.new("TextButton")
-WalkClearBtn.Size = UDim2.new(0.3, -5, 0.3, -5)
+WalkClearBtn.Size = UDim2.new(0.3, -2.5, 0.3, -2.5)
 WalkClearBtn.Position = UDim2.new(0.68, 0, 0.3, 0)
 WalkClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 WalkClearBtn.BorderColor3 = Library.Theme.Border
@@ -1204,6 +1216,7 @@ WalkStatus.TextScaled = true
 WalkStatus.Font = Enum.Font.SourceSans
 WalkStatus.Parent = WalkFrame
 
+-- ===== ВЕРНУТАЯ надпись скорости =====
 local WalkSpeedLabel = Instance.new("TextLabel")
 WalkSpeedLabel.Size = UDim2.new(0.3, 0, 0.15, 0)
 WalkSpeedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
@@ -1214,28 +1227,37 @@ WalkSpeedLabel.TextScaled = true
 WalkSpeedLabel.Font = Enum.Font.SourceSans
 WalkSpeedLabel.Parent = WalkFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local WalkSpeedSlider = Instance.new("Frame")
-WalkSpeedSlider.Size = UDim2.new(0.4, -10, 0.05, 0)
+WalkSpeedSlider.Name = "OrionSliderTrack"
+WalkSpeedSlider.Size = UDim2.new(0.4, -5, 0, 3)
 WalkSpeedSlider.Position = UDim2.new(0.45, 0, 0.87, 0)
-WalkSpeedSlider.BackgroundColor3 = Library.Theme.Border
+WalkSpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 WalkSpeedSlider.BorderSizePixel = 0
+WalkSpeedSlider.BackgroundTransparency = 0
 WalkSpeedSlider.Parent = WalkFrame
 
 local WalkSpeedFill = Instance.new("Frame")
+WalkSpeedFill.Name = "OrionSliderFill"
 WalkSpeedFill.Size = UDim2.new(0.3, 0, 1, 0)
-WalkSpeedFill.BackgroundColor3 = Library.Theme.WalkActive
+WalkSpeedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WalkSpeedFill.BorderSizePixel = 0
+WalkSpeedFill.BackgroundTransparency = 0
 WalkSpeedFill.Parent = WalkSpeedSlider
 
 local WalkSpeedButton = Instance.new("TextButton")
-WalkSpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
-WalkSpeedButton.Position = UDim2.new(0.3, -7.5, -0.4, 0)
+WalkSpeedButton.Name = "OrionSliderButton"
+WalkSpeedButton.Size = UDim2.new(0, 7, 0, 7)
+WalkSpeedButton.Position = UDim2.new(0.3, -3.5, 0.5, -3.5)
 WalkSpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-WalkSpeedButton.BorderColor3 = Library.Theme.Border
-WalkSpeedButton.BorderSizePixel = 2
+WalkSpeedButton.BorderSizePixel = 0
 WalkSpeedButton.Text = ""
 WalkSpeedButton.Parent = WalkSpeedSlider
 WalkSpeedButton.BackgroundTransparency = 0
+
+local WalkSpeedCorner = Instance.new("UICorner")
+WalkSpeedCorner.CornerRadius = UDim.new(1, 0)
+WalkSpeedCorner.Parent = WalkSpeedButton
 
 local WalkPointsList = Instance.new("ScrollingFrame")
 WalkPointsList.Size = UDim2.new(1, 0, 0.4, 0)
@@ -1244,12 +1266,12 @@ WalkPointsList.BackgroundColor3 = Library.Theme.Panel
 WalkPointsList.BorderColor3 = Library.Theme.Border
 WalkPointsList.BorderSizePixel = 2
 WalkPointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
-WalkPointsList.ScrollBarThickness = 8
+WalkPointsList.ScrollBarThickness = 4
 WalkPointsList.Parent = WalkTab
 
 local WalkListLayout = Instance.new("UIListLayout")
 WalkListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-WalkListLayout.Padding = UDim.new(0, 5)
+WalkListLayout.Padding = UDim.new(0, 2.5)
 WalkListLayout.Parent = WalkPointsList
 
 -- ===== TAB 5: NOCLIP =====
@@ -1273,7 +1295,7 @@ NoclipTitle.Font = Enum.Font.SourceSansBold
 NoclipTitle.Parent = NoclipFrame
 
 local NoclipToggleBtn = Instance.new("TextButton")
-NoclipToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
+NoclipToggleBtn.Size = UDim2.new(0.4, -5, 0.3, -2.5)
 NoclipToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
 NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 NoclipToggleBtn.BorderColor3 = Library.Theme.Border
@@ -1316,6 +1338,7 @@ PlatformTitle.Parent = PlatformFrame
 
 local PlatformLength = 25
 
+-- ===== ВЕРНУТАЯ надпись длины =====
 local LengthLabel = Instance.new("TextLabel")
 LengthLabel.Size = UDim2.new(0.25, 0, 0.08, 0)
 LengthLabel.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -1326,31 +1349,41 @@ LengthLabel.TextScaled = true
 LengthLabel.Font = Enum.Font.SourceSans
 LengthLabel.Parent = PlatformFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local LengthSlider = Instance.new("Frame")
-LengthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
+LengthSlider.Name = "OrionSliderTrack"
+LengthSlider.Size = UDim2.new(0.6, -5, 0, 3)
 LengthSlider.Position = UDim2.new(0.35, 0, 0.17, 0)
-LengthSlider.BackgroundColor3 = Library.Theme.Border
+LengthSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 LengthSlider.BorderSizePixel = 0
+LengthSlider.BackgroundTransparency = 0
 LengthSlider.Parent = PlatformFrame
 
 local LengthFill = Instance.new("Frame")
+LengthFill.Name = "OrionSliderFill"
 LengthFill.Size = UDim2.new(0.4898, 0, 1, 0)
-LengthFill.BackgroundColor3 = Library.Theme.Accent
+LengthFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 LengthFill.BorderSizePixel = 0
+LengthFill.BackgroundTransparency = 0
 LengthFill.Parent = LengthSlider
 
 local LengthButton = Instance.new("TextButton")
-LengthButton.Size = UDim2.new(0, 15, 1.8, 0)
-LengthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
+LengthButton.Name = "OrionSliderButton"
+LengthButton.Size = UDim2.new(0, 7, 0, 7)
+LengthButton.Position = UDim2.new(0.4898, -3.5, 0.5, -3.5)
 LengthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LengthButton.BorderColor3 = Library.Theme.Border
-LengthButton.BorderSizePixel = 2
+LengthButton.BorderSizePixel = 0
 LengthButton.Text = ""
 LengthButton.Parent = LengthSlider
 LengthButton.BackgroundTransparency = 0
 
+local LengthCorner = Instance.new("UICorner")
+LengthCorner.CornerRadius = UDim.new(1, 0)
+LengthCorner.Parent = LengthButton
+
 local PlatformWidth = 25
 
+-- ===== ВЕРНУТАЯ надпись ширины =====
 local WidthLabel = Instance.new("TextLabel")
 WidthLabel.Size = UDim2.new(0.25, 0, 0.08, 0)
 WidthLabel.Position = UDim2.new(0.05, 0, 0.3, 0)
@@ -1361,34 +1394,43 @@ WidthLabel.TextScaled = true
 WidthLabel.Font = Enum.Font.SourceSans
 WidthLabel.Parent = PlatformFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local WidthSlider = Instance.new("Frame")
-WidthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
+WidthSlider.Name = "OrionSliderTrack"
+WidthSlider.Size = UDim2.new(0.6, -5, 0, 3)
 WidthSlider.Position = UDim2.new(0.35, 0, 0.32, 0)
-WidthSlider.BackgroundColor3 = Library.Theme.Border
+WidthSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 WidthSlider.BorderSizePixel = 0
+WidthSlider.BackgroundTransparency = 0
 WidthSlider.Parent = PlatformFrame
 
 local WidthFill = Instance.new("Frame")
+WidthFill.Name = "OrionSliderFill"
 WidthFill.Size = UDim2.new(0.4898, 0, 1, 0)
-WidthFill.BackgroundColor3 = Library.Theme.Accent
+WidthFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WidthFill.BorderSizePixel = 0
+WidthFill.BackgroundTransparency = 0
 WidthFill.Parent = WidthSlider
 
 local WidthButton = Instance.new("TextButton")
-WidthButton.Size = UDim2.new(0, 15, 1.8, 0)
-WidthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
+WidthButton.Name = "OrionSliderButton"
+WidthButton.Size = UDim2.new(0, 7, 0, 7)
+WidthButton.Position = UDim2.new(0.4898, -3.5, 0.5, -3.5)
 WidthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-WidthButton.BorderColor3 = Library.Theme.Border
-WidthButton.BorderSizePixel = 2
+WidthButton.BorderSizePixel = 0
 WidthButton.Text = ""
 WidthButton.Parent = WidthSlider
 WidthButton.BackgroundTransparency = 0
+
+local WidthCorner = Instance.new("UICorner")
+WidthCorner.CornerRadius = UDim.new(1, 0)
+WidthCorner.Parent = WidthButton
 
 local MinSize = 1
 local MaxSize = 50
 
 local CreatePlatformBtn = Instance.new("TextButton")
-CreatePlatformBtn.Size = UDim2.new(0.6, -10, 0.15, -5)
+CreatePlatformBtn.Size = UDim2.new(0.6, -5, 0.15, -2.5)
 CreatePlatformBtn.Position = UDim2.new(0.2, 0, 0.45, 0)
 CreatePlatformBtn.BackgroundColor3 = Library.Theme.Success
 CreatePlatformBtn.BorderColor3 = Library.Theme.Border
@@ -1400,7 +1442,7 @@ CreatePlatformBtn.Font = Enum.Font.SourceSansBold
 CreatePlatformBtn.Parent = PlatformFrame
 
 local ClearPlatformsBtn = Instance.new("TextButton")
-ClearPlatformsBtn.Size = UDim2.new(0.6, -10, 0.12, -5)
+ClearPlatformsBtn.Size = UDim2.new(0.6, -5, 0.12, -2.5)
 ClearPlatformsBtn.Position = UDim2.new(0.2, 0, 0.65, 0)
 ClearPlatformsBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 ClearPlatformsBtn.BorderColor3 = Library.Theme.Border
@@ -1434,7 +1476,7 @@ PlayersControlPanel.Parent = PlayersTab
 
 local PlayersTitle = Instance.new("TextLabel")
 PlayersTitle.Size = UDim2.new(0.5, 0, 1, 0)
-PlayersTitle.Position = UDim2.new(0, 10, 0, 0)
+PlayersTitle.Position = UDim2.new(0, 5, 0, 0)
 PlayersTitle.BackgroundTransparency = 1
 PlayersTitle.Text = "PLAYERS ON SERVER"
 PlayersTitle.TextColor3 = Library.Theme.Text
@@ -1461,12 +1503,12 @@ PlayersList.BackgroundColor3 = Library.Theme.Panel
 PlayersList.BorderColor3 = Library.Theme.Border
 PlayersList.BorderSizePixel = 2
 PlayersList.CanvasSize = UDim2.new(0, 0, 0, 0)
-PlayersList.ScrollBarThickness = 8
+PlayersList.ScrollBarThickness = 4
 PlayersList.Parent = PlayersTab
 
 local PlayersListLayout = Instance.new("UIListLayout")
 PlayersListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-PlayersListLayout.Padding = UDim.new(0, 5)
+PlayersListLayout.Padding = UDim.new(0, 2.5)
 PlayersListLayout.Parent = PlayersList
 
 local lastPlayerUpdate = 0
@@ -1551,7 +1593,7 @@ local function UpdatePlayersList()
             local isOnline = player.Character and player.Character:FindFirstChild("HumanoidRootPart") ~= nil
 
             local ItemFrame = Instance.new("Frame")
-            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.Size = UDim2.new(1, -5, 0, 22.5)
             ItemFrame.BackgroundColor3 = Library.Theme.Panel
             ItemFrame.BorderColor3 = Library.Theme.Border
             ItemFrame.BorderSizePixel = 2
@@ -1559,7 +1601,7 @@ local function UpdatePlayersList()
 
             local StatusLabel = Instance.new("TextLabel")
             StatusLabel.Size = UDim2.new(0.08, 0, 1, 0)
-            StatusLabel.Position = UDim2.new(0, 5, 0, 0)
+            StatusLabel.Position = UDim2.new(0, 2.5, 0, 0)
             StatusLabel.BackgroundTransparency = 1
             StatusLabel.Text = "●"
             StatusLabel.TextColor3 = isOnline and Library.Theme.PlayerOnline or Library.Theme.PlayerOffline
@@ -1590,7 +1632,7 @@ local function UpdatePlayersList()
             IDLabel.Parent = ItemFrame
 
             local TeleportPlayerBtn = Instance.new("TextButton")
-            TeleportPlayerBtn.Size = UDim2.new(0.2, -5, 0.7, 0)
+            TeleportPlayerBtn.Size = UDim2.new(0.2, -2.5, 0.7, 0)
             TeleportPlayerBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
             TeleportPlayerBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
             TeleportPlayerBtn.BorderColor3 = Library.Theme.Border
@@ -1625,7 +1667,7 @@ local function UpdatePlayersList()
     end
 
     PlayersCountLabel.Text = "Players: " .. count
-    local totalHeight = count * 50 + 10
+    local totalHeight = count * 25 + 5
     PlayersList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
 
@@ -1746,7 +1788,7 @@ XRayInfo.Font = Enum.Font.SourceSans
 XRayInfo.Parent = XRayControlFrame
 
 local XRayToggleBtn = Instance.new("TextButton")
-XRayToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
+XRayToggleBtn.Size = UDim2.new(0.4, -5, 0.2, -2.5)
 XRayToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
 XRayToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 XRayToggleBtn.BorderColor3 = Library.Theme.Border
@@ -1757,6 +1799,7 @@ XRayToggleBtn.TextScaled = true
 XRayToggleBtn.Font = Enum.Font.SourceSansBold
 XRayToggleBtn.Parent = XRayControlFrame
 
+-- ===== ВЕРНУТАЯ надпись прозрачности =====
 local XRayTransparencyLabel = Instance.new("TextLabel")
 XRayTransparencyLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
 XRayTransparencyLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -1767,33 +1810,42 @@ XRayTransparencyLabel.TextScaled = true
 XRayTransparencyLabel.Font = Enum.Font.SourceSansBold
 XRayTransparencyLabel.Parent = XRayControlFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local XRaySlider = Instance.new("Frame")
-XRaySlider.Size = UDim2.new(0.6, -10, 0.05, 0)
+XRaySlider.Name = "OrionSliderTrack"
+XRaySlider.Size = UDim2.new(0.6, -5, 0, 3)
 XRaySlider.Position = UDim2.new(0.3, 0, 0.82, 0)
-XRaySlider.BackgroundColor3 = Library.Theme.Border
+XRaySlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 XRaySlider.BorderSizePixel = 0
+XRaySlider.BackgroundTransparency = 0
 XRaySlider.Parent = XRayControlFrame
 
 local XRayFill = Instance.new("Frame")
+XRayFill.Name = "OrionSliderFill"
 XRayFill.Size = UDim2.new(0.5, 0, 1, 0)
-XRayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+XRayFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 XRayFill.BorderSizePixel = 0
+XRayFill.BackgroundTransparency = 0
 XRayFill.Parent = XRaySlider
 
 local XRaySliderButton = Instance.new("TextButton")
-XRaySliderButton.Size = UDim2.new(0, 15, 1.8, 0)
-XRaySliderButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+XRaySliderButton.Name = "OrionSliderButton"
+XRaySliderButton.Size = UDim2.new(0, 7, 0, 7)
+XRaySliderButton.Position = UDim2.new(0.5, -3.5, 0.5, -3.5)
 XRaySliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-XRaySliderButton.BorderColor3 = Library.Theme.Border
-XRaySliderButton.BorderSizePixel = 2
+XRaySliderButton.BorderSizePixel = 0
 XRaySliderButton.Text = ""
 XRaySliderButton.Parent = XRaySlider
 XRaySliderButton.BackgroundTransparency = 0
 
+local XRayCorner = Instance.new("UICorner")
+XRayCorner.CornerRadius = UDim.new(1, 0)
+XRayCorner.Parent = XRaySliderButton
+
 local function UpdateXRaySlider()
     local percent = XRayTransparency / 100
     XRayFill.Size = UDim2.new(percent, 0, 1, 0)
-    XRaySliderButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+    XRaySliderButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
     XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
 end
 
@@ -1878,7 +1930,7 @@ SPIInfo.Font = Enum.Font.SourceSans
 SPIInfo.Parent = SPIControlFrame
 
 local SPIToggleBtn = Instance.new("TextButton")
-SPIToggleBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
+SPIToggleBtn.Size = UDim2.new(0.4, -5, 0.2, -2.5)
 SPIToggleBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
 SPIToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 SPIToggleBtn.BorderColor3 = Library.Theme.Border
@@ -1926,7 +1978,7 @@ local function CreatePlayerHighlight(player)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "SPIBillboard"
-    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.Size = UDim2.new(0, 100, 0, 25)
     billboard.StudsOffset = Vector3.new(0, 4, 0)
     billboard.AlwaysOnTop = true
     billboard.Parent = player.Character
@@ -2229,7 +2281,7 @@ local function UpdateWalkVisuals()
 
     for i, data in ipairs(WalkPointsData) do
         local sphere = Instance.new("Part")
-        sphere.Size = Vector3.new(2, 2, 2)
+        sphere.Size = Vector3.new(1, 1, 1)
         sphere.Position = data.pos
         sphere.Anchored = true
         sphere.CanCollide = false
@@ -2243,13 +2295,13 @@ local function UpdateWalkVisuals()
         local beam = Instance.new("Beam", sphere)
         beam.Attachment0 = attachment
         beam.Color = ColorSequence.new(Color3.fromRGB(0, 255, 50))
-        beam.Width0 = 1
-        beam.Width1 = 1
+        beam.Width0 = 0.5
+        beam.Width1 = 0.5
 
         local selectionBox = Instance.new("SelectionBox", sphere)
         selectionBox.Adornee = sphere
         selectionBox.Color3 = Color3.fromRGB(0, 255, 50)
-        selectionBox.LineThickness = 0.1
+        selectionBox.LineThickness = 0.05
         selectionBox.Transparency = 0.5
 
         table.insert(WalkVisuals, sphere)
@@ -2261,7 +2313,7 @@ local function UpdateWalkVisuals()
             local midPoint = (prevPos + currentPos) / 2
 
             local line = Instance.new("Part")
-            line.Size = Vector3.new(0.3, 0.3, distance)
+            line.Size = Vector3.new(0.15, 0.15, distance)
             line.Position = midPoint
             line.Anchored = true
             line.CanCollide = false
@@ -2322,7 +2374,7 @@ local function UpdatePointsList()
         local pos = data.pos
 
         local ItemFrame = Instance.new("Frame")
-        ItemFrame.Size = UDim2.new(1, -10, 0, 40)
+        ItemFrame.Size = UDim2.new(1, -5, 0, 20)
         ItemFrame.BackgroundColor3 = Library.Theme.Panel
         ItemFrame.BorderColor3 = Library.Theme.Border
         ItemFrame.BorderSizePixel = 1
@@ -2349,7 +2401,7 @@ local function UpdatePointsList()
         NameLabel.Parent = ItemFrame
 
         local TeleportPointBtn = Instance.new("TextButton")
-        TeleportPointBtn.Size = UDim2.new(0.15, -5, 0.8, 0)
+        TeleportPointBtn.Size = UDim2.new(0.15, -2.5, 0.8, 0)
         TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.1, 0)
         TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
         TeleportPointBtn.BorderColor3 = Library.Theme.Border
@@ -2382,7 +2434,7 @@ local function UpdatePointsList()
     end
 
     local count = #PointsData
-    PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 45 + 10)
+    PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 22.5 + 5)
 end
 
 local function UpdatePointInfo()
@@ -2424,7 +2476,7 @@ local function UpdateWalkPointsList()
         local pos = data.pos
 
         local ItemFrame = Instance.new("Frame")
-        ItemFrame.Size = UDim2.new(1, -10, 0, 35)
+        ItemFrame.Size = UDim2.new(1, -5, 0, 17.5)
         ItemFrame.BackgroundColor3 = Library.Theme.Panel
         ItemFrame.BorderColor3 = Library.Theme.Border
         ItemFrame.BorderSizePixel = 1
@@ -2489,7 +2541,7 @@ local function UpdateWalkPointsList()
     end
 
     local count = #WalkPointsData
-    WalkPointsList.CanvasSize = UDim2.new(0, 0, 0, count * 40 + 10)
+    WalkPointsList.CanvasSize = UDim2.new(0, 0, 0, count * 20 + 5)
     UpdateWalkVisuals()
 end
 
@@ -2823,7 +2875,7 @@ NoclipToggleBtn.MouseButton1Click:Connect(function()
     SetNoclip(not NoclipEnabled)
 end)
 
--- ===== SLIDERS =====
+-- ===== SLIDERS (ALL ORION STYLE, NO LABELS, NO NUMBERS) =====
 local draggingWalkSlider = false
 WalkSpeedButton.MouseButton1Down:Connect(function() draggingWalkSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
@@ -2838,7 +2890,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         WalkSpeed = math.floor(10 + percent * (MAX_WALK_SPEED - 10))
         WalkSpeedFill.Size = UDim2.new(percent, 0, 1, 0)
-        WalkSpeedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        WalkSpeedButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         WalkSpeedLabel.Text = "Speed: " .. WalkSpeed
     end
 end)
@@ -2857,7 +2909,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformLength = math.floor(MinSize + percent * (MaxSize - MinSize))
         LengthFill.Size = UDim2.new(percent, 0, 1, 0)
-        LengthButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        LengthButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         LengthLabel.Text = "Length: " .. PlatformLength .. " m"
     end
 end)
@@ -2876,7 +2928,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformWidth = math.floor(MinSize + percent * (MaxSize - MinSize))
         WidthFill.Size = UDim2.new(percent, 0, 1, 0)
-        WidthButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        WidthButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         WidthLabel.Text = "Width: " .. PlatformWidth .. " m"
     end
 end)
@@ -2924,8 +2976,8 @@ local function AnimateCollapse(targetCollapsed)
             MainButton.Position.Y.Offset + (MainButton.Size.Y.Offset / 2)
         )
     else
-        targetSize = UDim2.new(0, 750, 0, 650)
-        targetPosition = UDim2.new(0.5, -375, 0.5, -325)
+        targetSize = UDim2.new(0, 375, 0, 325)
+        targetPosition = UDim2.new(0.5, -187.5, 0.5, -162.5)
     end
 
     local startPos = MenuPanel.Position
@@ -2952,8 +3004,8 @@ local function AnimateCollapse(targetCollapsed)
             posY
         )
 
-        local scale = 1 - (1 - (currentWidth / 750)) * 0.5
-        MainButton.Size = UDim2.new(0, 50 * (1 + (1 - scale) * 0.5), 0, 50 * (1 + (1 - scale) * 0.5))
+        local scale = 1 - (1 - (currentWidth / 375)) * 0.5
+        MainButton.Size = UDim2.new(0, 25 * (1 + (1 - scale) * 0.5), 0, 25 * (1 + (1 - scale) * 0.5))
 
         if progress >= 1 then
             MenuPanel.Size = targetSize
@@ -3111,8 +3163,8 @@ PlatformInfo.Text = "Platforms: 0"
 setupDeathDetection()
 
 local Wave = Instance.new("Frame")
-Wave.Size = UDim2.new(1, 0, 0, 3)
-Wave.Position = UDim2.new(0, 0, 1, -3)
+Wave.Size = UDim2.new(1, 0, 0, 1.5)
+Wave.Position = UDim2.new(0, 0, 1, -1.5)
 Wave.BackgroundColor3 = Library.Theme.Accent
 Wave.BackgroundTransparency = 0.5
 Wave.Parent = MenuPanel
@@ -3121,7 +3173,7 @@ spawn(function()
     while true do
         for i = 1, 100 do
             wait(0.02)
-            Wave.Size = UDim2.new(1, 0, 0, 3 + math.sin(i/10) * 2)
+            Wave.Size = UDim2.new(1, 0, 0, 1.5 + math.sin(i/10) * 1)
         end
     end
 end)
@@ -3147,14 +3199,14 @@ print("📌 Click GG+ button to expand")
 print("📌 Click GG+ button again to collapse")
 print("========================================")
 
--- ===== VISIBLE BLUE RESIZE BUTTONS - ТОЛЬКО ПО УГЛАМ! =====
-local RESIZE_BUTTON_SIZE = 14
-local CORNER_BUTTON_SIZE = 18
+-- ===== VISIBLE BLUE RESIZE BUTTONS - ТОЛЬКО ПО УГЛАМ! (2x smaller) =====
+local RESIZE_BUTTON_SIZE = 7
+local CORNER_BUTTON_SIZE = 9
 
-local MIN_PANEL_WIDTH = 400
-local MIN_PANEL_HEIGHT = 300
-local MAX_PANEL_WIDTH = 1200
-local MAX_PANEL_HEIGHT = 900
+local MIN_PANEL_WIDTH = 200
+local MIN_PANEL_HEIGHT = 150
+local MAX_PANEL_WIDTH = 600
+local MAX_PANEL_HEIGHT = 450
 
 local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, resizeY, rotation, isCorner)
     local size = isCorner and CORNER_BUTTON_SIZE or RESIZE_BUTTON_SIZE
@@ -3227,7 +3279,7 @@ local function createVisibleResizeHandle(posX, posY, anchorX, anchorY, resizeX, 
                 startPos.Y.Scale, offsetY
             )
 
-            TabContainer.Size = UDim2.new(1, -20, 1, -70)
+            TabContainer.Size = UDim2.new(1, -10, 1, -35)
         end
     end)
 
@@ -3245,7 +3297,8 @@ end
 
 pcall(function()
     for _, child in pairs(MenuPanel:GetChildren()) do
-        if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then            if child.Size and child.Size.X and child.Size.X.Offset then
+        if child:IsA("Frame") and child.BackgroundTransparency == 1 and child.BorderSizePixel == 0 then
+            if child.Size and child.Size.X and child.Size.X.Offset then
                 local offset = child.Size.X.Offset
                 if offset == 15 or offset == 30 or offset == 60 or offset == 90 or offset == 1800 then
                     child:Destroy()
@@ -3276,7 +3329,7 @@ pcall(function()
 end)
 
 print("Blue resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
-print("Corner buttons: 18x18 (full round)")
+print("Corner buttons: 9x9 (full round)")
 print("Color: blue (0, 100, 255)")
 print("Dragging works only by title")
 print("Кнопки по стенкам УДАЛЕНЫ!")
@@ -3296,7 +3349,7 @@ pcall(function()
     end
 end)
 
--- ===== TAB 10: FREECAM (РАБОЧАЯ, МЕНЮ КЛИКАЕТСЯ, КВАДРАТНЫЙ ПОЛЗУНОК, МАКС 300, БЕЗ ПОДСКАЗОК) =====
+-- ===== TAB 10: FREECAM (РАБОЧАЯ, МЕНЮ КЛИКАЕТСЯ, ORION STYLE SLIDER, MAX 300, БЕЗ ПОДСКАЗОК) =====
 do
     local freecamTab = Tabs[10]
     if freecamTab then
@@ -3333,7 +3386,6 @@ do
             if input.UserInputType ~= Enum.UserInputType.Touch then return end
             if lookTouchId ~= nil then return end
 
-            -- Не начинаем обзор, если тач попал по меню
             if MenuPanel and MenuPanel.Visible then
                 local mp = MenuPanel.AbsolutePosition
                 local ms = MenuPanel.AbsoluteSize
@@ -3386,7 +3438,7 @@ do
             LookGui.Parent = game.CoreGui
             LookGui.ResetOnSpawn = false
             LookGui.IgnoreGuiInset = true
-            LookGui.DisplayOrder = 50   -- НИЖЕ, чем AdminPanel (200)
+            LookGui.DisplayOrder = 50
 
             local topArea = Instance.new("Frame")
             topArea.Size = UDim2.new(1, 0, 0.55, 0)
@@ -3397,8 +3449,8 @@ do
             topArea.Parent = LookGui
 
             local rightArea = Instance.new("Frame")
-            rightArea.Size = UDim2.new(1, -230, 0.7, 0)
-            rightArea.Position = UDim2.new(0, 230, 0.15, 0)
+            rightArea.Size = UDim2.new(1, -115, 0.7, 0)
+            rightArea.Position = UDim2.new(0, 115, 0.15, 0)
             rightArea.BackgroundTransparency = 1
             rightArea.BorderSizePixel = 0
             rightArea.Active = true
@@ -3413,15 +3465,14 @@ do
             LookGui.Enabled = false
         end
 
-        -- UI вкладки Freecam
         local container = Instance.new("Frame")
         container.Size = UDim2.new(1, 0, 1, 0)
         container.BackgroundTransparency = 1
         container.Parent = freecamTab
 
         local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
-        mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+        mainFrame.Size = UDim2.new(1, -10, 0.5, 0)
+        mainFrame.Position = UDim2.new(0, 5, 0.1, 0)
         mainFrame.BackgroundColor3 = Library.Theme.Panel
         mainFrame.BorderColor3 = Library.Theme.Border
         mainFrame.BorderSizePixel = 2
@@ -3454,9 +3505,10 @@ do
         toggleCorner.CornerRadius = UDim.new(1, 0)
         toggleCorner.Parent = toggleBtn
 
+        -- ===== ВЕРНУТАЯ надпись скорости =====
         local speedTitle = Instance.new("TextLabel")
-        speedTitle.Size = UDim2.new(1, -20, 0, 20)
-        speedTitle.Position = UDim2.new(0, 10, 0.42, 0)
+        speedTitle.Size = UDim2.new(1, -10, 0, 10)
+        speedTitle.Position = UDim2.new(0, 5, 0.42, 0)
         speedTitle.BackgroundTransparency = 1
         speedTitle.Text = "Speed: 100"
         speedTitle.TextColor3 = Library.Theme.Text
@@ -3465,37 +3517,41 @@ do
         speedTitle.TextXAlignment = Enum.TextXAlignment.Left
         speedTitle.Parent = mainFrame
 
-        -- ===== ПОЛЗУНОК БЕЗ СКРУГЛЕНИЙ, МАКСИМУМ 300 =====
+        -- ===== ORION STYLE SLIDER (непрозрачный) =====
         local speedSlider = Instance.new("Frame")
-        speedSlider.Size = UDim2.new(1, -20, 0.08, 0)
-        speedSlider.Position = UDim2.new(0, 10, 0.55, 0)
-        speedSlider.BackgroundColor3 = Library.Theme.Border
+        speedSlider.Name = "OrionSliderTrack"
+        speedSlider.Size = UDim2.new(1, -10, 0, 3)
+        speedSlider.Position = UDim2.new(0, 5, 0.55, 0)
+        speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         speedSlider.BorderSizePixel = 0
+        speedSlider.BackgroundTransparency = 0
         speedSlider.Parent = mainFrame
-        -- БЕЗ UICorner (квадратный)
 
         local speedFill = Instance.new("Frame")
+        speedFill.Name = "OrionSliderFill"
         speedFill.Size = UDim2.new(0, 0, 1, 0)
-        speedFill.BackgroundColor3 = Library.Theme.Accent
+        speedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         speedFill.BorderSizePixel = 0
+        speedFill.BackgroundTransparency = 0
         speedFill.Parent = speedSlider
-        -- БЕЗ UICorner (квадратный)
 
         local speedButton = Instance.new("TextButton")
-        speedButton.Size = UDim2.new(0, 14, 1, 0)
-        speedButton.Position = UDim2.new(0, -7, 0, 0)
+        speedButton.Name = "OrionSliderButton"
+        speedButton.Size = UDim2.new(0, 7, 0, 7)
+        speedButton.Position = UDim2.new(0, -3.5, 0.5, -3.5)
         speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        speedButton.BorderColor3 = Library.Theme.Border
-        speedButton.BorderSizePixel = 2
+        speedButton.BorderSizePixel = 0
         speedButton.Text = ""
         speedButton.Parent = speedSlider
-        -- БЕЗ UICorner (квадратный)
-        -- ====================================================
+
+        local speedCorner = Instance.new("UICorner")
+        speedCorner.CornerRadius = UDim.new(1, 0)
+        speedCorner.Parent = speedButton
 
         local function updateSpeedSlider()
             local percent = (FC.baseSpeed - 1) / (FC.maxSpeed - 1)
             speedFill.Size = UDim2.new(percent, 0, 1, 0)
-            speedButton.Position = UDim2.new(percent, -7, 0, 0)
+            speedButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
             speedTitle.Text = "Speed: " .. math.floor(FC.baseSpeed)
         end
 
@@ -3584,7 +3640,6 @@ do
             if FC.isActive then disableFreecam() else enableFreecam() end
         end)
 
-        -- Слайдер (1..300)
         local draggingSpeed = false
         local function updateSpeedFromInput(input)
             local sliderPos = speedSlider.AbsolutePosition
@@ -3614,7 +3669,6 @@ do
             end
         end)
 
-        -- ПК: F9 + мышь
         if userInputService.KeyboardEnabled then
             userInputService.InputBegan:Connect(function(input, gp)
                 if gp then return end
@@ -3635,7 +3689,6 @@ do
             end)
         end
 
-        -- Главный цикл — полёт по направлению взгляда
         game:GetService("RunService").RenderStepped:Connect(function(dt)
             if not FC.isActive then return end
             local camera = workspace.CurrentCamera
@@ -3719,6 +3772,8 @@ local function CreateFinalLoadingScreen()
     loadingGui.Parent = game.CoreGui
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
+    loadingGui.DisplayOrder = 9999
+    loadingGui.IgnoreGuiInset = true
 
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
@@ -3727,6 +3782,7 @@ local function CreateFinalLoadingScreen()
     background.BackgroundTransparency = 0
     background.Parent = loadingGui
     background.ZIndex = 999
+    background.Active = true
 
     local background2 = Instance.new("Frame")
     background2.Size = UDim2.new(10, 0, 10, 0)
@@ -3735,16 +3791,17 @@ local function CreateFinalLoadingScreen()
     background2.BackgroundTransparency = 0
     background2.Parent = loadingGui
     background2.ZIndex = 998
+    background2.Active = true
 
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, 500, 0, 380)
-    container.Position = UDim2.new(0.5, -250, 0.5, -190)
+    container.Size = UDim2.new(0, 250, 0, 190)
+    container.Position = UDim2.new(0.5, -125, 0.5, -95)
     container.BackgroundTransparency = 1
     container.Parent = background
     container.ZIndex = 1000
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 0, 50)
+    textLabel.Size = UDim2.new(1, 0, 0, 25)
     textLabel.Position = UDim2.new(0, 0, 0.02, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = "GG+"
@@ -3756,7 +3813,7 @@ local function CreateFinalLoadingScreen()
     textLabel.Parent = container
 
     local subtitle = Instance.new("TextLabel")
-    subtitle.Size = UDim2.new(1, 0, 0, 30)
+    subtitle.Size = UDim2.new(1, 0, 0, 15)
     subtitle.Position = UDim2.new(0, 0, 0.18, 0)
     subtitle.BackgroundTransparency = 1
     subtitle.Text = "Loading"
@@ -3767,7 +3824,7 @@ local function CreateFinalLoadingScreen()
 
     local tabNames = {"1.Points", "2.Click-TP", "3.Fly", "4.Walk", "5.Noclip", "6.Platforms", "7.Players", "8.X-Ray", "9.SPI", "10.Freecam", "11.Clicker", "12.Speed", "13.Forward"}
     local tabLabel = Instance.new("TextLabel")
-    tabLabel.Size = UDim2.new(1, 0, 0, 30)
+    tabLabel.Size = UDim2.new(1, 0, 0, 15)
     tabLabel.Position = UDim2.new(0, 0, 0.32, 0)
     tabLabel.BackgroundTransparency = 1
     tabLabel.Text = ""
@@ -3777,7 +3834,7 @@ local function CreateFinalLoadingScreen()
     tabLabel.Parent = container
 
     local allLoadedLabel = Instance.new("TextLabel")
-    allLoadedLabel.Size = UDim2.new(1, 0, 0, 30)
+    allLoadedLabel.Size = UDim2.new(1, 0, 0, 15)
     allLoadedLabel.Position = UDim2.new(0, 0, 0.44, 0)
     allLoadedLabel.BackgroundTransparency = 1
     allLoadedLabel.Text = ""
@@ -3788,7 +3845,7 @@ local function CreateFinalLoadingScreen()
     allLoadedLabel.Parent = container
 
     local timeLabel = Instance.new("TextLabel")
-    timeLabel.Size = UDim2.new(1, 0, 0, 30)
+    timeLabel.Size = UDim2.new(1, 0, 0, 15)
     timeLabel.Position = UDim2.new(0, 0, 0.56, 0)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = "0%"
@@ -3798,7 +3855,7 @@ local function CreateFinalLoadingScreen()
     timeLabel.Parent = container
 
     local line1Label = Instance.new("TextLabel")
-    line1Label.Size = UDim2.new(1, 0, 0, 30)
+    line1Label.Size = UDim2.new(1, 0, 0, 15)
     line1Label.Position = UDim2.new(0, 0, 0.68, 0)
     line1Label.BackgroundTransparency = 1
     line1Label.Text = "catnap220564"
@@ -3809,7 +3866,7 @@ local function CreateFinalLoadingScreen()
     line1Label.Parent = container
 
     local line2Label = Instance.new("TextLabel")
-    line2Label.Size = UDim2.new(1, 0, 0, 30)
+    line2Label.Size = UDim2.new(1, 0, 0, 15)
     line2Label.Position = UDim2.new(0, 0, 0.78, 0)
     line2Label.BackgroundTransparency = 1
     line2Label.Text = "GGpoVer220564"
@@ -3820,7 +3877,7 @@ local function CreateFinalLoadingScreen()
     line2Label.Parent = container
 
     local progressBar = Instance.new("Frame")
-    progressBar.Size = UDim2.new(0.8, 0, 0, 6)
+    progressBar.Size = UDim2.new(0.8, 0, 0, 3)
     progressBar.Position = UDim2.new(0.1, 0, 0.87, 0)
     progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     progressBar.BorderSizePixel = 0
@@ -4066,8 +4123,8 @@ pcall(function()
     container.Parent = xrayTab
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.Size = UDim2.new(1, -10, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 5, 0.15, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
@@ -4093,7 +4150,7 @@ pcall(function()
     info.Parent = mainFrame
 
     local xrayBtn = Instance.new("TextButton")
-    xrayBtn.Size = UDim2.new(0.4, -10, 0.2, -5)
+    xrayBtn.Size = UDim2.new(0.4, -5, 0.2, -2.5)
     xrayBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
     xrayBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
     xrayBtn.BorderColor3 = Library.Theme.Border
@@ -4104,6 +4161,7 @@ pcall(function()
     xrayBtn.Font = Enum.Font.SourceSansBold
     xrayBtn.Parent = mainFrame
 
+    -- ===== ВЕРНУТАЯ надпись прозрачности =====
     local transLabel = Instance.new("TextLabel")
     transLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
     transLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -4114,28 +4172,37 @@ pcall(function()
     transLabel.Font = Enum.Font.SourceSansBold
     transLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local transSlider = Instance.new("Frame")
-    transSlider.Size = UDim2.new(0.6, -10, 0.05, 0)
+    transSlider.Name = "OrionSliderTrack"
+    transSlider.Size = UDim2.new(0.6, -5, 0, 3)
     transSlider.Position = UDim2.new(0.3, 0, 0.82, 0)
-    transSlider.BackgroundColor3 = Library.Theme.Border
+    transSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     transSlider.BorderSizePixel = 0
+    transSlider.BackgroundTransparency = 0
     transSlider.Parent = mainFrame
 
     local transFill = Instance.new("Frame")
+    transFill.Name = "OrionSliderFill"
     transFill.Size = UDim2.new(0.5, 0, 1, 0)
-    transFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    transFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     transFill.BorderSizePixel = 0
+    transFill.BackgroundTransparency = 0
     transFill.Parent = transSlider
 
     local transButton = Instance.new("TextButton")
-    transButton.Size = UDim2.new(0, 15, 1.8, 0)
-    transButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+    transButton.Name = "OrionSliderButton"
+    transButton.Size = UDim2.new(0, 7, 0, 7)
+    transButton.Position = UDim2.new(0.5, -3.5, 0.5, -3.5)
     transButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    transButton.BorderColor3 = Library.Theme.Border
-    transButton.BorderSizePixel = 2
+    transButton.BorderSizePixel = 0
     transButton.Text = ""
     transButton.Parent = transSlider
     transButton.BackgroundTransparency = 0
+
+    local transCorner = Instance.new("UICorner")
+    transCorner.CornerRadius = UDim.new(1, 0)
+    transCorner.Parent = transButton
 
     local xrayEnabled = false
     local currentTransparency = 0.5
@@ -4222,7 +4289,7 @@ pcall(function()
     local function updateSlider()
         local percent = currentTransparency
         transFill.Size = UDim2.new(percent, 0, 1, 0)
-        transButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        transButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         transLabel.Text = math.floor(percent * 100) .. "%"
     end
 
@@ -4261,6 +4328,18 @@ pcall(function()
     end)
 end)
 
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" then
+            obj.BackgroundTransparency = 0
+        end
+        if obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
+end)
+
 pcall(function()
     if MenuPanel then
         MenuPanel.BackgroundTransparency = 0.5
@@ -4276,7 +4355,7 @@ pcall(function()
 
     for _, tab in pairs(Tabs) do
         for _, child in pairs(tab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
         end
@@ -4323,7 +4402,7 @@ pcall(function()
     end
 
     for _, child in pairs(Tabs[10]:GetChildren()) do
-        if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+        if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
             child.BackgroundTransparency = 0.5
         end
     end
@@ -4333,11 +4412,11 @@ pcall(function()
     local freecamTab = Tabs[10]
     if freecamTab then
         for _, child in pairs(freecamTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4363,12 +4442,12 @@ pcall(function()
     local playersTab = Tabs[7]
     if playersTab then
         for _, child in pairs(playersTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
 
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4378,12 +4457,12 @@ pcall(function()
     local xrayTab = Tabs[8]
     if xrayTab then
         for _, child in pairs(xrayTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
 
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4404,7 +4483,7 @@ pcall(function()
 
     if xrayTab then
         for _, obj in pairs(xrayTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
@@ -4412,7 +4491,7 @@ pcall(function()
 
     if playersTab then
         for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
@@ -4431,7 +4510,7 @@ pcall(function()
         end
 
         for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.Parent == PlayersList then
+            if obj:IsA("Frame") and obj.Parent == PlayersList and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
@@ -4515,7 +4594,7 @@ pcall(function()
 
                 child.Image = "rbxassetid://0"
 
-                child.Size = UDim2.new(0, 12, 0, 12)
+                child.Size = UDim2.new(0, 6, 0, 6)
 
                 child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
                 child.BackgroundTransparency = 0.4
@@ -4527,7 +4606,7 @@ pcall(function()
                 child.BorderSizePixel = 1
                 child.BorderColor3 = Color3.fromRGB(0, 200, 255)
 
-                child.Size = UDim2.new(0, 14, 0, 14)
+                child.Size = UDim2.new(0, 7, 0, 7)
             end
         end
     end
@@ -4549,10 +4628,10 @@ pcall(function()
             child.Image = "rbxassetid://0"
 
             local currentSize = child.Size
-            if currentSize.X.Offset == 12 then
-                child.Size = UDim2.new(0, 24, 0, 24)
-            elseif currentSize.X.Offset == 14 then
-                child.Size = UDim2.new(0, 28, 0, 28)
+            if currentSize.X.Offset == 6 then
+                child.Size = UDim2.new(0, 12, 0, 12)
+            elseif currentSize.X.Offset == 7 then
+                child.Size = UDim2.new(0, 14, 0, 14)
             else
                 child.Size = UDim2.new(0, currentSize.X.Offset * 2, 0, currentSize.Y.Offset * 2)
             end
@@ -4586,16 +4665,16 @@ pcall(function()
             child.Image = "rbxassetid://0"
 
             local currentSize = child.Size
-            if currentSize.X.Offset == 24 then
-                child.Size = UDim2.new(0, 14, 0, 14)
-            elseif currentSize.X.Offset == 28 then
-                child.Size = UDim2.new(0, 16, 0, 16)
-            elseif currentSize.X.Offset == 12 then
-                child.Size = UDim2.new(0, 14, 0, 14)
+            if currentSize.X.Offset == 12 then
+                child.Size = UDim2.new(0, 7, 0, 7)
             elseif currentSize.X.Offset == 14 then
-                child.Size = UDim2.new(0, 16, 0, 16)
+                child.Size = UDim2.new(0, 8, 0, 8)
+            elseif currentSize.X.Offset == 6 then
+                child.Size = UDim2.new(0, 7, 0, 7)
+            elseif currentSize.X.Offset == 7 then
+                child.Size = UDim2.new(0, 8, 0, 8)
             else
-                child.Size = UDim2.new(0, 14, 0, 14)
+                child.Size = UDim2.new(0, 7, 0, 7)
             end
 
             child.Position = UDim2.new(
@@ -4621,16 +4700,18 @@ pcall(function()
     local function processButtons(container)
         for _, obj in pairs(container:GetDescendants()) do
             if obj:IsA("TextButton") or obj:IsA("ImageButton") then
-                if obj.BackgroundTransparency < 0.3 then
-                    obj.BackgroundTransparency = 0.3
-                end
+                if obj.Name ~= "OrionSliderButton" then
+                    if obj.BackgroundTransparency < 0.3 then
+                        obj.BackgroundTransparency = 0.3
+                    end
 
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
+                    local corner = obj:FindFirstChild("UICorner")
+                    if not corner then
+                        corner = Instance.new("UICorner")
+                        corner.Parent = obj
+                    end
+                    corner.CornerRadius = UDim.new(1, 0)
                 end
-                corner.CornerRadius = UDim.new(1, 0)
             end
         end
     end
@@ -4698,7 +4779,7 @@ pcall(function()
                     corner:Destroy()
                 end
 
-                obj.Size = UDim2.new(0.2, -5, 0.7, 0)
+                obj.Size = UDim2.new(0.2, -2.5, 0.7, 0)
 
                 obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
                 obj.BorderSizePixel = 2
@@ -4770,7 +4851,19 @@ pcall(function()
             btn.BorderSizePixel = 2
             btn.BorderColor3 = Library.Theme.Border
 
-            btn.Size = UDim2.new(1, -5, 0, 35)
+            btn.Size = UDim2.new(1, -2.5, 0, 17.5)
+        end
+    end
+end)
+
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ПОВТОРНО) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" then
+            obj.BackgroundTransparency = 0
+        end
+        if obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
         end
     end
 end)
@@ -4796,7 +4889,7 @@ pcall(function()
         table.insert(Tabs, newTab)
 
         local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.Size = UDim2.new(1, -2.5, 0, 17.5)
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 2
@@ -4807,7 +4900,7 @@ pcall(function()
         newBtn.Parent = TabScrollingFrame
         table.insert(TabButtons, newBtn)
 
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 19 + 2.5)
 
         newBtn.MouseButton1Click:Connect(function()
             for j, tab in ipairs(Tabs) do
@@ -4862,8 +4955,8 @@ pcall(function()
     container.Parent = clickerTab
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.Size = UDim2.new(1, -10, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 5, 0.15, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
@@ -4890,7 +4983,7 @@ pcall(function()
     info.Parent = mainFrame
 
     local clickerBtn = Instance.new("TextButton")
-    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    clickerBtn.Size = UDim2.new(0.4, -5, 0.2, 0)
     clickerBtn.Position = UDim2.new(0.3, 0, 0.38, 0)
     clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
     clickerBtn.BorderColor3 = Library.Theme.Border
@@ -4906,6 +4999,7 @@ pcall(function()
     clickerCorner.CornerRadius = UDim.new(1, 0)
     clickerCorner.Parent = clickerBtn
 
+    -- ===== ВЕРНУТАЯ надпись задержки =====
     local delayLabel = Instance.new("TextLabel")
     delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
     delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -4917,28 +5011,37 @@ pcall(function()
     delayLabel.TextXAlignment = Enum.TextXAlignment.Left
     delayLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local delaySlider = Instance.new("Frame")
-    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
+    delaySlider.Name = "OrionSliderTrack"
+    delaySlider.Size = UDim2.new(0.5, -5, 0, 3)
     delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
-    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     delaySlider.BorderSizePixel = 0
+    delaySlider.BackgroundTransparency = 0
     delaySlider.Parent = mainFrame
 
     local delayFill = Instance.new("Frame")
+    delayFill.Name = "OrionSliderFill"
     delayFill.Size = UDim2.new(0.1, 0, 1, 0)
-    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     delayFill.BorderSizePixel = 0
+    delayFill.BackgroundTransparency = 0
     delayFill.Parent = delaySlider
 
     local delayButton = Instance.new("TextButton")
-    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
-    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
+    delayButton.Name = "OrionSliderButton"
+    delayButton.Size = UDim2.new(0, 7, 0, 7)
+    delayButton.Position = UDim2.new(0.1, -3.5, 0.5, -3.5)
     delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    delayButton.BorderColor3 = Library.Theme.Border
-    delayButton.BorderSizePixel = 2
+    delayButton.BorderSizePixel = 0
     delayButton.Text = ""
     delayButton.Parent = delaySlider
     delayButton.BackgroundTransparency = 0
+
+    local delayCorner = Instance.new("UICorner")
+    delayCorner.CornerRadius = UDim.new(1, 0)
+    delayCorner.Parent = delayButton
 
     local isClicking = false
     local clickDelay = 100
@@ -5051,7 +5154,7 @@ pcall(function()
             local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
             clickDelay = math.floor(50 + percent * 950)
             delayFill.Size = UDim2.new(percent, 0, 1, 0)
-            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+            delayButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
             delayLabel.Text = "Delay: " .. clickDelay .. " ms"
         end
     end)
@@ -5076,7 +5179,7 @@ pcall(function()
             local pos = data.pos
 
             local ItemFrame = Instance.new("Frame")
-            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
+            ItemFrame.Size = UDim2.new(1, -5, 0, 22.5)
             ItemFrame.BackgroundColor3 = Library.Theme.Panel
             ItemFrame.BorderColor3 = Library.Theme.Border
             ItemFrame.BorderSizePixel = 1
@@ -5084,8 +5187,8 @@ pcall(function()
             ItemFrame.Parent = PointsList
 
             local circleFrame = Instance.new("Frame")
-            circleFrame.Size = UDim2.new(0, 30, 0, 30)
-            circleFrame.Position = UDim2.new(0, 5, 0.5, -15)
+            circleFrame.Size = UDim2.new(0, 15, 0, 15)
+            circleFrame.Position = UDim2.new(0, 2.5, 0.5, -7.5)
             circleFrame.BackgroundColor3 = Library.Theme.Accent
             circleFrame.BorderColor3 = Library.Theme.Border
             circleFrame.BorderSizePixel = 2
@@ -5116,7 +5219,7 @@ pcall(function()
             NameLabel.Parent = ItemFrame
 
             local TeleportPointBtn = Instance.new("TextButton")
-            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
+            TeleportPointBtn.Size = UDim2.new(0.13, -2.5, 0.7, 0)
             TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
             TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
             TeleportPointBtn.BorderColor3 = Library.Theme.Border
@@ -5159,7 +5262,7 @@ pcall(function()
         end
 
         local count = #PointsData
-        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
+        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 25 + 5)
     end
 
     UpdatePointsList()
@@ -5186,7 +5289,7 @@ pcall(function()
             local pos = data.pos
 
             local sphere = Instance.new("Part")
-            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
+            sphere.Size = Vector3.new(1.25, 1.25, 1.25)
             sphere.Position = pos
             sphere.Anchored = true
             sphere.CanCollide = false
@@ -5208,8 +5311,8 @@ pcall(function()
 
             local billboard = Instance.new("BillboardGui")
             billboard.Name = "PointNumber"
-            billboard.Size = UDim2.new(0, 60, 0, 60)
-            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+            billboard.Size = UDim2.new(0, 30, 0, 30)
+            billboard.StudsOffset = Vector3.new(0, 1.75, 0)
             billboard.AlwaysOnTop = true
             billboard.Parent = sphere
             table.insert(PointVisuals, billboard)
@@ -5381,8 +5484,8 @@ pcall(function()
 
         local gui = Instance.new("BillboardGui")
         gui.Name = "SpeedIndicator"
-        gui.Size = UDim2.new(0, 80, 0, 25)
-        gui.StudsOffset = Vector3.new(0, 3.5, 0)
+        gui.Size = UDim2.new(0, 40, 0, 12.5)
+        gui.StudsOffset = Vector3.new(0, 1.75, 0)
         gui.AlwaysOnTop = true
         gui.MaxDistance = 50
         gui.Enabled = _G.SpeedIndicatorEnabled
@@ -5681,7 +5784,7 @@ pcall(function()
         table.insert(Tabs, newTab)
 
         local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.Size = UDim2.new(1, -2.5, 0, 17.5)
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 2
@@ -5692,7 +5795,7 @@ pcall(function()
         newBtn.Parent = TabScrollingFrame
         table.insert(TabButtons, newBtn)
 
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 19 + 2.5)
 
         newBtn.MouseButton1Click:Connect(function()
             for j, tab in ipairs(Tabs) do
@@ -5717,8 +5820,8 @@ pcall(function()
     container.Parent = speedTab
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.Size = UDim2.new(1, -10, 0.6, 0)
+    mainFrame.Position = UDim2.new(0, 5, 0.1, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
@@ -5735,8 +5838,8 @@ pcall(function()
     title.Parent = mainFrame
 
     local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, -20, 0.12, 0)
-    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.Size = UDim2.new(1, -10, 0.12, 0)
+    info.Position = UDim2.new(0, 5, 0.17, 0)
     info.BackgroundTransparency = 1
     info.Text = "Changes player movement speed (16 - 300)"
     info.TextColor3 = Library.Theme.Accent
@@ -5746,7 +5849,7 @@ pcall(function()
     info.Parent = mainFrame
 
     local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
+    toggleBtn.Size = UDim2.new(0.4, -5, 0.2, 0)
     toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
     toggleBtn.BorderColor3 = Library.Theme.Border
@@ -5784,6 +5887,7 @@ pcall(function()
     defaultSpeedLabel.TextXAlignment = Enum.TextXAlignment.Right
     defaultSpeedLabel.Parent = mainFrame
 
+    -- ===== ВЕРНУТАЯ надпись скорости =====
     local speedLabel = Instance.new("TextLabel")
     speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
     speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
@@ -5795,28 +5899,37 @@ pcall(function()
     speedLabel.TextXAlignment = Enum.TextXAlignment.Left
     speedLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    speedSlider.Name = "OrionSliderTrack"
+    speedSlider.Size = UDim2.new(0.55, -5, 0, 3)
     speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
+    speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     speedSlider.BorderSizePixel = 0
+    speedSlider.BackgroundTransparency = 0
     speedSlider.Parent = mainFrame
 
     local speedFill = Instance.new("Frame")
+    speedFill.Name = "OrionSliderFill"
     speedFill.Size = UDim2.new(0, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    speedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     speedFill.BorderSizePixel = 0
+    speedFill.BackgroundTransparency = 0
     speedFill.Parent = speedSlider
 
     local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
+    speedButton.Name = "OrionSliderButton"
+    speedButton.Size = UDim2.new(0, 7, 0, 7)
+    speedButton.Position = UDim2.new(0, -3.5, 0.5, -3.5)
     speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
+    speedButton.BorderSizePixel = 0
     speedButton.Text = ""
     speedButton.Parent = speedSlider
     speedButton.BackgroundTransparency = 0
+
+    local speedCorner = Instance.new("UICorner")
+    speedCorner.CornerRadius = UDim.new(1, 0)
+    speedCorner.Parent = speedButton
 
     local SpeedEnabled = false
     local TargetSpeed = 16
@@ -5840,7 +5953,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
         speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        speedButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
     end
 
@@ -6054,6 +6167,15 @@ pcall(function()
     end
 end)
 
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ЕЩЁ РАЗ) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" or obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
+end)
+
 -- =====================================================
 -- ===== TAB 13: FORWARD (ТЕЛЕПОРТ ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
 -- =====================================================
@@ -6078,7 +6200,7 @@ pcall(function()
         table.insert(Tabs, newTab)
 
         local newBtn = Instance.new("TextButton")
-        newBtn.Size = UDim2.new(1, -5, 0, 35)
+        newBtn.Size = UDim2.new(1, -2.5, 0, 17.5)
         newBtn.BackgroundColor3 = Library.Theme.Button
         newBtn.BorderColor3 = Library.Theme.Border
         newBtn.BorderSizePixel = 2
@@ -6089,7 +6211,7 @@ pcall(function()
         newBtn.Parent = TabScrollingFrame
         table.insert(TabButtons, newBtn)
 
-        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 38 + 5)
+        TabScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #TabNames * 19 + 2.5)
 
         newBtn.MouseButton1Click:Connect(function()
             for j, tab in ipairs(Tabs) do
@@ -6114,8 +6236,8 @@ pcall(function()
     container.Parent = forwardTab
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
+    mainFrame.Size = UDim2.new(1, -10, 0.5, 0)
+    mainFrame.Position = UDim2.new(0, 5, 0.15, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
@@ -6132,8 +6254,8 @@ pcall(function()
     title.Parent = mainFrame
 
     local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, -20, 0.12, 0)
-    info.Position = UDim2.new(0, 10, 0.18, 0)
+    info.Size = UDim2.new(1, -10, 0.12, 0)
+    info.Position = UDim2.new(0, 5, 0.18, 0)
     info.BackgroundTransparency = 1
     info.Text = "Teleports you forward in the direction your camera is looking"
     info.TextColor3 = Library.Theme.Accent
@@ -6142,6 +6264,7 @@ pcall(function()
     info.TextXAlignment = Enum.TextXAlignment.Left
     info.Parent = mainFrame
 
+    -- ===== ВЕРНУТАЯ надпись дистанции =====
     local distanceLabel = Instance.new("TextLabel")
     distanceLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
     distanceLabel.Position = UDim2.new(0.05, 0, 0.4, 0)
@@ -6153,31 +6276,40 @@ pcall(function()
     distanceLabel.TextXAlignment = Enum.TextXAlignment.Left
     distanceLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local distanceSlider = Instance.new("Frame")
-    distanceSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    distanceSlider.Name = "OrionSliderTrack"
+    distanceSlider.Size = UDim2.new(0.55, -5, 0, 3)
     distanceSlider.Position = UDim2.new(0.35, 0, 0.44, 0)
-    distanceSlider.BackgroundColor3 = Library.Theme.Border
+    distanceSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     distanceSlider.BorderSizePixel = 0
+    distanceSlider.BackgroundTransparency = 0
     distanceSlider.Parent = mainFrame
 
     local distanceFill = Instance.new("Frame")
+    distanceFill.Name = "OrionSliderFill"
     distanceFill.Size = UDim2.new(0.0408, 0, 1, 0)
-    distanceFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    distanceFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     distanceFill.BorderSizePixel = 0
+    distanceFill.BackgroundTransparency = 0
     distanceFill.Parent = distanceSlider
 
     local distanceButton = Instance.new("TextButton")
-    distanceButton.Size = UDim2.new(0, 15, 1.8, 0)
-    distanceButton.Position = UDim2.new(0.0408, -7.5, -0.4, 0)
+    distanceButton.Name = "OrionSliderButton"
+    distanceButton.Size = UDim2.new(0, 7, 0, 7)
+    distanceButton.Position = UDim2.new(0.0408, -3.5, 0.5, -3.5)
     distanceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    distanceButton.BorderColor3 = Library.Theme.Border
-    distanceButton.BorderSizePixel = 2
+    distanceButton.BorderSizePixel = 0
     distanceButton.Text = ""
     distanceButton.Parent = distanceSlider
     distanceButton.BackgroundTransparency = 0
 
+    local distanceCorner = Instance.new("UICorner")
+    distanceCorner.CornerRadius = UDim.new(1, 0)
+    distanceCorner.Parent = distanceButton
+
     local forwardBtn = Instance.new("TextButton")
-    forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
+    forwardBtn.Size = UDim2.new(0.5, -5, 0.2, 0)
     forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
     forwardBtn.BackgroundColor3 = Library.Theme.Success
     forwardBtn.BorderColor3 = Library.Theme.Border
@@ -6264,7 +6396,7 @@ pcall(function()
 
         local beamPart = Instance.new("Part")
         beamPart.Name = "BeamPart"
-        beamPart.Size = Vector3.new(0.15, 0.15, beamLength)
+        beamPart.Size = Vector3.new(0.075, 0.075, beamLength)
         beamPart.Anchored = false
         beamPart.CanCollide = false
         beamPart.Material = Enum.Material.Neon
@@ -6275,14 +6407,14 @@ pcall(function()
         local weldBeam = Instance.new("Weld")
         weldBeam.Part0 = torso
         weldBeam.Part1 = beamPart
-        local offset = beamLength / 2 + 0.3
+        local offset = beamLength / 2 + 0.15
         weldBeam.C0 = CFrame.new(0, 0, -offset) * CFrame.Angles(0, 0, 0)
         weldBeam.Parent = beamPart
         table.insert(RedBeamObjects, weldBeam)
 
         local sphere = Instance.new("Part")
         sphere.Name = "SphereEnd"
-        sphere.Size = Vector3.new(0.5, 0.5, 0.5)
+        sphere.Size = Vector3.new(0.25, 0.25, 0.25)
         sphere.Shape = Enum.PartType.Ball
         sphere.Anchored = false
         sphere.CanCollide = false
@@ -6364,7 +6496,7 @@ pcall(function()
         local weldBeam = beamPart:FindFirstChildWhichIsA("Weld")
         if weldBeam then
             local beamLength = forwardDistance
-            local offset = beamLength / 2 + 0.3
+            local offset = beamLength / 2 + 0.15
             weldBeam.C0 = CFrame.new(0, 0, -offset) * CFrame.Angles(0, 0, 0)
         end
 
@@ -6374,7 +6506,7 @@ pcall(function()
             weldSphere.C0 = CFrame.new(0, 0, -beamLength / 2) * CFrame.Angles(0, 0, 0)
         end
 
-        beamPart.Size = Vector3.new(0.15, 0.15, forwardDistance)
+        beamPart.Size = Vector3.new(0.075, 0.075, forwardDistance)
     end
 
     local function UpdateForwardVisuals()
@@ -6426,7 +6558,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
-        distanceButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        distanceButton.Position = UDim2.new(percent, -3.5, 0.5, -3.5)
         distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
         UpdateRedBeam()
     end
@@ -6500,6 +6632,15 @@ pcall(function()
     UpdateSlider()
 end)
 
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ПОСЛЕДНИЙ РАЗ) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" or obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
+end)
+
 -- ===== SETUP DRAG SYSTEMS =====
 SetupMainButtonDrag()
 SetupMenuDrag()
@@ -6507,5 +6648,160 @@ SetupMenuDrag()
 -- ===== APPLY INITIAL THEME =====
 ApplyThemeColors(Library.Theme)
 
+-- ===== TOUCH CONTROLS FOR ALL SLIDERS =====
+-- (Touch support already integrated via InputChanged with Touch UserInputType)
+
+-- ===== TOUCH CONTROLS FOR TAB BUTTONS =====
+pcall(function()
+    for i, btn in ipairs(TabButtons) do
+        btn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                btn.BackgroundColor3 = Library.Theme.ButtonHover
+            end
+        end)
+
+        btn.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                btn.BackgroundColor3 = (CurrentTab == i) and Library.Theme.Accent or Library.Theme.Button
+            end
+        end)
+    end
+end)
+
+-- ===== TOUCH CONTROLS FOR ALL BUTTONS =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+            if obj.Name ~= "OrionSliderButton" then
+                obj.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.Touch then
+                        obj.BackgroundTransparency = 0.1
+                    end
+                end)
+
+                obj.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.Touch then
+                        obj.BackgroundTransparency = 0.3
+                    end
+                end)
+            end
+        end
+    end
+end)
+
+-- ===== TOUCH CONTROLS FOR MENU DRAG =====
+pcall(function()
+    local touchDragStart = nil
+    local touchStartPos = nil
+    local isTouchDragging = false
+
+    TitleFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            isTouchDragging = true
+            touchDragStart = input.Position
+            touchStartPos = MenuPanel.Position
+            input.StopPropagation = true
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isTouchDragging and input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - touchDragStart
+            MenuPanel.Position = UDim2.new(
+                touchStartPos.X.Scale,
+                touchStartPos.X.Offset + delta.X,
+                touchStartPos.Y.Scale,
+                touchStartPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            isTouchDragging = false
+        end
+    end)
+end)
+
+-- ===== TOUCH CONTROLS FOR MAIN BUTTON DRAG =====
+pcall(function()
+    local touchDragStart = nil
+    local touchStartPos = nil
+    local isTouchDragging = false
+
+    MainButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            isTouchDragging = true
+            touchDragStart = input.Position
+            touchStartPos = MainButton.Position
+            input.StopPropagation = true
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isTouchDragging and input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - touchDragStart
+            MainButton.Position = UDim2.new(
+                touchStartPos.X.Scale,
+                touchStartPos.X.Offset + delta.X,
+                touchStartPos.Y.Scale,
+                touchStartPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            isTouchDragging = false
+        end
+    end)
+end)
+
+-- ===== TOUCH CONTROLS FOR RESIZE HANDLES =====
+pcall(function()
+    for _, child in pairs(MenuPanel:GetChildren()) do
+        if child:IsA("ImageButton") then
+            local isTouchResizing = false
+            local touchResizeStart = nil
+            local touchResizeStartSize = nil
+            local touchResizeStartPos = nil
+
+            child.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    isTouchResizing = true
+                    touchResizeStart = input.Position
+                    touchResizeStartSize = MenuPanel.Size
+                    touchResizeStartPos = MenuPanel.Position
+                    input.StopPropagation = true
+                end
+            end)
+
+            game:GetService("UserInputService").InputChanged:Connect(function(input)
+                if isTouchResizing and input.UserInputType == Enum.UserInputType.Touch then
+                    local delta = input.Position - touchResizeStart
+                    local newWidth = math.clamp(touchResizeStartSize.X.Offset + delta.X, MIN_PANEL_WIDTH, MAX_PANEL_WIDTH)
+                    local newHeight = math.clamp(touchResizeStartSize.Y.Offset + delta.Y, MIN_PANEL_HEIGHT, MAX_PANEL_HEIGHT)
+
+                    MenuPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+                end
+            end)
+
+            game:GetService("UserInputService").InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    isTouchResizing = false
+                end
+            end)
+        end
+    end
+end)
+
 -- Запуск анимации загрузки
 ShowLoadingAnimation()
+
+print("✅ GG+ Panel loaded for Solara!")
+print("📌 UI is 2x smaller")
+print("📌 Full touch controls added")
+print("📌 All sliders support touch")
+print("📌 Menu, buttons, tabs support touch")
+print("📌 Drag support for menu and main button")
+print("📌 Resize handles support touch")
