@@ -1,4 +1,4 @@
--- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Flight with Run Animation + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!)
+-- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!) + FLY (Solara Edition) - FIXED FLY BUTTON + WORKING FREECAM TAB (SQUARE SLIDER, MAX 300, NO INFO, CLICKABLE MENU)
 
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
@@ -7,6 +7,8 @@ local function ShowLoadingAnimation()
     loadingGui.Parent = game.CoreGui
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
+    loadingGui.DisplayOrder = 9999
+    loadingGui.IgnoreGuiInset = true
 
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
@@ -15,6 +17,7 @@ local function ShowLoadingAnimation()
     background.BackgroundTransparency = 0
     background.Parent = loadingGui
     background.ZIndex = 999
+    background.Active = true
 
     local background2 = Instance.new("Frame")
     background2.Size = UDim2.new(10, 0, 10, 0)
@@ -23,6 +26,7 @@ local function ShowLoadingAnimation()
     background2.BackgroundTransparency = 0
     background2.Parent = loadingGui
     background2.ZIndex = 998
+    background2.Active = true
 
     local container = Instance.new("Frame")
     container.Size = UDim2.new(0, 500, 0, 380)
@@ -153,7 +157,7 @@ local function ShowLoadingAnimation()
             if not allTabsShown then
                 allTabsShown = true
                 tabLabel.Text = "13.Forward"
-                
+
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 1
                 allLoadedShown = true
@@ -169,11 +173,11 @@ local function ShowLoadingAnimation()
         local revealProgress = math.min(elapsed * 1.5, 1)
         local charsToShow = math.max(1, math.floor(revealProgress * #text))
         local displayText = string.sub(text, 1, charsToShow)
-        
+
         if #displayText < #text then
             displayText = displayText .. string.rep("_", #text - #displayText)
         end
-        
+
         textLabel.Text = displayText
         textLabel.TextScaled = true
         textLabel.TextSize = 0
@@ -209,7 +213,7 @@ local function ShowLoadingAnimation()
             if not allTabsShown then
                 tabLabel.Text = "13.Forward"
             end
-            
+
             if not allLoadedShown then
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 0
@@ -229,7 +233,7 @@ local function ShowLoadingAnimation()
                     fadeConnection:Disconnect()
                     connection:Disconnect()
                     print("Loading animation complete!")
-                    
+
                     task.wait(1)
                     print("✅ Panel is ready! Click GG+ button to open menu.")
                 else
@@ -308,41 +312,41 @@ end
 
 local function ApplyThemeColors(colors)
     local themeColors = colors or Library.Theme
-    
+
     if MenuPanel then
         MenuPanel.BackgroundColor3 = themeColors.Background
         MenuPanel.BorderColor3 = themeColors.Border
     end
-    
+
     if TitleFrame then
         TitleFrame.BackgroundColor3 = themeColors.Panel
     end
-    
+
     if Title then
         Title.TextColor3 = themeColors.Text
     end
-    
+
     if TabBar then
         TabBar.BackgroundColor3 = themeColors.Panel
         TabBar.BorderColor3 = themeColors.Border
     end
-    
+
     if MainButton then
         MainButton.BackgroundColor3 = themeColors.Panel
         MainButton.BorderColor3 = themeColors.Border
     end
-    
+
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("ImageButton") then
             child.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
             child.BorderColor3 = Color3.fromRGB(0, 200, 255)
         end
     end
-    
+
     local panels = {
-        PointsList, WalkPointsList, PlayersList, NoclipFrame, 
-        XRayControlFrame, SPIControlFrame, PlatformFrame, 
-        FlyFrame, WalkFrame, ClickTeleportFrame, PlayersControlPanel
+        PointsList, WalkPointsList, PlayersList, NoclipFrame,
+        XRayControlFrame, SPIControlFrame, PlatformFrame,
+        WalkFrame, ClickTeleportFrame, PlayersControlPanel
     }
     for _, panel in pairs(panels) do
         if panel then
@@ -350,10 +354,10 @@ local function ApplyThemeColors(colors)
             panel.BorderColor3 = themeColors.Border
         end
     end
-    
+
     for _, obj in pairs(MenuPanel:GetDescendants()) do
         if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj ~= MenuPanel and obj.Parent ~= nil then
-            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" then
+            if obj.Name ~= "Wave" and obj.Name ~= "Shadow" and obj.Name ~= "LoadingScreen" and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundColor3 = themeColors.Panel
                 obj.BorderColor3 = themeColors.Border
             end
@@ -365,7 +369,7 @@ local function ApplyThemeColors(colors)
                     isResize = true
                 end
                 if not isResize then
-                    if obj.TextColor3 ~= Color3.fromRGB(200, 40, 40) and 
+                    if obj.TextColor3 ~= Color3.fromRGB(200, 40, 40) and
                        obj.TextColor3 ~= Color3.fromRGB(0, 200, 100) and
                        obj.TextColor3 ~= Color3.fromRGB(255, 255, 255) then
                         obj.TextColor3 = themeColors.Text
@@ -380,7 +384,7 @@ local function ApplyThemeColors(colors)
             end
             local isMainButton = (obj == MainButton or obj.Parent == MainButton)
             local isResizeButton = (obj.Parent and obj.Parent:IsA("ImageButton") and obj.Parent.Parent == MenuPanel)
-            
+
             if not isTabButton and not isMainButton and not isResizeButton then
                 if obj.Text ~= "ON" and obj.Text ~= "OFF" then
                     obj.TextColor3 = themeColors.Text
@@ -388,18 +392,9 @@ local function ApplyThemeColors(colors)
             end
         end
     end
-    
+
     if PointInfo then PointInfo.TextColor3 = themeColors.Text end
     if WalkStatus then WalkStatus.TextColor3 = themeColors.Text end
-    if WalkSpeedLabel then WalkSpeedLabel.TextColor3 = themeColors.Text end
-    if SpeedLabel then SpeedLabel.TextColor3 = themeColors.Text end
-    if FlyIndicator then 
-        if FlyEnabled then
-            FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
-        else
-            FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-        end
-    end
     if NoclipIndicator then
         if NoclipEnabled then
             NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
@@ -424,6 +419,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdminPanel"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 200
 
 -- Main Menu Button
 local MainButton = Instance.new("ImageButton")
@@ -532,15 +528,15 @@ local function SetupMenuDrag()
                 end
                 return false
             end
-            
+
             if current:IsA("ScrollingFrame") or current:IsA("TextBox") or current:IsA("Slider") then
                 return false
             end
-            
+
             if current:IsA("Frame") and current.Name == "ScrollingFrame" then
                 return false
             end
-            
+
             current = current.Parent
         end
 
@@ -772,92 +768,387 @@ local ModeIndicator = Instance.new("TextLabel")
 ModeIndicator.Size = UDim2.new(1, 0, 0.2, 0)
 ModeIndicator.Position = UDim2.new(0, 0, 0.8, 0)
 ModeIndicator.BackgroundTransparency = 1
-ModeIndicator.Text = "Mode: Disabled"
+ModeIndicator.Text = ""
 ModeIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
 ModeIndicator.TextScaled = true
 ModeIndicator.Font = Enum.Font.SourceSans
 ModeIndicator.Parent = ClickTeleportFrame
 
--- ===== TAB 3: FLY =====
+-- ===== TAB 3: FLY (Solara Edition) - FIXED =====
 local FlyTab = Tabs[3]
 
-local FlyFrame = Instance.new("Frame")
-FlyFrame.Size = UDim2.new(1, 0, 0.4, 0)
-FlyFrame.Position = UDim2.new(0, 0, 0.15, 0)
-FlyFrame.BackgroundColor3 = Library.Theme.Panel
-FlyFrame.BorderColor3 = Library.Theme.Border
-FlyFrame.BorderSizePixel = 2
-FlyFrame.Parent = FlyTab
+do
+    local FLY_CONFIG = {
+        flySpeed = 100,
+        maxSpeed = 300,
+        minSpeed = 10,
+        jumpSpeed = 45,
+        acceleration = 8,
+        deceleration = 10,
+        deadzone = 0.05,
+        mobileJumpHoldTime = 0.25,
+    }
 
-local FlyTitle = Instance.new("TextLabel")
-FlyTitle.Size = UDim2.new(1, 0, 0.25, 0)
-FlyTitle.BackgroundTransparency = 1
-FlyTitle.Text = "FLY MOD"
-FlyTitle.TextColor3 = Library.Theme.Text
-FlyTitle.TextScaled = true
-FlyTitle.Font = Enum.Font.SourceSansBold
-FlyTitle.Parent = FlyFrame
+    local flying = false
+    local bodyVelocity, bodyGyro, flyConnection
+    local currentVelocity = Vector3.new(0, 0, 0)
+    local targetVelocity = Vector3.new(0, 0, 0)
+    local jumpHeld = false
+    local lastJumpRequest = 0
+    local flyWasActiveBeforeDeath = false
+    local flyJustStarted = false
 
-local FlyToggleBtn = Instance.new("TextButton")
-FlyToggleBtn.Size = UDim2.new(0.4, -10, 0.3, -5)
-FlyToggleBtn.Position = UDim2.new(0.3, 0, 0.3, 0)
-FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-FlyToggleBtn.BorderColor3 = Library.Theme.Border
-FlyToggleBtn.BorderSizePixel = 2
-FlyToggleBtn.Text = "OFF"
-FlyToggleBtn.TextColor3 = Library.Theme.Text
-FlyToggleBtn.TextScaled = true
-FlyToggleBtn.Font = Enum.Font.SourceSansBold
-FlyToggleBtn.Parent = FlyFrame
+    local player = game.Players.LocalPlayer
+    local userInputService = game:GetService("UserInputService")
+    local runService = game:GetService("RunService")
 
-local FlyIndicator = Instance.new("TextLabel")
-FlyIndicator.Size = UDim2.new(1, 0, 0.15, 0)
-FlyIndicator.Position = UDim2.new(0, 0, 0.7, 0)
-FlyIndicator.BackgroundTransparency = 1
-FlyIndicator.Text = "Fly: Disabled"
-FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-FlyIndicator.TextScaled = true
-FlyIndicator.Font = Enum.Font.SourceSans
-FlyIndicator.Parent = FlyFrame
+    local flyToggleBtn
 
-local FlySpeed = 100
+    local function lerpVelocity(current, target, alpha)
+        return current:Lerp(target, alpha)
+    end
 
-local SpeedLabel = Instance.new("TextLabel")
-SpeedLabel.Size = UDim2.new(0.3, 0, 0.25, 0)
-SpeedLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.Text = "Speed: 100"
-SpeedLabel.TextColor3 = Library.Theme.Text
-SpeedLabel.TextScaled = true
-SpeedLabel.Font = Enum.Font.SourceSans
-SpeedLabel.Parent = FlyFrame
+    local function stopFly()
+        if not flying then return end
+        flying = false
 
-local SpeedSlider = Instance.new("Frame")
-SpeedSlider.Size = UDim2.new(0.5, -10, 0.06, 0)
-SpeedSlider.Position = UDim2.new(0.45, 0, 0.85, 0)
-SpeedSlider.BackgroundColor3 = Library.Theme.Border
-SpeedSlider.BorderSizePixel = 0
-SpeedSlider.Parent = FlyFrame
+        if flyToggleBtn then
+            flyToggleBtn.Text = "OFF"
+            flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+            flyToggleBtn.BorderColor3 = Library.Theme.Border
+        end
 
-local SpeedFill = Instance.new("Frame")
-SpeedFill.Size = UDim2.new(0.375, 0, 1, 0)
-SpeedFill.BackgroundColor3 = Library.Theme.Accent
-SpeedFill.BorderSizePixel = 0
-SpeedFill.Parent = SpeedSlider
+        jumpHeld = false
+        currentVelocity = Vector3.new(0, 0, 0)
+        targetVelocity = Vector3.new(0, 0, 0)
+        flyJustStarted = false
 
-local SpeedButton = Instance.new("TextButton")
-SpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
-SpeedButton.Position = UDim2.new(0.375, -7.5, -0.4, 0)
-SpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SpeedButton.BorderColor3 = Library.Theme.Border
-SpeedButton.BorderSizePixel = 2
-SpeedButton.Text = ""
-SpeedButton.Parent = SpeedSlider
-SpeedButton.BackgroundTransparency = 0
+        if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+        if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end
 
-local SpeedButtonCorner = Instance.new("UICorner")
-SpeedButtonCorner.CornerRadius = UDim.new(1, 0)
-SpeedButtonCorner.Parent = SpeedButton
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.PlatformStand = false
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                task.wait(0.1)
+                humanoid:ChangeState(Enum.HumanoidStateType.Running)
+            end
+
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                for _, obj in ipairs(rootPart:GetChildren()) do
+                    if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro")
+                       or obj:IsA("BodyForce") or obj:IsA("BodyThrust") then
+                        obj:Destroy()
+                    end
+                end
+            end
+        end
+    end
+
+    local function startFly()
+        if flyToggleBtn then
+            flyToggleBtn.Text = "ON"
+            flyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            flyToggleBtn.BorderColor3 = Color3.fromRGB(0, 255, 100)
+        end
+
+        local character = player.Character
+        if not character then
+            if flyToggleBtn then
+                flyToggleBtn.Text = "OFF"
+                flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+                flyToggleBtn.BorderColor3 = Library.Theme.Border
+            end
+            warn("[FLY] No character")
+            return
+        end
+
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not rootPart or not humanoid then
+            if flyToggleBtn then
+                flyToggleBtn.Text = "OFF"
+                flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+                flyToggleBtn.BorderColor3 = Library.Theme.Border
+            end
+            warn("[FLY] No HumanoidRootPart or Humanoid")
+            return
+        end
+
+        flying = true
+        flyJustStarted = true
+
+        humanoid.PlatformStand = true
+
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Name = "FlyBodyVelocity"
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = rootPart
+
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.Name = "FlyBodyGyro"
+        bodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+        bodyGyro.P = 15000
+        bodyGyro.D = 500
+        bodyGyro.Parent = rootPart
+
+        flyConnection = runService.RenderStepped:Connect(function(dt)
+            if not flying then return end
+
+            local currentChar = player.Character
+            local currentRoot = currentChar and currentChar:FindFirstChild("HumanoidRootPart")
+            local currentHumanoid = currentChar and currentChar:FindFirstChildOfClass("Humanoid")
+            if not currentRoot or not currentHumanoid then
+                task.wait(0.5)
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+                    stopFly()
+                end
+                return
+            end
+
+            local camera = workspace.CurrentCamera
+            if not camera then return end
+
+            local camLook = camera.CFrame.LookVector
+            local camRight = camera.CFrame.RightVector
+            local desired = Vector3.new(0, 0, 0)
+
+            local moveDir = Vector3.new(0, 0, 0)
+            if userInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camLook end
+            if userInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camLook end
+            if userInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camRight end
+            if userInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camRight end
+
+            local humanoidMove = currentHumanoid.MoveDirection
+            if humanoidMove.Magnitude > FLY_CONFIG.deadzone then
+                local worldMove = humanoidMove.Unit
+                local forwardDot = worldMove:Dot(camLook)
+                local rightDot = worldMove:Dot(camRight)
+                moveDir = moveDir + (camLook * forwardDot + camRight * rightDot)
+            end
+
+            if moveDir.Magnitude > 0.001 then
+                moveDir = moveDir.Unit
+                desired = moveDir * FLY_CONFIG.flySpeed
+            end
+
+            if jumpHeld then
+                desired = desired + Vector3.new(0, FLY_CONFIG.jumpSpeed, 0)
+            end
+
+            if userInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                desired = desired + Vector3.new(0, -FLY_CONFIG.jumpSpeed, 0)
+            end
+
+            targetVelocity = desired
+
+            local alpha
+            if targetVelocity.Magnitude > 0.1 then
+                alpha = math.clamp(dt * FLY_CONFIG.acceleration, 0, 1)
+            else
+                alpha = math.clamp(dt * FLY_CONFIG.deceleration, 0, 1)
+            end
+
+            currentVelocity = lerpVelocity(currentVelocity, targetVelocity, alpha)
+
+            if bodyVelocity and bodyVelocity.Parent then
+                bodyVelocity.Velocity = currentVelocity
+            end
+            if bodyGyro and bodyGyro.Parent then
+                bodyGyro.CFrame = camera.CFrame
+            end
+
+            flyJustStarted = false
+        end)
+    end
+
+    local FlyFrame = Instance.new("Frame")
+    FlyFrame.Size = UDim2.new(1, 0, 0.85, 0)
+    FlyFrame.Position = UDim2.new(0, 0, 0.05, 0)
+    FlyFrame.BackgroundColor3 = Library.Theme.Panel
+    FlyFrame.BorderColor3 = Library.Theme.Border
+    FlyFrame.BorderSizePixel = 2
+    FlyFrame.Parent = FlyTab
+
+    local FlyTitle = Instance.new("TextLabel")
+    FlyTitle.Size = UDim2.new(1, 0, 0.1, 0)
+    FlyTitle.BackgroundTransparency = 1
+    FlyTitle.Text = "FLY"
+    FlyTitle.TextColor3 = Library.Theme.Text
+    FlyTitle.TextScaled = true
+    FlyTitle.Font = Enum.Font.SourceSansBold
+    FlyTitle.Parent = FlyFrame
+
+    flyToggleBtn = Instance.new("TextButton")
+    flyToggleBtn.Size = UDim2.new(0.4, -10, 0.15, -5)
+    flyToggleBtn.Position = UDim2.new(0.3, 0, 0.15, 0)
+    flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    flyToggleBtn.BorderColor3 = Library.Theme.Border
+    flyToggleBtn.BorderSizePixel = 2
+    flyToggleBtn.Text = "OFF"
+    flyToggleBtn.TextColor3 = Library.Theme.Text
+    flyToggleBtn.TextScaled = true
+    flyToggleBtn.Font = Enum.Font.SourceSansBold
+    flyToggleBtn.Parent = FlyFrame
+
+    -- ===== VERнутая надпись скорости =====
+    local flySpeedTitle = Instance.new("TextLabel")
+    flySpeedTitle.Size = UDim2.new(0.3, 0, 0.08, 0)
+    flySpeedTitle.Position = UDim2.new(0.05, 0, 0.43, 0)
+    flySpeedTitle.BackgroundTransparency = 1
+    flySpeedTitle.Text = "Speed: " .. FLY_CONFIG.flySpeed
+    flySpeedTitle.TextColor3 = Library.Theme.Text
+    flySpeedTitle.TextScaled = true
+    flySpeedTitle.Font = Enum.Font.SourceSans
+    flySpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+    flySpeedTitle.Parent = FlyFrame
+
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
+    local flySpeedSlider = Instance.new("Frame")
+    flySpeedSlider.Name = "OrionSliderTrack"
+    flySpeedSlider.Size = UDim2.new(0.55, -10, 0, 6)
+    flySpeedSlider.Position = UDim2.new(0.4, 0, 0.45, 0)
+    flySpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    flySpeedSlider.BorderSizePixel = 0
+    flySpeedSlider.BackgroundTransparency = 0
+    flySpeedSlider.Parent = FlyFrame
+
+    local flySpeedFill = Instance.new("Frame")
+    flySpeedFill.Name = "OrionSliderFill"
+    flySpeedFill.Size = UDim2.new(0.3, 0, 1, 0)
+    flySpeedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    flySpeedFill.BorderSizePixel = 0
+    flySpeedFill.BackgroundTransparency = 0
+    flySpeedFill.Parent = flySpeedSlider
+
+    local flySpeedButton = Instance.new("TextButton")
+    flySpeedButton.Name = "OrionSliderButton"
+    flySpeedButton.Size = UDim2.new(0, 14, 0, 14)
+    flySpeedButton.Position = UDim2.new(0.3, -7, 0.5, -7)
+    flySpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    flySpeedButton.BorderSizePixel = 0
+    flySpeedButton.Text = ""
+    flySpeedButton.Parent = flySpeedSlider
+    flySpeedButton.BackgroundTransparency = 0
+
+    local flySpeedCorner = Instance.new("UICorner")
+    flySpeedCorner.CornerRadius = UDim.new(1, 0)
+    flySpeedCorner.Parent = flySpeedButton
+
+    local isDraggingFlySpeed = false
+
+    local function updateFlySpeedUI()
+        local ratio = math.clamp(
+            (FLY_CONFIG.flySpeed - FLY_CONFIG.minSpeed) / (FLY_CONFIG.maxSpeed - FLY_CONFIG.minSpeed),
+            0,
+            1
+        )
+        flySpeedFill.Size = UDim2.new(ratio, 0, 1, 0)
+        flySpeedButton.Position = UDim2.new(ratio, -7, 0.5, -7)
+        flySpeedTitle.Text = "Speed: " .. math.floor(FLY_CONFIG.flySpeed)
+    end
+
+    local function setFlySpeedFromX(x)
+        local sliderAbsX = flySpeedSlider.AbsolutePosition.X
+        local sliderWidth = flySpeedSlider.AbsoluteSize.X
+        if sliderWidth <= 0 then return end
+        local ratio = math.clamp((x - sliderAbsX) / sliderWidth, 0, 1)
+        local newSpeed = FLY_CONFIG.minSpeed + ratio * (FLY_CONFIG.maxSpeed - FLY_CONFIG.minSpeed)
+        newSpeed = math.floor(newSpeed + 0.5)
+        FLY_CONFIG.flySpeed = math.clamp(newSpeed, FLY_CONFIG.minSpeed, FLY_CONFIG.maxSpeed)
+        updateFlySpeedUI()
+    end
+
+    flySpeedButton.MouseButton1Down:Connect(function()
+        isDraggingFlySpeed = true
+    end)
+
+    userInputService.InputChanged:Connect(function(input)
+        if isDraggingFlySpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
+            setFlySpeedFromX(input.Position.X)
+        end
+    end)
+
+    userInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingFlySpeed = false
+        end
+    end)
+
+    flyToggleBtn.MouseButton1Click:Connect(function()
+        if flying then
+            stopFly()
+        else
+            startFly()
+        end
+    end)
+
+    local function onCharacterAdded(character)
+        local shouldAutoEnable = flyWasActiveBeforeDeath
+        flyWasActiveBeforeDeath = false
+
+        local humanoid = character:WaitForChild("Humanoid", 5)
+        local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+
+        if shouldAutoEnable and humanoid and rootPart then
+            task.wait(0.5)
+            if not flying then
+                startFly()
+            end
+        end
+    end
+
+    local function onCharacterRemoving()
+        flyWasActiveBeforeDeath = flying
+        if flying then
+            stopFly()
+        end
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+
+    if player.Character then
+        player.CharacterRemoving:Connect(onCharacterRemoving)
+    end
+
+    player.CharacterAdded:Connect(function(character)
+        character.CharacterRemoving:Connect(onCharacterRemoving)
+    end)
+
+    userInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if not flying then return end
+
+        if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+            jumpHeld = true
+        end
+    end)
+
+    userInputService.InputEnded:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+            jumpHeld = false
+        end
+    end)
+
+    userInputService.JumpRequest:Connect(function()
+        if not flying then return end
+        lastJumpRequest = tick()
+        jumpHeld = true
+        task.spawn(function()
+            task.wait(FLY_CONFIG.mobileJumpHoldTime)
+            if tick() - lastJumpRequest >= FLY_CONFIG.mobileJumpHoldTime - 0.01 then
+                jumpHeld = false
+            end
+        end)
+    end)
+
+    updateFlySpeedUI()
+end
 
 -- ===== TAB 4: AUTO-WALK =====
 local WalkTab = Tabs[4]
@@ -925,6 +1216,7 @@ WalkStatus.TextScaled = true
 WalkStatus.Font = Enum.Font.SourceSans
 WalkStatus.Parent = WalkFrame
 
+-- ===== ВЕРНУТАЯ надпись скорости =====
 local WalkSpeedLabel = Instance.new("TextLabel")
 WalkSpeedLabel.Size = UDim2.new(0.3, 0, 0.15, 0)
 WalkSpeedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
@@ -935,32 +1227,37 @@ WalkSpeedLabel.TextScaled = true
 WalkSpeedLabel.Font = Enum.Font.SourceSans
 WalkSpeedLabel.Parent = WalkFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local WalkSpeedSlider = Instance.new("Frame")
-WalkSpeedSlider.Size = UDim2.new(0.4, -10, 0.05, 0)
+WalkSpeedSlider.Name = "OrionSliderTrack"
+WalkSpeedSlider.Size = UDim2.new(0.4, -10, 0, 6)
 WalkSpeedSlider.Position = UDim2.new(0.45, 0, 0.87, 0)
-WalkSpeedSlider.BackgroundColor3 = Library.Theme.Border
+WalkSpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 WalkSpeedSlider.BorderSizePixel = 0
+WalkSpeedSlider.BackgroundTransparency = 0
 WalkSpeedSlider.Parent = WalkFrame
 
 local WalkSpeedFill = Instance.new("Frame")
+WalkSpeedFill.Name = "OrionSliderFill"
 WalkSpeedFill.Size = UDim2.new(0.3, 0, 1, 0)
-WalkSpeedFill.BackgroundColor3 = Library.Theme.WalkActive
+WalkSpeedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WalkSpeedFill.BorderSizePixel = 0
+WalkSpeedFill.BackgroundTransparency = 0
 WalkSpeedFill.Parent = WalkSpeedSlider
 
 local WalkSpeedButton = Instance.new("TextButton")
-WalkSpeedButton.Size = UDim2.new(0, 15, 1.8, 0)
-WalkSpeedButton.Position = UDim2.new(0.3, -7.5, -0.4, 0)
+WalkSpeedButton.Name = "OrionSliderButton"
+WalkSpeedButton.Size = UDim2.new(0, 14, 0, 14)
+WalkSpeedButton.Position = UDim2.new(0.3, -7, 0.5, -7)
 WalkSpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-WalkSpeedButton.BorderColor3 = Library.Theme.Border
-WalkSpeedButton.BorderSizePixel = 2
+WalkSpeedButton.BorderSizePixel = 0
 WalkSpeedButton.Text = ""
 WalkSpeedButton.Parent = WalkSpeedSlider
 WalkSpeedButton.BackgroundTransparency = 0
 
-local WalkSpeedButtonCorner = Instance.new("UICorner")
-WalkSpeedButtonCorner.CornerRadius = UDim.new(1, 0)
-WalkSpeedButtonCorner.Parent = WalkSpeedButton
+local WalkSpeedCorner = Instance.new("UICorner")
+WalkSpeedCorner.CornerRadius = UDim.new(1, 0)
+WalkSpeedCorner.Parent = WalkSpeedButton
 
 local WalkPointsList = Instance.new("ScrollingFrame")
 WalkPointsList.Size = UDim2.new(1, 0, 0.4, 0)
@@ -1009,19 +1306,9 @@ NoclipToggleBtn.TextScaled = true
 NoclipToggleBtn.Font = Enum.Font.SourceSansBold
 NoclipToggleBtn.Parent = NoclipFrame
 
-local NoclipIndicator = Instance.new("TextLabel")
-NoclipIndicator.Size = UDim2.new(1, 0, 0.15, 0)
-NoclipIndicator.Position = UDim2.new(0, 0, 0.7, 0)
-NoclipIndicator.BackgroundTransparency = 1
-NoclipIndicator.Text = "Noclip: Disabled"
-NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-NoclipIndicator.TextScaled = true
-NoclipIndicator.Font = Enum.Font.SourceSans
-NoclipIndicator.Parent = NoclipFrame
-
 local NoclipInfo = Instance.new("TextLabel")
 NoclipInfo.Size = UDim2.new(1, 0, 0.2, 0)
-NoclipInfo.Position = UDim2.new(0, 0, 0.88, 0)
+NoclipInfo.Position = UDim2.new(0, 0, 0.7, 0)
 NoclipInfo.BackgroundTransparency = 1
 NoclipInfo.Text = "Noclip allows you to pass through walls"
 NoclipInfo.TextColor3 = Library.Theme.Text
@@ -1051,6 +1338,7 @@ PlatformTitle.Parent = PlatformFrame
 
 local PlatformLength = 25
 
+-- ===== ВЕРНУТАЯ надпись длины =====
 local LengthLabel = Instance.new("TextLabel")
 LengthLabel.Size = UDim2.new(0.25, 0, 0.08, 0)
 LengthLabel.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -1061,35 +1349,41 @@ LengthLabel.TextScaled = true
 LengthLabel.Font = Enum.Font.SourceSans
 LengthLabel.Parent = PlatformFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local LengthSlider = Instance.new("Frame")
-LengthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
+LengthSlider.Name = "OrionSliderTrack"
+LengthSlider.Size = UDim2.new(0.6, -10, 0, 6)
 LengthSlider.Position = UDim2.new(0.35, 0, 0.17, 0)
-LengthSlider.BackgroundColor3 = Library.Theme.Border
+LengthSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 LengthSlider.BorderSizePixel = 0
+LengthSlider.BackgroundTransparency = 0
 LengthSlider.Parent = PlatformFrame
 
 local LengthFill = Instance.new("Frame")
+LengthFill.Name = "OrionSliderFill"
 LengthFill.Size = UDim2.new(0.4898, 0, 1, 0)
-LengthFill.BackgroundColor3 = Library.Theme.Accent
+LengthFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 LengthFill.BorderSizePixel = 0
+LengthFill.BackgroundTransparency = 0
 LengthFill.Parent = LengthSlider
 
 local LengthButton = Instance.new("TextButton")
-LengthButton.Size = UDim2.new(0, 15, 1.8, 0)
-LengthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
+LengthButton.Name = "OrionSliderButton"
+LengthButton.Size = UDim2.new(0, 14, 0, 14)
+LengthButton.Position = UDim2.new(0.4898, -7, 0.5, -7)
 LengthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LengthButton.BorderColor3 = Library.Theme.Border
-LengthButton.BorderSizePixel = 2
+LengthButton.BorderSizePixel = 0
 LengthButton.Text = ""
 LengthButton.Parent = LengthSlider
 LengthButton.BackgroundTransparency = 0
 
-local LengthButtonCorner = Instance.new("UICorner")
-LengthButtonCorner.CornerRadius = UDim.new(1, 0)
-LengthButtonCorner.Parent = LengthButton
+local LengthCorner = Instance.new("UICorner")
+LengthCorner.CornerRadius = UDim.new(1, 0)
+LengthCorner.Parent = LengthButton
 
 local PlatformWidth = 25
 
+-- ===== ВЕРНУТАЯ надпись ширины =====
 local WidthLabel = Instance.new("TextLabel")
 WidthLabel.Size = UDim2.new(0.25, 0, 0.08, 0)
 WidthLabel.Position = UDim2.new(0.05, 0, 0.3, 0)
@@ -1100,32 +1394,37 @@ WidthLabel.TextScaled = true
 WidthLabel.Font = Enum.Font.SourceSans
 WidthLabel.Parent = PlatformFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local WidthSlider = Instance.new("Frame")
-WidthSlider.Size = UDim2.new(0.6, -10, 0.04, 0)
+WidthSlider.Name = "OrionSliderTrack"
+WidthSlider.Size = UDim2.new(0.6, -10, 0, 6)
 WidthSlider.Position = UDim2.new(0.35, 0, 0.32, 0)
-WidthSlider.BackgroundColor3 = Library.Theme.Border
+WidthSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 WidthSlider.BorderSizePixel = 0
+WidthSlider.BackgroundTransparency = 0
 WidthSlider.Parent = PlatformFrame
 
 local WidthFill = Instance.new("Frame")
+WidthFill.Name = "OrionSliderFill"
 WidthFill.Size = UDim2.new(0.4898, 0, 1, 0)
-WidthFill.BackgroundColor3 = Library.Theme.Accent
+WidthFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 WidthFill.BorderSizePixel = 0
+WidthFill.BackgroundTransparency = 0
 WidthFill.Parent = WidthSlider
 
 local WidthButton = Instance.new("TextButton")
-WidthButton.Size = UDim2.new(0, 15, 1.8, 0)
-WidthButton.Position = UDim2.new(0.4898, -7.5, -0.4, 0)
+WidthButton.Name = "OrionSliderButton"
+WidthButton.Size = UDim2.new(0, 14, 0, 14)
+WidthButton.Position = UDim2.new(0.4898, -7, 0.5, -7)
 WidthButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-WidthButton.BorderColor3 = Library.Theme.Border
-WidthButton.BorderSizePixel = 2
+WidthButton.BorderSizePixel = 0
 WidthButton.Text = ""
 WidthButton.Parent = WidthSlider
 WidthButton.BackgroundTransparency = 0
 
-local WidthButtonCorner = Instance.new("UICorner")
-WidthButtonCorner.CornerRadius = UDim.new(1, 0)
-WidthButtonCorner.Parent = WidthButton
+local WidthCorner = Instance.new("UICorner")
+WidthCorner.CornerRadius = UDim.new(1, 0)
+WidthCorner.Parent = WidthButton
 
 local MinSize = 1
 local MaxSize = 50
@@ -1250,7 +1549,7 @@ local function TeleportToPlayer(targetPlayer)
     end
 
     local targetPos = nil
-    
+
     local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if targetHrp then
         targetPos = targetHrp.Position + Vector3.new(0, 3, 0)
@@ -1343,7 +1642,7 @@ local function UpdatePlayersList()
             TeleportPlayerBtn.TextScaled = true
             TeleportPlayerBtn.Font = Enum.Font.SourceSansBold
             TeleportPlayerBtn.Parent = ItemFrame
-            
+
             local tpCorner = Instance.new("UICorner")
             tpCorner.CornerRadius = UDim.new(1, 0)
             tpCorner.Parent = TeleportPlayerBtn
@@ -1500,16 +1799,7 @@ XRayToggleBtn.TextScaled = true
 XRayToggleBtn.Font = Enum.Font.SourceSansBold
 XRayToggleBtn.Parent = XRayControlFrame
 
-local XRayIndicator = Instance.new("TextLabel")
-XRayIndicator.Size = UDim2.new(1, 0, 0.12, 0)
-XRayIndicator.Position = UDim2.new(0, 0, 0.62, 0)
-XRayIndicator.BackgroundTransparency = 1
-XRayIndicator.Text = "X-Ray: Disabled"
-XRayIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-XRayIndicator.TextScaled = true
-XRayIndicator.Font = Enum.Font.SourceSans
-XRayIndicator.Parent = XRayControlFrame
-
+-- ===== ВЕРНУТАЯ надпись прозрачности =====
 local XRayTransparencyLabel = Instance.new("TextLabel")
 XRayTransparencyLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
 XRayTransparencyLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -1520,37 +1810,42 @@ XRayTransparencyLabel.TextScaled = true
 XRayTransparencyLabel.Font = Enum.Font.SourceSansBold
 XRayTransparencyLabel.Parent = XRayControlFrame
 
+-- ===== ORION STYLE SLIDER (непрозрачный) =====
 local XRaySlider = Instance.new("Frame")
-XRaySlider.Size = UDim2.new(0.6, -10, 0.05, 0)
+XRaySlider.Name = "OrionSliderTrack"
+XRaySlider.Size = UDim2.new(0.6, -10, 0, 6)
 XRaySlider.Position = UDim2.new(0.3, 0, 0.82, 0)
-XRaySlider.BackgroundColor3 = Library.Theme.Border
+XRaySlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 XRaySlider.BorderSizePixel = 0
+XRaySlider.BackgroundTransparency = 0
 XRaySlider.Parent = XRayControlFrame
 
 local XRayFill = Instance.new("Frame")
+XRayFill.Name = "OrionSliderFill"
 XRayFill.Size = UDim2.new(0.5, 0, 1, 0)
-XRayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+XRayFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 XRayFill.BorderSizePixel = 0
+XRayFill.BackgroundTransparency = 0
 XRayFill.Parent = XRaySlider
 
 local XRaySliderButton = Instance.new("TextButton")
-XRaySliderButton.Size = UDim2.new(0, 15, 1.8, 0)
-XRaySliderButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+XRaySliderButton.Name = "OrionSliderButton"
+XRaySliderButton.Size = UDim2.new(0, 14, 0, 14)
+XRaySliderButton.Position = UDim2.new(0.5, -7, 0.5, -7)
 XRaySliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-XRaySliderButton.BorderColor3 = Library.Theme.Border
-XRaySliderButton.BorderSizePixel = 2
+XRaySliderButton.BorderSizePixel = 0
 XRaySliderButton.Text = ""
 XRaySliderButton.Parent = XRaySlider
 XRaySliderButton.BackgroundTransparency = 0
 
-local XRaySliderButtonCorner = Instance.new("UICorner")
-XRaySliderButtonCorner.CornerRadius = UDim.new(1, 0)
-XRaySliderButtonCorner.Parent = XRaySliderButton
+local XRayCorner = Instance.new("UICorner")
+XRayCorner.CornerRadius = UDim.new(1, 0)
+XRayCorner.Parent = XRaySliderButton
 
 local function UpdateXRaySlider()
     local percent = XRayTransparency / 100
     XRayFill.Size = UDim2.new(percent, 0, 1, 0)
-    XRaySliderButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+    XRaySliderButton.Position = UDim2.new(percent, -7, 0.5, -7)
     XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
 end
 
@@ -1558,8 +1853,6 @@ local function ToggleXRay()
     XRayActive = not XRayActive
     XRayToggleBtn.Text = XRayActive and "ON" or "OFF"
     XRayToggleBtn.BackgroundColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
-    XRayIndicator.Text = XRayActive and "X-Ray: Enabled" or "X-Ray: Disabled"
-    XRayIndicator.TextColor3 = XRayActive and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
 
     if XRayActive then
         XRayOriginalTransparencies = {}
@@ -1568,7 +1861,6 @@ local function ToggleXRay()
     end
 
     UpdateXRay()
-    print(XRayActive and "X-Ray activated (world only)" or "X-Ray deactivated")
 end
 
 XRayToggleBtn.MouseButton1Click:Connect(ToggleXRay)
@@ -1649,19 +1941,9 @@ SPIToggleBtn.TextScaled = true
 SPIToggleBtn.Font = Enum.Font.SourceSansBold
 SPIToggleBtn.Parent = SPIControlFrame
 
-local SPIIndicator = Instance.new("TextLabel")
-SPIIndicator.Size = UDim2.new(1, 0, 0.12, 0)
-SPIIndicator.Position = UDim2.new(0, 0, 0.62, 0)
-SPIIndicator.BackgroundTransparency = 1
-SPIIndicator.Text = "SPI: Disabled"
-SPIIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-SPIIndicator.TextScaled = true
-SPIIndicator.Font = Enum.Font.SourceSans
-SPIIndicator.Parent = SPIControlFrame
-
 local SPICountLabel = Instance.new("TextLabel")
 SPICountLabel.Size = UDim2.new(1, 0, 0.12, 0)
-SPICountLabel.Position = UDim2.new(0, 0, 0.76, 0)
+SPICountLabel.Position = UDim2.new(0, 0, 0.62, 0)
 SPICountLabel.BackgroundTransparency = 1
 SPICountLabel.Text = "Players on map: 0"
 SPICountLabel.TextColor3 = Library.Theme.Text
@@ -1786,8 +2068,6 @@ local function ToggleSPI()
     SPIEnabled = not SPIEnabled
     SPIToggleBtn.Text = SPIEnabled and "ON" or "OFF"
     SPIToggleBtn.BackgroundColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
-    SPIIndicator.Text = SPIEnabled and "SPI: Enabled" or "SPI: Disabled"
-    SPIIndicator.TextColor3 = SPIEnabled and Library.Theme.SPI or Color3.fromRGB(200, 40, 40)
 
     if SPIEnabled then
         UpdateSPI()
@@ -1888,18 +2168,6 @@ local ClickTeleportEnabled = false
 local MAX_POINTS = 1000
 local MAX_WALK_SPEED = 300
 
--- Переменные для Fly с авто-включением после смерти
-local FlyEnabled = false
-local FlyWasEnabledBeforeDeath = false
-local FlyConnection = nil
-local FlyBodyVelocity = nil
-local FlyBodyGyro = nil
-local FlyAnimationTrack = nil
-local FlyAnimator = nil
-local FlyRestartTimer = nil
-local PlayerDiedRecently = false
-local FLY_RESTART_DELAY = 2
-
 local WalkEnabled = false
 local WalkSpeed = 16
 local WalkLoop = nil
@@ -1919,276 +2187,6 @@ local NoclipConnection = nil
 local WaitForTeleport = false
 local TeleportWaitStart = 0
 
--- ===== FLY WITH AUTO-RESTART AFTER DEATH (2 SECOND DELAY) =====
-local function ToggleFly()
-    local player = game.Players.LocalPlayer
-    if not player or not player.Character then return end
-
-    local character = player.Character
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChild("Humanoid")
-
-    if not hrp or not humanoid then return end
-
-    FlyEnabled = not FlyEnabled
-    FlyWasEnabledBeforeDeath = FlyEnabled
-
-    if FlyEnabled then
-        if PlayerDiedRecently then
-            FlyEnabled = false
-            FlyWasEnabledBeforeDeath = false
-            print("⏳ Fly disabled during death cooldown")
-            return
-        end
-        
-        FlyToggleBtn.Text = "ON"
-        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        FlyIndicator.Text = "Fly: Enabled"
-        FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        humanoid.PlatformStand = false
-
-        local animator = humanoid:FindFirstChild("Animator")
-        if animator then
-            local walkAnim = nil
-            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move")) then
-                    walkAnim = track
-                    break
-                end
-            end
-
-            if not walkAnim then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://507766686"
-                walkAnim = animator:LoadAnimation(animation)
-            end
-
-            if walkAnim then
-                walkAnim:Play()
-                walkAnim:AdjustSpeed(1.5)
-                FlyAnimationTrack = walkAnim
-                FlyAnimator = animator
-            end
-        end
-
-        FlyBodyVelocity = Instance.new("BodyVelocity")
-        FlyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-        FlyBodyVelocity.Parent = hrp
-
-        FlyBodyGyro = Instance.new("BodyGyro")
-        FlyBodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
-        FlyBodyGyro.CFrame = hrp.CFrame
-        FlyBodyGyro.Parent = hrp
-
-        FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
-            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
-
-            local moveDirection = Vector3.new()
-            local camera = workspace.CurrentCamera
-
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
-
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-
-            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
-
-            FlyBodyVelocity.Velocity = moveDirection
-
-            if humanoid and FlyAnimationTrack then
-                local isMoving = moveDirection.Magnitude > 0.5
-                if isMoving then
-                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
-                    local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
-                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
-                else
-                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
-                end
-            end
-
-            if moveDirection.Magnitude > 0.1 then
-                local lookAt = hrp.Position + moveDirection.Unit
-                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
-            end
-        end)
-
-    else
-        FlyToggleBtn.Text = "OFF"
-        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        FlyIndicator.Text = "Fly: Disabled"
-        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
-        FlyAnimator = nil
-
-        if humanoid then humanoid.PlatformStand = false end
-
-        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
-        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
-        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
-    end
-end
-
-local function RestartFlyAfterDeath()
-    if FlyRestartTimer then
-        task.cancel(FlyRestartTimer)
-        FlyRestartTimer = nil
-    end
-    
-    if FlyWasEnabledBeforeDeath then
-        print("⏳ Fly will restart in 2 seconds...")
-        FlyRestartTimer = task.spawn(function()
-            task.wait(FLY_RESTART_DELAY)
-            PlayerDiedRecently = false
-            if FlyWasEnabledBeforeDeath and not FlyEnabled then
-                local player = game.Players.LocalPlayer
-                if player and player.Character then
-                    print("✅ Restarting Fly after death...")
-                    FlyEnabled = true
-                    FlyWasEnabledBeforeDeath = true
-                    FlyToggleBtn.Text = "ON"
-                    FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-                    FlyIndicator.Text = "Fly: Enabled"
-                    FlyIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
-                    
-                    local character = player.Character
-                    local hrp = character:FindFirstChild("HumanoidRootPart")
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    if hrp and humanoid then
-                        humanoid.PlatformStand = false
-                        
-                        local animator = humanoid:FindFirstChild("Animator")
-                        if animator then
-                            local walkAnim = nil
-                            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                                if track.Animation and (track.Animation.Name:find("Run") or track.Animation.Name:find("Walk") or track.Animation.Name:find("move")) then
-                                    walkAnim = track
-                                    break
-                                end
-                            end
-                            if not walkAnim then
-                                local animation = Instance.new("Animation")
-                                animation.AnimationId = "rbxassetid://507766686"
-                                walkAnim = animator:LoadAnimation(animation)
-                            end
-                            if walkAnim then
-                                walkAnim:Play()
-                                walkAnim:AdjustSpeed(1.5)
-                                FlyAnimationTrack = walkAnim
-                                FlyAnimator = animator
-                            end
-                        end
-                        
-                        FlyBodyVelocity = Instance.new("BodyVelocity")
-                        FlyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-                        FlyBodyVelocity.Parent = hrp
-                        
-                        FlyBodyGyro = Instance.new("BodyGyro")
-                        FlyBodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
-                        FlyBodyGyro.CFrame = hrp.CFrame
-                        FlyBodyGyro.Parent = hrp
-                        
-                        FlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                            if not FlyEnabled or not hrp or not FlyBodyVelocity then return end
-                            
-                            local moveDirection = Vector3.new()
-                            local camera = workspace.CurrentCamera
-                            
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-                            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
-                            
-                            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit * FlySpeed end
-                            
-                            FlyBodyVelocity.Velocity = moveDirection
-                            
-                            if humanoid and FlyAnimationTrack then
-                                local isMoving = moveDirection.Magnitude > 0.5
-                                if isMoving then
-                                    if not FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Play() end
-                                    local speedPercent = math.min(moveDirection.Magnitude / FlySpeed, 1)
-                                    FlyAnimationTrack:AdjustSpeed(0.8 + speedPercent * 1.7)
-                                else
-                                    if FlyAnimationTrack.IsPlaying then FlyAnimationTrack:Stop() end
-                                end
-                            end
-                            
-                            if moveDirection.Magnitude > 0.1 then
-                                local lookAt = hrp.Position + moveDirection.Unit
-                                FlyBodyGyro.CFrame = CFrame.new(hrp.Position, lookAt)
-                            end
-                        end)
-                        
-                        print("✅ Fly restarted successfully after death!")
-                    end
-                end
-            end
-            FlyRestartTimer = nil
-        end)
-    else
-        PlayerDiedRecently = false
-    end
-end
-
-local function onCharacterDied()
-    if FlyEnabled then
-        FlyWasEnabledBeforeDeath = true
-        print("💀 Player died with Fly ON - will restart in 2 seconds")
-    else
-        FlyWasEnabledBeforeDeath = false
-        print("💀 Player died with Fly OFF - will NOT restart")
-    end
-    
-    if FlyEnabled then
-        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
-        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
-        if FlyBodyGyro then FlyBodyGyro:Destroy(); FlyBodyGyro = nil end
-        if FlyAnimationTrack then FlyAnimationTrack:Stop(); FlyAnimationTrack = nil end
-        FlyEnabled = false
-        FlyToggleBtn.Text = "OFF"
-        FlyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        FlyIndicator.Text = "Fly: Disabled"
-        FlyIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
-        
-        local player = game.Players.LocalPlayer
-        if player and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            if humanoid then humanoid.PlatformStand = false end
-        end
-    end
-    
-    PlayerDiedRecently = true
-    
-    if WalkEnabled and #WalkPointsData > 0 then
-        CurrentWalkIndex = 1
-        SmoothVelocity = Vector3.new(0, 0, 0)
-        WaitingAtEnd = false
-        WaitForTeleport = false
-        IsStopped = false
-
-        if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
-
-        if not NoclipEnabled then SetNoclip(true) end
-
-        if #WalkPointsData > 0 then
-            local firstData = WalkPointsData[1]
-            if firstData then
-                WalkStatus.Text = "Walking to " .. firstData.name .. " (restart after death)"
-                WalkStatus.TextColor3 = Library.Theme.Warning
-            end
-        end
-    end
-    
-    RestartFlyAfterDeath()
-end
-
 local function SetNoclip(state)
     if state then
         if not NoclipConnection then
@@ -2204,15 +2202,11 @@ local function SetNoclip(state)
         NoclipEnabled = true
         NoclipToggleBtn.Text = "ON"
         NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        NoclipIndicator.Text = "Noclip: Enabled"
-        NoclipIndicator.TextColor3 = Color3.fromRGB(0, 200, 100)
     else
         if NoclipConnection then NoclipConnection:Disconnect(); NoclipConnection = nil end
         NoclipEnabled = false
         NoclipToggleBtn.Text = "OFF"
         NoclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        NoclipIndicator.Text = "Noclip: Disabled"
-        NoclipIndicator.TextColor3 = Color3.fromRGB(200, 40, 40)
     end
 end
 
@@ -2221,21 +2215,53 @@ local function setupDeathDetection()
     if not player then return end
 
     player.CharacterAdded:Connect(function(newCharacter)
-        PlayerDiedRecently = false
-        if FlyWasEnabledBeforeDeath and not FlyEnabled then
-            task.wait(FLY_RESTART_DELAY)
-            if FlyWasEnabledBeforeDeath and not FlyEnabled then
-                ToggleFly()
-            end
-        end
-        
         local humanoid = newCharacter:WaitForChild("Humanoid")
-        if humanoid then humanoid.Died:Connect(function() onCharacterDied() end) end
+        if humanoid then humanoid.Died:Connect(function()
+            if WalkEnabled and #WalkPointsData > 0 then
+                CurrentWalkIndex = 1
+                SmoothVelocity = Vector3.new(0, 0, 0)
+                WaitingAtEnd = false
+                WaitForTeleport = false
+                IsStopped = false
+
+                if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
+
+                if not NoclipEnabled then SetNoclip(true) end
+
+                if #WalkPointsData > 0 then
+                    local firstData = WalkPointsData[1]
+                    if firstData then
+                        WalkStatus.Text = "Walking to " .. firstData.name .. " (restart after death)"
+                        WalkStatus.TextColor3 = Library.Theme.Warning
+                    end
+                end
+            end
+        end) end
     end)
 
     if player.Character then
         local humanoid = player.Character:FindFirstChild("Humanoid")
-        if humanoid then humanoid.Died:Connect(function() onCharacterDied() end) end
+        if humanoid then humanoid.Died:Connect(function()
+            if WalkEnabled and #WalkPointsData > 0 then
+                CurrentWalkIndex = 1
+                SmoothVelocity = Vector3.new(0, 0, 0)
+                WaitingAtEnd = false
+                WaitForTeleport = false
+                IsStopped = false
+
+                if StopBodyPosition then StopBodyPosition:Destroy(); StopBodyPosition = nil end
+
+                if not NoclipEnabled then SetNoclip(true) end
+
+                if #WalkPointsData > 0 then
+                    local firstData = WalkPointsData[1]
+                    if firstData then
+                        WalkStatus.Text = "Walking to " .. firstData.name .. " (restart after death)"
+                        WalkStatus.TextColor3 = Library.Theme.Warning
+                    end
+                end
+            end
+        end) end
     end
 end
 
@@ -2645,8 +2671,6 @@ local function StartWalking()
     WalkStartBtn.Text = "PAUSE"
     WalkStartBtn.BackgroundColor3 = Library.Theme.Warning
 
-    if FlyEnabled then ToggleFly() end
-
     WalkLoop = task.spawn(function()
         while WalkEnabled and game.Players.LocalPlayer and game.Players.LocalPlayer.Character do
             local player = game.Players.LocalPlayer
@@ -2844,36 +2868,14 @@ ClickToggleBtn.MouseButton1Click:Connect(function()
     ClickTeleportEnabled = not ClickTeleportEnabled
     ClickToggleBtn.Text = ClickTeleportEnabled and "ON" or "OFF"
     ClickToggleBtn.BackgroundColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
-    ModeIndicator.Text = ClickTeleportEnabled and "Mode: Enabled (click on object to teleport)" or "Mode: Disabled"
-    ModeIndicator.TextColor3 = ClickTeleportEnabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 40, 40)
+    ModeIndicator.Text = ""
 end)
-
-FlyToggleBtn.MouseButton1Click:Connect(ToggleFly)
 
 NoclipToggleBtn.MouseButton1Click:Connect(function()
     SetNoclip(not NoclipEnabled)
 end)
 
--- ===== SLIDERS =====
-local draggingSlider = false
-SpeedButton.MouseButton1Down:Connect(function() draggingSlider = true end)
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = false end
-end)
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local sliderPos = SpeedSlider.AbsolutePosition
-        local sliderSize = SpeedSlider.AbsoluteSize
-        local mouseX = input.Position.X
-
-        local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-        FlySpeed = math.floor(10 + percent * 240)
-        SpeedFill.Size = UDim2.new(percent, 0, 1, 0)
-        SpeedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-        SpeedLabel.Text = "Speed: " .. FlySpeed
-    end
-end)
-
+-- ===== SLIDERS (ALL ORION STYLE, NO LABELS, NO NUMBERS) =====
 local draggingWalkSlider = false
 WalkSpeedButton.MouseButton1Down:Connect(function() draggingWalkSlider = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(input)
@@ -2888,7 +2890,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         WalkSpeed = math.floor(10 + percent * (MAX_WALK_SPEED - 10))
         WalkSpeedFill.Size = UDim2.new(percent, 0, 1, 0)
-        WalkSpeedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        WalkSpeedButton.Position = UDim2.new(percent, -7, 0.5, -7)
         WalkSpeedLabel.Text = "Speed: " .. WalkSpeed
     end
 end)
@@ -2907,7 +2909,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformLength = math.floor(MinSize + percent * (MaxSize - MinSize))
         LengthFill.Size = UDim2.new(percent, 0, 1, 0)
-        LengthButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        LengthButton.Position = UDim2.new(percent, -7, 0.5, -7)
         LengthLabel.Text = "Length: " .. PlatformLength .. " m"
     end
 end)
@@ -2926,7 +2928,7 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
         local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
         PlatformWidth = math.floor(MinSize + percent * (MaxSize - MinSize))
         WidthFill.Size = UDim2.new(percent, 0, 1, 0)
-        WidthButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        WidthButton.Position = UDim2.new(percent, -7, 0.5, -7)
         WidthLabel.Text = "Width: " .. PlatformWidth .. " m"
     end
 end)
@@ -3019,12 +3021,12 @@ local function AnimateCollapse(targetCollapsed)
             isCollapsed = targetCollapsed
             menuOpen = not targetCollapsed
             collapseAnimating = false
-            
+
             if animationConnection then
                 animationConnection:Disconnect()
                 animationConnection = nil
             end
-            
+
             print("Animation complete! menuOpen=" .. tostring(menuOpen) .. ", isCollapsed=" .. tostring(isCollapsed))
         end
     end)
@@ -3034,7 +3036,7 @@ local function ToggleMenu()
     if collapseAnimating then
         return
     end
-    
+
     if menuOpen and not isCollapsed then
         print("Toggling: Collapse")
         AnimateCollapse(true)
@@ -3043,7 +3045,7 @@ local function ToggleMenu()
         MenuPanel.BackgroundTransparency = 0.5
         MenuPanel.Visible = true
         AnimateCollapse(false)
-        
+
         if not isCollapsed then
             UpdatePointsList()
             UpdateWalkPointsList()
@@ -3062,7 +3064,7 @@ local function InitializeMenuState()
         MenuPanel.Visible = false
         MenuPanel.BackgroundTransparency = 1
         MenuPanel.Size = UDim2.new(0, 0, 0, 0)
-        
+
         if MainButton then
             local mainPos = MainButton.Position
             MenuPanel.Position = UDim2.new(
@@ -3072,16 +3074,16 @@ local function InitializeMenuState()
                 mainPos.Y.Offset + (MainButton.Size.Y.Offset / 2)
             )
         end
-        
+
         menuOpen = false
         isCollapsed = true
         collapseAnimating = false
-        
+
         if animationConnection then
             animationConnection:Disconnect()
             animationConnection = nil
         end
-        
+
         print("✅ Menu initialized: collapsed=" .. tostring(isCollapsed) .. ", open=" .. tostring(menuOpen))
     end
 end
@@ -3123,7 +3125,6 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if input.KeyCode == Enum.KeyCode.T and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then TeleportToLastPoint() end
     if input.KeyCode == Enum.KeyCode.S and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then SetPoint() end
     if input.KeyCode == Enum.KeyCode.C and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then ClickToggleBtn.MouseButton1Click:Fire() end
-    if input.KeyCode == Enum.KeyCode.F and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then FlyToggleBtn.MouseButton1Click:Fire() end
     if input.KeyCode == Enum.KeyCode.W and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
         if WalkEnabled then StopWalking() else StartWalking() end
     end
@@ -3182,7 +3183,6 @@ print("Tabs are now VERTICALLY positioned on the left")
 print("Arrow switching between tabs removed")
 print("All tabs: Points, Click-TP, Fly, Walk, Noclip, Platforms, Players, X-Ray, SPI, Freecam, Clicker, Speed, Forward")
 print("Alt+C - click-teleport")
-print("Alt+F - flight with run animation (WASD + Space/Ctrl)")
 print("Alt+W - start/pause walk | Alt+X - add walk point")
 print("Alt+Z - clear all walk points")
 print("Alt+N - noclip")
@@ -3340,7 +3340,7 @@ pcall(function()
         Wave:Destroy()
         print("✅ Wave (полоска внизу) УДАЛЕНА!")
     end
-    
+
     for _, child in pairs(MenuPanel:GetChildren()) do
         if child:IsA("Frame") and child.Name == "Wave" then
             child:Destroy()
@@ -3349,22 +3349,134 @@ pcall(function()
     end
 end)
 
--- ===== TAB 10: FREECAM =====
+-- ===== TAB 10: FREECAM (РАБОЧАЯ, МЕНЮ КЛИКАЕТСЯ, ORION STYLE SLIDER, MAX 300, БЕЗ ПОДСКАЗОК) =====
 do
     local freecamTab = Tabs[10]
+    if freecamTab then
+        for _, child in pairs(freecamTab:GetChildren()) do
+            child:Destroy()
+        end
 
-    local function createFreecamUI()
+        local isMobile = game:GetService("UserInputService").TouchEnabled
+        local userInputService = game:GetService("UserInputService")
+
+        local FC = {}
+
+        FC.isActive = false
+        FC.baseSpeed = 100
+        FC.maxSpeed = 300
+        FC.freecamPosition = Vector3.new(0, 0, 0)
+        FC.cameraRotation = CFrame.new()
+        FC.savedCameraCFrame = nil
+        FC.savedCameraFocus = nil
+        FC.savedCharacterCFrame = nil
+        FC.savedWalkSpeed = nil
+        FC.savedJumpPower = nil
+        FC.savedAutoRotate = nil
+        FC.savedPlatformStand = nil
+        FC.savedAnchored = nil
+
+        local LookGui = nil
+        local lookTouchId = nil
+        local lastPos = nil
+        local sensitivity = 0.005
+
+        local function beginLook(input)
+            if not FC.isActive then return end
+            if input.UserInputType ~= Enum.UserInputType.Touch then return end
+            if lookTouchId ~= nil then return end
+
+            if MenuPanel and MenuPanel.Visible then
+                local mp = MenuPanel.AbsolutePosition
+                local ms = MenuPanel.AbsoluteSize
+                local mx, my = input.Position.X, input.Position.Y
+                if mx >= mp.X and mx <= mp.X + ms.X and my >= mp.Y and my <= mp.Y + ms.Y then
+                    return
+                end
+            end
+
+            lookTouchId = input
+            lastPos = Vector2.new(input.Position.X, input.Position.Y)
+        end
+
+        local function moveLook(input)
+            if not FC.isActive then return end
+            if lookTouchId == nil then return end
+            if input ~= lookTouchId then return end
+            if input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+            local curPos = Vector2.new(input.Position.X, input.Position.Y)
+            if lastPos then
+                local delta = curPos - lastPos
+                local dx = -delta.X * sensitivity
+                local dy = -delta.Y * sensitivity
+
+                local MAX_D = 0.35
+                if math.abs(dx) > MAX_D then dx = (dx > 0 and MAX_D or -MAX_D) end
+                if math.abs(dy) > MAX_D then dy = (dy > 0 and MAX_D or -MAX_D) end
+
+                FC.cameraRotation = FC.cameraRotation * CFrame.Angles(0, dx, 0) * CFrame.Angles(dy, 0, 0)
+                local look = FC.cameraRotation.LookVector
+                local up = FC.cameraRotation.UpVector
+                FC.cameraRotation = CFrame.lookAt(Vector3.new(0,0,0), look, up)
+            end
+            lastPos = curPos
+        end
+
+        local function endLook(input)
+            if input == lookTouchId then
+                lookTouchId = nil
+                lastPos = nil
+            end
+        end
+
+        local function createLookLayer()
+            if LookGui then return end
+
+            LookGui = Instance.new("ScreenGui")
+            LookGui.Name = "GGPlusLookLayer"
+            LookGui.Parent = game.CoreGui
+            LookGui.ResetOnSpawn = false
+            LookGui.IgnoreGuiInset = true
+            LookGui.DisplayOrder = 50
+
+            local topArea = Instance.new("Frame")
+            topArea.Size = UDim2.new(1, 0, 0.55, 0)
+            topArea.Position = UDim2.new(0, 0, 0, 0)
+            topArea.BackgroundTransparency = 1
+            topArea.BorderSizePixel = 0
+            topArea.Active = true
+            topArea.Parent = LookGui
+
+            local rightArea = Instance.new("Frame")
+            rightArea.Size = UDim2.new(1, -230, 0.7, 0)
+            rightArea.Position = UDim2.new(0, 230, 0.15, 0)
+            rightArea.BackgroundTransparency = 1
+            rightArea.BorderSizePixel = 0
+            rightArea.Active = true
+            rightArea.Parent = LookGui
+
+            for _, area in ipairs({topArea, rightArea}) do
+                area.InputBegan:Connect(beginLook)
+                area.InputChanged:Connect(moveLook)
+                area.InputEnded:Connect(endLook)
+            end
+
+            LookGui.Enabled = false
+        end
+
         local container = Instance.new("Frame")
         container.Size = UDim2.new(1, 0, 1, 0)
         container.BackgroundTransparency = 1
         container.Parent = freecamTab
 
         local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
+        mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
         mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
         mainFrame.BackgroundColor3 = Library.Theme.Panel
         mainFrame.BorderColor3 = Library.Theme.Border
         mainFrame.BorderSizePixel = 2
+        mainFrame.BackgroundTransparency = 0.5
         mainFrame.Parent = container
 
         local title = Instance.new("TextLabel")
@@ -3376,20 +3488,9 @@ do
         title.Font = Enum.Font.SourceSansBold
         title.Parent = mainFrame
 
-        local desc = Instance.new("TextLabel")
-        desc.Size = UDim2.new(1, -20, 0.15, 0)
-        desc.Position = UDim2.new(0, 10, 0.17, 0)
-        desc.BackgroundTransparency = 1
-        desc.Text = "Smooth rotation without jerking, character visible"
-        desc.TextColor3 = Library.Theme.Accent
-        desc.TextScaled = true
-        desc.Font = Enum.Font.SourceSans
-        desc.TextXAlignment = Enum.TextXAlignment.Left
-        desc.Parent = mainFrame
-
         local toggleBtn = Instance.new("TextButton")
-        toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-        toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+        toggleBtn.Size = UDim2.new(0.6, 0, 0.15, 0)
+        toggleBtn.Position = UDim2.new(0.2, 0, 0.18, 0)
         toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         toggleBtn.BorderColor3 = Library.Theme.Border
         toggleBtn.BorderSizePixel = 2
@@ -3397,336 +3498,265 @@ do
         toggleBtn.TextColor3 = Library.Theme.Text
         toggleBtn.TextScaled = true
         toggleBtn.Font = Enum.Font.SourceSansBold
+        toggleBtn.BackgroundTransparency = 0.3
         toggleBtn.Parent = mainFrame
 
-        local statusLabel = Instance.new("TextLabel")
-        statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
-        statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
-        statusLabel.BackgroundTransparency = 1
-        statusLabel.Text = "Freecam: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.TextScaled = true
-        statusLabel.Font = Enum.Font.SourceSans
-        statusLabel.Parent = mainFrame
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(1, 0)
+        toggleCorner.Parent = toggleBtn
 
-        local speedLabel = Instance.new("TextLabel")
-        speedLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-        speedLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
-        speedLabel.BackgroundTransparency = 1
-        speedLabel.Text = "Speed: 100"
-        speedLabel.TextColor3 = Library.Theme.Text
-        speedLabel.TextScaled = true
-        speedLabel.Font = Enum.Font.SourceSans
-        speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-        speedLabel.Parent = mainFrame
+        -- ===== ВЕРНУТАЯ надпись скорости =====
+        local speedTitle = Instance.new("TextLabel")
+        speedTitle.Size = UDim2.new(1, -20, 0, 20)
+        speedTitle.Position = UDim2.new(0, 10, 0.42, 0)
+        speedTitle.BackgroundTransparency = 1
+        speedTitle.Text = "Speed: 100"
+        speedTitle.TextColor3 = Library.Theme.Text
+        speedTitle.TextScaled = true
+        speedTitle.Font = Enum.Font.SourceSansBold
+        speedTitle.TextXAlignment = Enum.TextXAlignment.Left
+        speedTitle.Parent = mainFrame
 
+        -- ===== ORION STYLE SLIDER (непрозрачный) =====
         local speedSlider = Instance.new("Frame")
-        speedSlider.Size = UDim2.new(0.5, -10, 0.05, 0)
-        speedSlider.Position = UDim2.new(0.4, 0, 0.8, 0)
-        speedSlider.BackgroundColor3 = Library.Theme.Border
+        speedSlider.Name = "OrionSliderTrack"
+        speedSlider.Size = UDim2.new(1, -20, 0, 6)
+        speedSlider.Position = UDim2.new(0, 10, 0.55, 0)
+        speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         speedSlider.BorderSizePixel = 0
+        speedSlider.BackgroundTransparency = 0
         speedSlider.Parent = mainFrame
 
         local speedFill = Instance.new("Frame")
-        speedFill.Size = UDim2.new(0.5, 0, 1, 0)
-        speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+        speedFill.Name = "OrionSliderFill"
+        speedFill.Size = UDim2.new(0, 0, 1, 0)
+        speedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         speedFill.BorderSizePixel = 0
+        speedFill.BackgroundTransparency = 0
         speedFill.Parent = speedSlider
 
         local speedButton = Instance.new("TextButton")
-        speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-        speedButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+        speedButton.Name = "OrionSliderButton"
+        speedButton.Size = UDim2.new(0, 14, 0, 14)
+        speedButton.Position = UDim2.new(0, -7, 0.5, -7)
         speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        speedButton.BorderColor3 = Library.Theme.Border
-        speedButton.BorderSizePixel = 2
+        speedButton.BorderSizePixel = 0
         speedButton.Text = ""
         speedButton.Parent = speedSlider
-        speedButton.BackgroundTransparency = 0
 
-        local speedButtonCorner = Instance.new("UICorner")
-        speedButtonCorner.CornerRadius = UDim.new(1, 0)
-        speedButtonCorner.Parent = speedButton
-
-        local controlsFrame = Instance.new("Frame")
-        controlsFrame.Size = UDim2.new(1, -20, 0.25, 0)
-        controlsFrame.Position = UDim2.new(0, 10, 0.73, 0)
-        controlsFrame.BackgroundColor3 = Library.Theme.Panel
-        controlsFrame.BorderColor3 = Library.Theme.Border
-        controlsFrame.BorderSizePixel = 2
-        controlsFrame.Parent = container
-
-        local controls = Instance.new("TextLabel")
-        controls.Size = UDim2.new(1, -10, 1, -10)
-        controls.Position = UDim2.new(0, 5, 0, 5)
-        controls.BackgroundTransparency = 1
-        controls.Text = "Controls: F9 - toggle | Alt - cursor | WASD - move | Space - up | Ctrl - down"
-        controls.TextColor3 = Library.Theme.Text
-        controls.TextScaled = true
-        controls.Font = Enum.Font.SourceSans
-        controls.TextXAlignment = Enum.TextXAlignment.Left
-        controls.TextYAlignment = Enum.TextYAlignment.Center
-        controls.Parent = controlsFrame
-
-        local isFreecamActive = false
-        local isCursorLocked = false
-        local savedCameraCFrame = nil
-        local savedCameraFocus = nil
-        local savedCharacterCFrame = nil
-        local baseSpeed = 100
-        local moveSpeed = 100
-        local sensitivity = 0.003
-        local freecamPosition = Vector3.new(0, 10, 0)
-
-        local cameraRotation = CFrame.new()
-
-        local savedWalkSpeed = 16
-        local savedJumpPower = 50
-        local savedAutoRotate = true
-        local savedPlatformStand = false
-        local savedAnchored = false
+        local speedCorner = Instance.new("UICorner")
+        speedCorner.CornerRadius = UDim.new(1, 0)
+        speedCorner.Parent = speedButton
 
         local function updateSpeedSlider()
-            local percent = (baseSpeed - 1) / 199
+            local percent = (FC.baseSpeed - 1) / (FC.maxSpeed - 1)
             speedFill.Size = UDim2.new(percent, 0, 1, 0)
-            speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-            speedLabel.Text = "Speed: " .. math.floor(baseSpeed)
+            speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
+            speedTitle.Text = "Speed: " .. math.floor(FC.baseSpeed)
         end
 
         local function enableFreecam()
-            if isFreecamActive then return end
+            if FC.isActive then return end
 
             local player = game.Players.LocalPlayer
             local char = player and player.Character
             local humanoid = char and char:FindFirstChild("Humanoid")
             local camera = workspace.CurrentCamera
 
-            savedCameraCFrame = camera.CFrame
-            savedCameraFocus = camera.Focus
+            FC.savedCameraCFrame = camera.CFrame
+            FC.savedCameraFocus = camera.Focus
 
             if char and char:FindFirstChild("HumanoidRootPart") then
-                savedCharacterCFrame = char.HumanoidRootPart.CFrame
-                freecamPosition = char.HumanoidRootPart.Position + Vector3.new(0, 10, 0)
+                FC.savedCharacterCFrame = char.HumanoidRootPart.CFrame
+                FC.freecamPosition = FC.savedCameraCFrame.Position
             else
-                freecamPosition = Vector3.new(0, 10, 0)
+                FC.freecamPosition = camera.CFrame.Position
             end
 
             if humanoid then
-                savedWalkSpeed = humanoid.WalkSpeed
-                savedJumpPower = humanoid.JumpPower
-                savedAutoRotate = humanoid.AutoRotate
-                savedPlatformStand = humanoid.PlatformStand
-            end
-
-            cameraRotation = savedCameraCFrame - savedCameraCFrame.Position
-
-            moveSpeed = baseSpeed
-
-            if humanoid then
+                FC.savedWalkSpeed = humanoid.WalkSpeed
+                FC.savedJumpPower = humanoid.JumpPower
+                FC.savedAutoRotate = humanoid.AutoRotate
+                FC.savedPlatformStand = humanoid.PlatformStand
                 humanoid.AutoRotate = false
                 humanoid.PlatformStand = false
                 humanoid.WalkSpeed = 16
                 humanoid.JumpPower = 50
             end
 
-            isFreecamActive = true
-            isCursorLocked = true
-
-            game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.LockCenter
+            FC.cameraRotation = CFrame.new(FC.savedCameraCFrame.Position, FC.savedCameraCFrame.Position + FC.savedCameraCFrame.LookVector)
 
             if char and char:FindFirstChild("HumanoidRootPart") then
-                savedAnchored = char.HumanoidRootPart.Anchored
+                FC.savedAnchored = char.HumanoidRootPart.Anchored
                 char.HumanoidRootPart.Anchored = true
             end
 
+            FC.isActive = true
+
             toggleBtn.Text = "ON"
-            toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-            statusLabel.Text = "Freecam: Enabled"
-            statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
+            toggleBtn.BackgroundColor3 = Library.Theme.Success
 
-            if MenuPanel then
-                _G.FreecamMenuState = {
-                    wasVisible = MenuPanel.Visible,
-                    wasOpen = menuOpen,
-                    wasCollapsed = isCollapsed
-                }
-                MenuPanel.Visible = false
-                menuOpen = false
-            end
-
-            print("✅ Freecam enabled. Character remains visible!")
+            createLookLayer()
+            if LookGui then LookGui.Enabled = true end
         end
 
         local function disableFreecam()
-            if not isFreecamActive then return end
+            if not FC.isActive then return end
 
             local player = game.Players.LocalPlayer
             local char = player and player.Character
             local humanoid = char and char:FindFirstChild("Humanoid")
             local camera = workspace.CurrentCamera
 
-            isFreecamActive = false
-            isCursorLocked = false
+            FC.isActive = false
 
-            game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-
-            if savedCameraCFrame then
-                camera.CFrame = savedCameraCFrame
-                camera.Focus = savedCameraFocus
+            if FC.savedCameraCFrame then
+                camera.CFrame = FC.savedCameraCFrame
+                camera.Focus = FC.savedCameraFocus
             end
 
             if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Anchored = savedAnchored or false
+                char.HumanoidRootPart.Anchored = FC.savedAnchored or false
             end
 
             if humanoid then
-                humanoid.AutoRotate = savedAutoRotate
-                humanoid.PlatformStand = savedPlatformStand
-                humanoid.WalkSpeed = savedWalkSpeed
-                humanoid.JumpPower = savedJumpPower
+                humanoid.AutoRotate = FC.savedAutoRotate
+                humanoid.PlatformStand = FC.savedPlatformStand
+                humanoid.WalkSpeed = FC.savedWalkSpeed
+                humanoid.JumpPower = FC.savedJumpPower
             end
 
-            if savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = savedCharacterCFrame
+            if FC.savedCharacterCFrame and char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = FC.savedCharacterCFrame
             end
 
             toggleBtn.Text = "OFF"
             toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-            statusLabel.Text = "Freecam: Disabled"
-            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
 
-            if MenuPanel then
-                local savedState = _G.FreecamMenuState
-                if savedState then
-                    MenuPanel.Visible = savedState.wasVisible
-                    menuOpen = savedState.wasOpen
-                    isCollapsed = savedState.wasCollapsed
-                    if MenuPanel.Visible then
-                        MenuPanel.BackgroundTransparency = 0.5
-                    end
-                    _G.FreecamMenuState = nil
-                    print("✅ Menu state restored: visible=" .. tostring(menuOpen))
-                end
-            end
-
-            print("✅ Freecam disabled. Character restored.")
+            if LookGui then LookGui.Enabled = false end
         end
 
-        local function toggleFreecam()
-            if isFreecamActive then
-                disableFreecam()
-            else
-                enableFreecam()
-            end
-        end
-
-        toggleBtn.MouseButton1Click:Connect(toggleFreecam)
+        toggleBtn.MouseButton1Click:Connect(function()
+            if FC.isActive then disableFreecam() else enableFreecam() end
+        end)
 
         local draggingSpeed = false
-        speedButton.MouseButton1Down:Connect(function() draggingSpeed = true end)
+        local function updateSpeedFromInput(input)
+            local sliderPos = speedSlider.AbsolutePosition
+            local sliderSize = speedSlider.AbsoluteSize
+            local percent = math.clamp((input.Position.X - sliderPos.X) / sliderSize.X, 0, 1)
+            FC.baseSpeed = math.floor(1 + percent * (FC.maxSpeed - 1))
+            updateSpeedSlider()
+        end
 
-        game:GetService("UserInputService").InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        speedButton.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSpeed = true
+                updateSpeedFromInput(input)
+            end
+        end)
+        userInputService.InputChanged:Connect(function(input)
+            if draggingSpeed and (input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseMovement) then
+                updateSpeedFromInput(input)
+            end
+        end)
+        userInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch
+               or input.UserInputType == Enum.UserInputType.MouseButton1 then
                 draggingSpeed = false
             end
         end)
 
-        game:GetService("UserInputService").InputChanged:Connect(function(input)
-            if draggingSpeed and input.UserInputType == Enum.UserInputType.MouseMovement then
-                local sliderPos = speedSlider.AbsolutePosition
-                local sliderSize = speedSlider.AbsoluteSize
-                local mouseX = input.Position.X
-
-                local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-                baseSpeed = math.floor(1 + percent * 199)
-                updateSpeedSlider()
-                moveSpeed = baseSpeed
-            end
-        end)
-
-        local inputService = game:GetService("UserInputService")
-
-        inputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-
-            if input.KeyCode == Enum.KeyCode.F9 then
-                toggleFreecam()
-            end
-
-            if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
-                if isFreecamActive then
-                    if isCursorLocked then
-                        inputService.MouseBehavior = Enum.MouseBehavior.Default
-                        isCursorLocked = false
-                    else
-                        inputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-                        isCursorLocked = true
-                    end
+        if userInputService.KeyboardEnabled then
+            userInputService.InputBegan:Connect(function(input, gp)
+                if gp then return end
+                if input.KeyCode == Enum.KeyCode.F9 then
+                    if FC.isActive then disableFreecam() else enableFreecam() end
                 end
-            end
-        end)
+            end)
+            userInputService.InputChanged:Connect(function(input)
+                if not FC.isActive then return end
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local dx = -input.Delta.X * 0.005
+                    local dy = -input.Delta.Y * 0.005
+                    FC.cameraRotation = FC.cameraRotation * CFrame.Angles(0, dx, 0) * CFrame.Angles(dy, 0, 0)
+                    local look = FC.cameraRotation.LookVector
+                    local up = FC.cameraRotation.UpVector
+                    FC.cameraRotation = CFrame.lookAt(Vector3.new(0,0,0), look, up)
+                end
+            end)
+        end
 
-        inputService.InputChanged:Connect(function(input)
-            if not isFreecamActive then return end
-            if not isCursorLocked then return end
-
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                local deltaX = -input.Delta.X * sensitivity
-                local deltaY = -input.Delta.Y * sensitivity
-
-                local rotY = CFrame.Angles(0, deltaX, 0)
-                local rotX = CFrame.Angles(deltaY, 0, 0)
-
-                cameraRotation = cameraRotation * rotY
-                cameraRotation = cameraRotation * rotX
-
-                local pos = cameraRotation.Position
-                local look = cameraRotation.LookVector
-                local up = cameraRotation.UpVector
-                cameraRotation = CFrame.lookAt(pos, pos + look, up)
-            end
-        end)
-
-        game:GetService("RunService").RenderStepped:Connect(function()
-            if not isFreecamActive then return end
-
+        game:GetService("RunService").RenderStepped:Connect(function(dt)
+            if not FC.isActive then return end
             local camera = workspace.CurrentCamera
             local moveDirection = Vector3.new(0, 0, 0)
 
-            if inputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + Vector3.new(0, 0, -1) end
-            if inputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection + Vector3.new(0, 0, 1) end
-            if inputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection + Vector3.new(-1, 0, 0) end
-            if inputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + Vector3.new(1, 0, 0) end
-            if inputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
-            if inputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
+            local camLook = FC.cameraRotation.LookVector
+            local camRight = FC.cameraRotation.RightVector
+            local flatLook = Vector3.new(camLook.X, 0, camLook.Z)
+            local flatRight = Vector3.new(camRight.X, 0, camRight.Z)
+            if flatLook.Magnitude > 0.01 then flatLook = flatLook.Unit end
+            if flatRight.Magnitude > 0.01 then flatRight = flatRight.Unit end
 
-            if moveDirection.Magnitude > 0 then moveDirection = moveDirection.Unit end
+            if isMobile then
+                local player = game.Players.LocalPlayer
+                local char = player and player.Character
+                local humanoid = char and char:FindFirstChild("Humanoid")
 
-            local deltaTime = 0.016
-            local moveAmount = moveSpeed * deltaTime
-
-            if moveDirection.Magnitude > 0 then
-                local worldMove = cameraRotation * moveDirection
-                freecamPosition = freecamPosition + worldMove * moveAmount
+                if humanoid then
+                    local md = humanoid.MoveDirection
+                    if md.Magnitude > 0.05 then
+                        local forwardAmt = md:Dot(flatLook)
+                        local rightAmt = md:Dot(flatRight)
+                        moveDirection = moveDirection + camLook * forwardAmt
+                        moveDirection = moveDirection + flatRight * rightAmt
+                    end
+                    if humanoid.Jump then
+                        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                    end
+                end
             end
 
-            local newCFrame = CFrame.new(freecamPosition) * cameraRotation
+            if userInputService.KeyboardEnabled then
+                if userInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + camLook
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - camLook
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - flatRight
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + flatRight
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                end
+                if userInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    moveDirection = moveDirection - Vector3.new(0, 1, 0)
+                end
+            end
 
+            if moveDirection.Magnitude > 0 then
+                moveDirection = moveDirection.Unit
+            end
+
+            local moveAmount = FC.baseSpeed * dt
+            if moveDirection.Magnitude > 0 then
+                FC.freecamPosition = FC.freecamPosition + moveDirection * moveAmount
+            end
+
+            local newCFrame = CFrame.new(FC.freecamPosition) * (FC.cameraRotation - FC.cameraRotation.Position)
             camera.CFrame = newCFrame
-            camera.Focus = CFrame.new(freecamPosition + cameraRotation.LookVector * 100)
+            camera.Focus = CFrame.new(FC.freecamPosition + newCFrame.LookVector * 100)
         end)
 
         updateSpeedSlider()
-
-        print("========================================")
-        print("✅ FREECAM FIXED!")
-        print("📌 Character does NOT become transparent")
-        print("📌 Smooth rotation via CFrame")
-        print("📌 F9 - toggle | Alt - cursor | WASD - move")
-        print("📌 Menu state is saved and restored!")
-        print("========================================")
     end
-
-    createFreecamUI()
 end
 
 -- ===== FIX: MOVING LOADING SCREEN TO THE END =====
@@ -3742,6 +3772,8 @@ local function CreateFinalLoadingScreen()
     loadingGui.Parent = game.CoreGui
     loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     loadingGui.ResetOnSpawn = false
+    loadingGui.DisplayOrder = 9999
+    loadingGui.IgnoreGuiInset = true
 
     local background = Instance.new("Frame")
     background.Size = UDim2.new(10, 0, 10, 0)
@@ -3750,6 +3782,7 @@ local function CreateFinalLoadingScreen()
     background.BackgroundTransparency = 0
     background.Parent = loadingGui
     background.ZIndex = 999
+    background.Active = true
 
     local background2 = Instance.new("Frame")
     background2.Size = UDim2.new(10, 0, 10, 0)
@@ -3758,6 +3791,7 @@ local function CreateFinalLoadingScreen()
     background2.BackgroundTransparency = 0
     background2.Parent = loadingGui
     background2.ZIndex = 998
+    background2.Active = true
 
     local container = Instance.new("Frame")
     container.Size = UDim2.new(0, 500, 0, 380)
@@ -3887,7 +3921,7 @@ local function CreateFinalLoadingScreen()
             if not allTabsShown then
                 allTabsShown = true
                 tabLabel.Text = "13.Forward"
-                
+
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 1
                 allLoadedShown = true
@@ -3931,7 +3965,7 @@ local function CreateFinalLoadingScreen()
             if not allTabsShown then
                 tabLabel.Text = "13.Forward"
             end
-            
+
             if not allLoadedShown then
                 allLoadedLabel.Text = "All tabs loaded!"
                 allLoadedLabel.TextTransparency = 0
@@ -4127,16 +4161,7 @@ pcall(function()
     xrayBtn.Font = Enum.Font.SourceSansBold
     xrayBtn.Parent = mainFrame
 
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.12, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "X-Ray: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
+    -- ===== ВЕРНУТАЯ надпись прозрачности =====
     local transLabel = Instance.new("TextLabel")
     transLabel.Size = UDim2.new(0.2, 0, 0.12, 0)
     transLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -4147,47 +4172,37 @@ pcall(function()
     transLabel.Font = Enum.Font.SourceSansBold
     transLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local transSlider = Instance.new("Frame")
-    transSlider.Size = UDim2.new(0.6, -10, 0.05, 0)
+    transSlider.Name = "OrionSliderTrack"
+    transSlider.Size = UDim2.new(0.6, -10, 0, 6)
     transSlider.Position = UDim2.new(0.3, 0, 0.82, 0)
-    transSlider.BackgroundColor3 = Library.Theme.Border
+    transSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     transSlider.BorderSizePixel = 0
+    transSlider.BackgroundTransparency = 0
     transSlider.Parent = mainFrame
 
     local transFill = Instance.new("Frame")
+    transFill.Name = "OrionSliderFill"
     transFill.Size = UDim2.new(0.5, 0, 1, 0)
-    transFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    transFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     transFill.BorderSizePixel = 0
+    transFill.BackgroundTransparency = 0
     transFill.Parent = transSlider
 
     local transButton = Instance.new("TextButton")
-    transButton.Size = UDim2.new(0, 15, 1.8, 0)
-    transButton.Position = UDim2.new(0.5, -7.5, -0.4, 0)
+    transButton.Name = "OrionSliderButton"
+    transButton.Size = UDim2.new(0, 14, 0, 14)
+    transButton.Position = UDim2.new(0.5, -7, 0.5, -7)
     transButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    transButton.BorderColor3 = Library.Theme.Border
-    transButton.BorderSizePixel = 2
+    transButton.BorderSizePixel = 0
     transButton.Text = ""
     transButton.Parent = transSlider
     transButton.BackgroundTransparency = 0
 
-    local transButtonCorner = Instance.new("UICorner")
-    transButtonCorner.CornerRadius = UDim.new(1, 0)
-    transButtonCorner.Parent = transButton
-
-    local hotkeyFrame = Instance.new("Frame")
-    hotkeyFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    hotkeyFrame.Position = UDim2.new(0, 0, 0.7, 0)
-    hotkeyFrame.BackgroundTransparency = 1
-    hotkeyFrame.Parent = container
-
-    local hotkeyLabel = Instance.new("TextLabel")
-    hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
-    hotkeyLabel.BackgroundTransparency = 1
-    hotkeyLabel.Text = "Hotkey: Alt+R"
-    hotkeyLabel.TextColor3 = Library.Theme.Accent
-    hotkeyLabel.TextScaled = true
-    hotkeyLabel.Font = Enum.Font.SourceSansBold
-    hotkeyLabel.Parent = hotkeyFrame
+    local transCorner = Instance.new("UICorner")
+    transCorner.CornerRadius = UDim.new(1, 0)
+    transCorner.Parent = transButton
 
     local xrayEnabled = false
     local currentTransparency = 0.5
@@ -4246,10 +4261,6 @@ pcall(function()
 
         xrayBtn.Text = "ON"
         xrayBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "X-Ray: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        print("✅ X-Ray enabled")
     end
 
     local function disableXRay()
@@ -4265,10 +4276,6 @@ pcall(function()
 
         xrayBtn.Text = "OFF"
         xrayBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "X-Ray: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ X-Ray disabled")
     end
 
     local function toggleXRay()
@@ -4282,18 +4289,11 @@ pcall(function()
     local function updateSlider()
         local percent = currentTransparency
         transFill.Size = UDim2.new(percent, 0, 1, 0)
-        transButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        transButton.Position = UDim2.new(percent, -7, 0.5, -7)
         transLabel.Text = math.floor(percent * 100) .. "%"
     end
 
     xrayBtn.MouseButton1Click:Connect(toggleXRay)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.R and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-            toggleXRay()
-        end
-    end)
 
     local isDragging = false
     transButton.MouseButton1Down:Connect(function() isDragging = true end)
@@ -4326,10 +4326,18 @@ pcall(function()
             processParts(workspace, true)
         end
     end)
+end)
 
-    print("✅ X-Ray tab updated - works!")
-    print("📌 Alt+R - toggle")
-    print("📌 Slider adjusts transparency")
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" then
+            obj.BackgroundTransparency = 0
+        end
+        if obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
 end)
 
 pcall(function()
@@ -4347,7 +4355,7 @@ pcall(function()
 
     for _, tab in pairs(Tabs) do
         for _, child in pairs(tab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
         end
@@ -4385,10 +4393,6 @@ pcall(function()
         PlatformFrame.BackgroundTransparency = 0.5
     end
 
-    if FlyFrame then
-        FlyFrame.BackgroundTransparency = 0.5
-    end
-
     if WalkFrame then
         WalkFrame.BackgroundTransparency = 0.5
     end
@@ -4398,23 +4402,21 @@ pcall(function()
     end
 
     for _, child in pairs(Tabs[10]:GetChildren()) do
-        if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+        if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
             child.BackgroundTransparency = 0.5
         end
     end
-
-    print("✅ Background transparency set to 50%")
 end)
 
 pcall(function()
     local freecamTab = Tabs[10]
     if freecamTab then
         for _, child in pairs(freecamTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4434,20 +4436,18 @@ pcall(function()
             obj.BackgroundTransparency = 0.5
         end
     end
-
-    print("✅ Additional transparency applied: Freecam and input fields")
 end)
 
 pcall(function()
     local playersTab = Tabs[7]
     if playersTab then
         for _, child in pairs(playersTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
 
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4457,12 +4457,12 @@ pcall(function()
     local xrayTab = Tabs[8]
     if xrayTab then
         for _, child in pairs(xrayTab:GetChildren()) do
-            if child:IsA("Frame") and child.BackgroundTransparency < 1 then
+            if child:IsA("Frame") and child.BackgroundTransparency < 1 and child.Name ~= "OrionSliderTrack" and child.Name ~= "OrionSliderFill" then
                 child.BackgroundTransparency = 0.5
             end
 
             for _, subChild in pairs(child:GetChildren()) do
-                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 then
+                if subChild:IsA("Frame") and subChild.BackgroundTransparency < 1 and subChild.Name ~= "OrionSliderTrack" and subChild.Name ~= "OrionSliderFill" then
                     subChild.BackgroundTransparency = 0.5
                 end
             end
@@ -4483,7 +4483,7 @@ pcall(function()
 
     if xrayTab then
         for _, obj in pairs(xrayTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
@@ -4491,13 +4491,11 @@ pcall(function()
 
     if playersTab then
         for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 then
+            if obj:IsA("Frame") and obj.BackgroundTransparency < 1 and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
     end
-
-    print("✅ Transparency applied for Players and X-Ray tabs")
 end)
 
 pcall(function()
@@ -4512,7 +4510,7 @@ pcall(function()
         end
 
         for _, obj in pairs(playersTab:GetDescendants()) do
-            if obj:IsA("Frame") and obj.Parent == PlayersList then
+            if obj:IsA("Frame") and obj.Parent == PlayersList and obj.Name ~= "OrionSliderTrack" and obj.Name ~= "OrionSliderFill" then
                 obj.BackgroundTransparency = 0.5
             end
         end
@@ -4525,8 +4523,6 @@ pcall(function()
             end
         end
     end
-
-    print("✅ Player list and nicknames are now transparent (50%)")
 end)
 
 pcall(function()
@@ -4551,8 +4547,6 @@ pcall(function()
             end
         end
     end
-
-    print("✅ Player rows (online/offline, name, ID, TP) are now transparent (50%)")
 end)
 
 pcall(function()
@@ -4622,10 +4616,6 @@ pcall(function()
             child:Destroy()
         end
     end
-
-    print("✅ GG+ button transparent and round")
-    print("✅ Resize buttons on walls - transparent and round")
-    print("✅ Corner buttons - transparent")
 end)
 
 pcall(function()
@@ -4663,10 +4653,6 @@ pcall(function()
             corner.Parent = child
         end
     end
-
-    print("✅ Arrows removed from all resize buttons")
-    print("✅ Resize buttons doubled in size")
-    print("✅ ALL buttons are now FULL ROUND!")
 end)
 
 pcall(function()
@@ -4708,26 +4694,24 @@ pcall(function()
             corner.Parent = child
         end
     end
-
-    print("✅ Resize buttons resized: 14x14 and 16x16")
-    print("✅ Arrows removed")
-    print("✅ ALL buttons are now FULL ROUND (1,0)")
 end)
 
 pcall(function()
     local function processButtons(container)
         for _, obj in pairs(container:GetDescendants()) do
             if obj:IsA("TextButton") or obj:IsA("ImageButton") then
-                if obj.BackgroundTransparency < 0.3 then
-                    obj.BackgroundTransparency = 0.3
-                end
+                if obj.Name ~= "OrionSliderButton" then
+                    if obj.BackgroundTransparency < 0.3 then
+                        obj.BackgroundTransparency = 0.3
+                    end
 
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
+                    local corner = obj:FindFirstChild("UICorner")
+                    if not corner then
+                        corner = Instance.new("UICorner")
+                        corner.Parent = obj
+                    end
+                    corner.CornerRadius = UDim.new(1, 0)
                 end
-                corner.CornerRadius = UDim.new(1, 0)
             end
         end
     end
@@ -4781,11 +4765,6 @@ pcall(function()
         end
         corner.CornerRadius = UDim.new(1, 0)
     end
-
-    print("✅ All buttons became 30% transparent")
-    print("✅ ALL buttons are now FULL ROUND (1,0)")
-    print("✅ Main GG+ button - round")
-    print("✅ Resize buttons on walls and corners - ALL FULL ROUND!")
 end)
 
 pcall(function()
@@ -4805,7 +4784,7 @@ pcall(function()
                 obj.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
                 obj.BorderSizePixel = 2
                 obj.BorderColor3 = Color3.fromRGB(60, 220, 80)
-                
+
                 local newCorner = Instance.new("UICorner")
                 newCorner.CornerRadius = UDim.new(1, 0)
                 newCorner.Parent = obj
@@ -4830,9 +4809,6 @@ pcall(function()
             child.Image = "rbxassetid://0"
         end
     end
-
-    print("✅ TP buttons in Players tab are now 2x smaller and round")
-    print("✅ ALL resize buttons are now FULL ROUND!")
 end)
 
 pcall(function()
@@ -4862,8 +4838,6 @@ pcall(function()
             end
         end
     end
-
-    print("✅ TP buttons in Players tab are now 2x smaller, FULL ROUND and transparent")
 end)
 
 pcall(function()
@@ -4880,8 +4854,18 @@ pcall(function()
             btn.Size = UDim2.new(1, -5, 0, 35)
         end
     end
+end)
 
-    print("✅ Tab buttons are now square (no rounding)")
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ПОВТОРНО) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" then
+            obj.BackgroundTransparency = 0
+        end
+        if obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
 end)
 
 -- ===== TAB 11: CLICKER =====
@@ -4944,215 +4928,7 @@ pcall(function()
         if corner then corner:Destroy() end
         newBtn.BorderSizePixel = 2
         newBtn.BorderColor3 = Library.Theme.Border
-
-        print("✅ Added empty 'Clicker' tab")
     end
-end)
-
-pcall(function()
-    local clickerTab = nil
-    for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "11.Clicker" then
-            clickerTab = tab
-            break
-        end
-    end
-
-    if not clickerTab then
-        print("❌ 'Clicker' tab not found")
-        return
-    end
-
-    for _, child in pairs(clickerTab:GetChildren()) do
-        child:Destroy()
-    end
-
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, 0)
-    container.BackgroundTransparency = 1
-    container.Parent = clickerTab
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.15, 0)
-    mainFrame.BackgroundColor3 = Library.Theme.Panel
-    mainFrame.BorderColor3 = Library.Theme.Border
-    mainFrame.BorderSizePixel = 2
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.Parent = container
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "AUTO CLICKER"
-    title.TextColor3 = Library.Theme.Text
-    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = mainFrame
-
-    local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, 0, 0.12, 0)
-    info.Position = UDim2.new(0, 0, 0.17, 0)
-    info.BackgroundTransparency = 1
-    info.Text = "Automatic left mouse button clicker"
-    info.TextColor3 = Library.Theme.Accent
-    info.TextScaled = true
-    info.Font = Enum.Font.SourceSans
-    info.Parent = mainFrame
-
-    local clickerBtn = Instance.new("TextButton")
-    clickerBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    clickerBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
-    clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    clickerBtn.BorderColor3 = Library.Theme.Border
-    clickerBtn.BorderSizePixel = 2
-    clickerBtn.Text = "OFF"
-    clickerBtn.TextColor3 = Library.Theme.Text
-    clickerBtn.TextScaled = true
-    clickerBtn.Font = Enum.Font.SourceSansBold
-    clickerBtn.BackgroundTransparency = 0.3
-    clickerBtn.Parent = mainFrame
-
-    local clickerCorner = Instance.new("UICorner")
-    clickerCorner.CornerRadius = UDim.new(1, 0)
-    clickerCorner.Parent = clickerBtn
-
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Auto Clicker: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
-    local delayLabel = Instance.new("TextLabel")
-    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-    delayLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
-    delayLabel.BackgroundTransparency = 1
-    delayLabel.Text = "Delay: 100 ms"
-    delayLabel.TextColor3 = Library.Theme.Text
-    delayLabel.TextScaled = true
-    delayLabel.Font = Enum.Font.SourceSans
-    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
-    delayLabel.Parent = mainFrame
-
-    local delaySlider = Instance.new("Frame")
-    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
-    delaySlider.Position = UDim2.new(0.4, 0, 0.8, 0)
-    delaySlider.BackgroundColor3 = Library.Theme.Border
-    delaySlider.BorderSizePixel = 0
-    delaySlider.Parent = mainFrame
-
-    local delayFill = Instance.new("Frame")
-    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
-    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    delayFill.BorderSizePixel = 0
-    delayFill.Parent = delaySlider
-
-    local delayButton = Instance.new("TextButton")
-    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
-    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
-    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    delayButton.BorderColor3 = Library.Theme.Border
-    delayButton.BorderSizePixel = 2
-    delayButton.Text = ""
-    delayButton.Parent = delaySlider
-    delayButton.BackgroundTransparency = 0
-
-    local delayButtonCorner = Instance.new("UICorner")
-    delayButtonCorner.CornerRadius = UDim.new(1, 0)
-    delayButtonCorner.Parent = delayButton
-
-    local isClicking = false
-    local clickDelay = 100
-    local clickConnection = nil
-    local mouse = game.Players.LocalPlayer:GetMouse()
-
-    local function DoClick()
-        if not isClicking then return end
-        mouse1click()
-    end
-
-    local function EnableClicker()
-        if isClicking then return end
-        isClicking = true
-
-        clickerBtn.Text = "ON"
-        clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Auto Clicker: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            if not isClicking then return end
-            DoClick()
-            task.wait(clickDelay / 1000)
-        end)
-
-        print("✅ Auto Clicker enabled")
-    end
-
-    local function DisableClicker()
-        if not isClicking then return end
-        isClicking = false
-
-        if clickConnection then
-            clickConnection:Disconnect()
-            clickConnection = nil
-        end
-
-        clickerBtn.Text = "OFF"
-        clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Auto Clicker: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ Auto Clicker disabled")
-    end
-
-    local function ToggleClicker()
-        if isClicking then
-            DisableClicker()
-        else
-            EnableClicker()
-        end
-    end
-
-    clickerBtn.MouseButton1Click:Connect(ToggleClicker)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
-            ToggleClicker()
-        end
-    end)
-
-    local isDragging = false
-    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = delaySlider.AbsolutePosition
-            local sliderSize = delaySlider.AbsoluteSize
-            local mouseX = input.Position.X
-
-            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            clickDelay = math.floor(50 + percent * 950)
-            delayFill.Size = UDim2.new(percent, 0, 1, 0)
-            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
-            delayLabel.Text = "Delay: " .. clickDelay .. " ms"
-        end
-    end)
-
-    print("✅ 'Clicker' tab updated - auto clicker added")
-    print("📌 Alt+K - toggle auto clicker")
-    print("📌 Slider adjusts click delay (50-1000 ms)")
 end)
 
 pcall(function()
@@ -5223,16 +4999,7 @@ pcall(function()
     clickerCorner.CornerRadius = UDim.new(1, 0)
     clickerCorner.Parent = clickerBtn
 
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.62, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Auto Clicker: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
+    -- ===== ВЕРНУТАЯ надпись задержки =====
     local delayLabel = Instance.new("TextLabel")
     delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
     delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
@@ -5244,32 +5011,37 @@ pcall(function()
     delayLabel.TextXAlignment = Enum.TextXAlignment.Left
     delayLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local delaySlider = Instance.new("Frame")
-    delaySlider.Size = UDim2.new(0.5, -10, 0.05, 0)
+    delaySlider.Name = "OrionSliderTrack"
+    delaySlider.Size = UDim2.new(0.5, -10, 0, 6)
     delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
-    delaySlider.BackgroundColor3 = Library.Theme.Border
+    delaySlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     delaySlider.BorderSizePixel = 0
+    delaySlider.BackgroundTransparency = 0
     delaySlider.Parent = mainFrame
 
     local delayFill = Instance.new("Frame")
+    delayFill.Name = "OrionSliderFill"
     delayFill.Size = UDim2.new(0.1, 0, 1, 0)
-    delayFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    delayFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     delayFill.BorderSizePixel = 0
+    delayFill.BackgroundTransparency = 0
     delayFill.Parent = delaySlider
 
     local delayButton = Instance.new("TextButton")
-    delayButton.Size = UDim2.new(0, 15, 1.8, 0)
-    delayButton.Position = UDim2.new(0.1, -7.5, -0.4, 0)
+    delayButton.Name = "OrionSliderButton"
+    delayButton.Size = UDim2.new(0, 14, 0, 14)
+    delayButton.Position = UDim2.new(0.1, -7, 0.5, -7)
     delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    delayButton.BorderColor3 = Library.Theme.Border
-    delayButton.BorderSizePixel = 2
+    delayButton.BorderSizePixel = 0
     delayButton.Text = ""
     delayButton.Parent = delaySlider
     delayButton.BackgroundTransparency = 0
 
-    local delayButtonCorner = Instance.new("UICorner")
-    delayButtonCorner.CornerRadius = UDim.new(1, 0)
-    delayButtonCorner.Parent = delayButton
+    local delayCorner = Instance.new("UICorner")
+    delayCorner.CornerRadius = UDim.new(1, 0)
+    delayCorner.Parent = delayButton
 
     local isClicking = false
     local clickDelay = 100
@@ -5326,16 +5098,12 @@ pcall(function()
 
         clickerBtn.Text = "ON"
         clickerBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Auto Clicker: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
 
         clickConnection = game:GetService("RunService").Heartbeat:Connect(function()
             if not isClicking then return end
             DoClick()
             task.wait(clickDelay / 1000)
         end)
-
-        print("✅ Auto Clicker enabled")
     end
 
     local function DisableClicker()
@@ -5349,10 +5117,6 @@ pcall(function()
 
         clickerBtn.Text = "OFF"
         clickerBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Auto Clicker: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ Auto Clicker disabled")
     end
 
     local function ToggleClicker()
@@ -5390,39 +5154,10 @@ pcall(function()
             local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
             clickDelay = math.floor(50 + percent * 950)
             delayFill.Size = UDim2.new(percent, 0, 1, 0)
-            delayButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+            delayButton.Position = UDim2.new(percent, -7, 0.5, -7)
             delayLabel.Text = "Delay: " .. clickDelay .. " ms"
         end
     end)
-
-    print("✅ 'Clicker' tab updated - auto clicker WORKS")
-    print("📌 Alt+K - toggle auto clicker")
-    print("📌 Auto Clicker does NOT work when cursor is over GUI panel")
-    print("📌 Slider adjusts click delay (50-1000 ms)")
-end)
-
-pcall(function()
-    local clickerTab = nil
-    for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "11.Clicker" then
-            clickerTab = tab
-            break
-        end
-    end
-
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ON" or obj.Text == "OFF") then
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(1, 0)
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
 end)
 
 pcall(function()
@@ -5531,285 +5266,6 @@ pcall(function()
     end
 
     UpdatePointsList()
-    print("✅ Points are now displayed with numbers in circles")
-    print("✅ When deleting a point, numbering updates automatically")
-end)
-
-pcall(function()
-    local clickerTab = nil
-    for i, tab in ipairs(Tabs) do
-        if TabNames[i] == "11.Clicker" then
-            clickerTab = tab
-            break
-        end
-    end
-
-    if clickerTab then
-        for _, obj in pairs(clickerTab:GetDescendants()) do
-            if obj:IsA("TextButton") and (obj.Text == "ON" or obj.Text == "OFF") then
-                local corner = obj:FindFirstChild("UICorner")
-                if not corner then
-                    corner = Instance.new("UICorner")
-                    corner.Parent = obj
-                end
-                corner.CornerRadius = UDim.new(1, 0)
-                obj.BackgroundTransparency = 0.3
-            end
-        end
-    end
-    print("✅ Clicker tab button is now FULL ROUND")
-end)
-
-pcall(function()
-    local PointVisuals = {}
-
-    local function ClearPointVisuals()
-        for _, obj in pairs(PointVisuals) do
-            if obj and obj.Parent then
-                obj:Destroy()
-            end
-        end
-        PointVisuals = {}
-    end
-
-    local function UpdatePointVisuals()
-        ClearPointVisuals()
-
-        for i, data in ipairs(PointsData) do
-            local pos = data.pos
-
-            local sphere = Instance.new("Part")
-            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
-            sphere.Position = pos
-            sphere.Anchored = true
-            sphere.CanCollide = false
-            sphere.Material = Enum.Material.Neon
-            sphere.BrickColor = BrickColor.new("Bright blue")
-            sphere.Transparency = 0.3
-            sphere.Shape = Enum.PartType.Ball
-            sphere.Parent = workspace
-            table.insert(PointVisuals, sphere)
-
-            local highlight = Instance.new("Highlight")
-            highlight.Parent = sphere
-            highlight.FillColor = Color3.fromRGB(0, 150, 255)
-            highlight.FillTransparency = 0.3
-            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
-            highlight.OutlineTransparency = 0
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            table.insert(PointVisuals, highlight)
-
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "PointNumber"
-            billboard.Size = UDim2.new(0, 60, 0, 60)
-            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = sphere
-            table.insert(PointVisuals, billboard)
-
-            local bgFrame = Instance.new("Frame")
-            bgFrame.Size = UDim2.new(1, 0, 1, 0)
-            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-            bgFrame.BackgroundTransparency = 0.2
-            bgFrame.BorderSizePixel = 2
-            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
-            bgFrame.Parent = billboard
-
-            local bgCorner = Instance.new("UICorner")
-            bgCorner.CornerRadius = UDim.new(1, 0)
-            bgCorner.Parent = bgFrame
-
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            numLabel.TextStrokeTransparency = 0.3
-            numLabel.Parent = bgFrame
-            table.insert(PointVisuals, numLabel)
-
-            local line = Instance.new("Part")
-            local groundPos = Vector3.new(pos.X, pos.Y - 3, pos.Z)
-            local distance = (pos - groundPos).Magnitude
-
-            line.Size = Vector3.new(0.1, 0.1, distance)
-            line.Position = (pos + groundPos) / 2
-            line.Anchored = true
-            line.CanCollide = false
-            line.Material = Enum.Material.Neon
-            line.BrickColor = BrickColor.new("Bright blue")
-            line.Transparency = 0.5
-            line.Parent = workspace
-
-            local direction = (groundPos - pos).Unit
-            line.CFrame = CFrame.lookAt((pos + groundPos) / 2, (pos + groundPos) / 2 + direction)
-            table.insert(PointVisuals, line)
-        end
-    end
-
-    local originalUpdatePointsList = UpdatePointsList
-
-    UpdatePointsList = function()
-        originalUpdatePointsList()
-        UpdatePointVisuals()
-    end
-
-    local originalSetPoint = SetPoint
-    SetPoint = function()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-
-        if #PointsData >= MAX_POINTS then return end
-
-        local name = "Point " .. (#PointsData + 1)
-
-        local pos = hrp.Position
-        table.insert(PointsData, {name = name, pos = pos})
-        UpdatePointsList()
-        UpdatePointInfo()
-    end
-
-    task.wait(0.5)
-    UpdatePointVisuals()
-
-    for i, btn in ipairs(TabButtons) do
-        btn.MouseButton1Click:Connect(function()
-            if i == 1 then
-                task.wait(0.1)
-                UpdatePointVisuals()
-            end
-        end)
-    end
-
-    game.Players.LocalPlayer.CharacterAdded:Connect(function()
-        task.wait(1)
-        UpdatePointVisuals()
-    end)
-
-    print("✅ Points are visible in the world as glowing spheres with numbers")
-    print("✅ Point names are NOT displayed in the world")
-    print("✅ Adding/deleting points updates everything automatically")
-end)
-
-pcall(function()
-    if NameInput then
-        NameInput:Destroy()
-    end
-
-    local pointsTab = Tabs[1]
-    if pointsTab then
-        local oldControl = pointsTab:FindFirstChild("PointControl")
-        if oldControl then
-            oldControl:Destroy()
-        end
-
-        local PointControl = Instance.new("Frame")
-        PointControl.Name = "PointControl"
-        PointControl.Size = UDim2.new(1, 0, 0.35, 0)
-        PointControl.Position = UDim2.new(0, 0, 0.62, 0)
-        PointControl.BackgroundTransparency = 1
-        PointControl.Parent = pointsTab
-
-        local SetBtn = Instance.new("TextButton")
-        SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-        SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-        SetBtn.BackgroundColor3 = Library.Theme.Success
-        SetBtn.BorderColor3 = Library.Theme.Border
-        SetBtn.BorderSizePixel = 2
-        SetBtn.Text = "SET POINT"
-        SetBtn.TextColor3 = Library.Theme.Text
-        SetBtn.TextScaled = true
-        SetBtn.Font = Enum.Font.SourceSansBold
-        SetBtn.BackgroundTransparency = 0.3
-        SetBtn.Parent = PointControl
-
-        local setCorner = Instance.new("UICorner")
-        setCorner.CornerRadius = UDim.new(0, 12)
-        setCorner.Parent = SetBtn
-
-        local TeleportBtn = Instance.new("TextButton")
-        TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-        TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
-        TeleportBtn.BackgroundColor3 = Library.Theme.Accent
-        TeleportBtn.BorderColor3 = Library.Theme.Border
-        TeleportBtn.BorderSizePixel = 2
-        TeleportBtn.Text = "TELEPORT"
-        TeleportBtn.TextColor3 = Library.Theme.Text
-        TeleportBtn.TextScaled = true
-        TeleportBtn.Font = Enum.Font.SourceSansBold
-        TeleportBtn.BackgroundTransparency = 0.3
-        TeleportBtn.Parent = PointControl
-
-        local tpCorner = Instance.new("UICorner")
-        tpCorner.CornerRadius = UDim.new(0, 12)
-        tpCorner.Parent = TeleportBtn
-
-        local ClearBtn = Instance.new("TextButton")
-        ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
-        ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
-        ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        ClearBtn.BorderColor3 = Library.Theme.Border
-        ClearBtn.BorderSizePixel = 2
-        ClearBtn.Text = "CLEAR ALL"
-        ClearBtn.TextColor3 = Library.Theme.Text
-        ClearBtn.TextScaled = true
-        ClearBtn.Font = Enum.Font.SourceSansBold
-        ClearBtn.BackgroundTransparency = 0.3
-        ClearBtn.Parent = PointControl
-
-        local clearCorner = Instance.new("UICorner")
-        clearCorner.CornerRadius = UDim.new(0, 12)
-        clearCorner.Parent = ClearBtn
-
-        local PointInfo = Instance.new("TextLabel")
-        PointInfo.Name = "PointInfo"
-        PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
-        PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
-        PointInfo.BackgroundTransparency = 1
-        PointInfo.Text = "Points: 0 / 1000"
-        PointInfo.TextColor3 = Library.Theme.Text
-        PointInfo.TextScaled = true
-        PointInfo.Font = Enum.Font.SourceSans
-        PointInfo.Parent = PointControl
-
-        SetPoint = function()
-            local player = game.Players.LocalPlayer
-            if not player or not player.Character then return end
-
-            local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-
-            if #PointsData >= MAX_POINTS then return end
-
-            local name = "Point " .. (#PointsData + 1)
-
-            local pos = hrp.Position
-            table.insert(PointsData, {name = name, pos = pos})
-            UpdatePointsList()
-            UpdatePointInfo()
-        end
-
-        ClearAllPoints = function()
-            PointsData = {}
-            UpdatePointsList()
-            UpdatePointInfo()
-            ClearPointVisuals()
-        end
-
-        SetBtn.MouseButton1Click:Connect(SetPoint)
-        TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint)
-        ClearBtn.MouseButton1Click:Connect(ClearAllPoints)
-    end
-
-    print("✅ Point name input field removed")
-    print("✅ Points are now automatically numbered")
-    print("✅ 'CLEAR ALL' button added")
 end)
 
 pcall(function()
@@ -5916,356 +5372,6 @@ pcall(function()
         task.wait(1)
         UpdatePointVisuals()
     end)
-
-    print("✅ Points are visible in the world as glowing spheres with numbers")
-    print("✅ Point names are NOT displayed in the world")
-    print("✅ Adding/deleting points updates everything automatically")
-end)
-
-pcall(function()
-    local pointsTab = Tabs[1]
-    if not pointsTab then return end
-
-    for _, child in pairs(pointsTab:GetChildren()) do
-        child:Destroy()
-    end
-
-    local PointsList = Instance.new("ScrollingFrame")
-    PointsList.Name = "PointsList"
-    PointsList.Size = UDim2.new(1, 0, 0.6, 0)
-    PointsList.BackgroundColor3 = Library.Theme.Panel
-    PointsList.BorderColor3 = Library.Theme.Border
-    PointsList.BorderSizePixel = 2
-    PointsList.CanvasSize = UDim2.new(0, 0, 0, 0)
-    PointsList.ScrollBarThickness = 8
-    PointsList.BackgroundTransparency = 0.5
-    PointsList.Parent = pointsTab
-
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 5)
-    ListLayout.Parent = PointsList
-
-    local PointControl = Instance.new("Frame")
-    PointControl.Name = "PointControl"
-    PointControl.Size = UDim2.new(1, 0, 0.35, 0)
-    PointControl.Position = UDim2.new(0, 0, 0.62, 0)
-    PointControl.BackgroundTransparency = 1
-    PointControl.Parent = pointsTab
-
-    local SetBtn = Instance.new("TextButton")
-    SetBtn.Name = "SetBtn"
-    SetBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-    SetBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-    SetBtn.BackgroundColor3 = Library.Theme.Success
-    SetBtn.BorderColor3 = Library.Theme.Border
-    SetBtn.BorderSizePixel = 2
-    SetBtn.Text = "SET POINT"
-    SetBtn.TextColor3 = Library.Theme.Text
-    SetBtn.TextScaled = true
-    SetBtn.Font = Enum.Font.SourceSansBold
-    SetBtn.BackgroundTransparency = 0.3
-    SetBtn.Parent = PointControl
-
-    local setCorner = Instance.new("UICorner")
-    setCorner.CornerRadius = UDim.new(0, 12)
-    setCorner.Parent = SetBtn
-
-    local TeleportBtn = Instance.new("TextButton")
-    TeleportBtn.Name = "TeleportBtn"
-    TeleportBtn.Size = UDim2.new(0.4, -5, 0.35, -5)
-    TeleportBtn.Position = UDim2.new(0.55, 0, 0.1, 0)
-    TeleportBtn.BackgroundColor3 = Library.Theme.Accent
-    TeleportBtn.BorderColor3 = Library.Theme.Border
-    TeleportBtn.BorderSizePixel = 2
-    TeleportBtn.Text = "TELEPORT"
-    TeleportBtn.TextColor3 = Library.Theme.Text
-    TeleportBtn.TextScaled = true
-    TeleportBtn.Font = Enum.Font.SourceSansBold
-    TeleportBtn.BackgroundTransparency = 0.3
-    TeleportBtn.Parent = PointControl
-
-    local tpCorner = Instance.new("UICorner")
-    tpCorner.CornerRadius = UDim.new(0, 12)
-    tpCorner.Parent = TeleportBtn
-
-    local ClearBtn = Instance.new("TextButton")
-    ClearBtn.Name = "ClearBtn"
-    ClearBtn.Size = UDim2.new(0.4, -5, 0.3, -5)
-    ClearBtn.Position = UDim2.new(0.3, 0, 0.55, 0)
-    ClearBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-    ClearBtn.BorderColor3 = Library.Theme.Border
-    ClearBtn.BorderSizePixel = 2
-    ClearBtn.Text = "CLEAR ALL"
-    ClearBtn.TextColor3 = Library.Theme.Text
-    ClearBtn.TextScaled = true
-    ClearBtn.Font = Enum.Font.SourceSansBold
-    ClearBtn.BackgroundTransparency = 0.3
-    ClearBtn.Parent = PointControl
-
-    local clearCorner = Instance.new("UICorner")
-    clearCorner.CornerRadius = UDim.new(0, 12)
-    clearCorner.Parent = ClearBtn
-
-    local PointInfo = Instance.new("TextLabel")
-    PointInfo.Name = "PointInfo"
-    PointInfo.Size = UDim2.new(1, 0, 0.2, 0)
-    PointInfo.Position = UDim2.new(0, 0, 0.78, 0)
-    PointInfo.BackgroundTransparency = 1
-    PointInfo.Text = "Points: 0"
-    PointInfo.TextColor3 = Library.Theme.Text
-    PointInfo.TextScaled = true
-    PointInfo.Font = Enum.Font.SourceSans
-    PointInfo.Parent = PointControl
-
-    _G.PointsList = PointsList
-    _G.PointInfo = PointInfo
-
-    print("✅ Points tab recreated without names")
-end)
-
-pcall(function()
-    function UpdatePointsList()
-        local PointsList = _G.PointsList
-        if not PointsList then return end
-
-        for _, child in pairs(PointsList:GetChildren()) do
-            if child:IsA("Frame") then child:Destroy() end
-        end
-
-        for i, data in ipairs(PointsData) do
-            local pos = data.pos
-
-            local ItemFrame = Instance.new("Frame")
-            ItemFrame.Size = UDim2.new(1, -10, 0, 45)
-            ItemFrame.BackgroundColor3 = Library.Theme.Panel
-            ItemFrame.BorderColor3 = Library.Theme.Border
-            ItemFrame.BorderSizePixel = 1
-            ItemFrame.BackgroundTransparency = 0.5
-            ItemFrame.Parent = PointsList
-
-            local circleFrame = Instance.new("Frame")
-            circleFrame.Size = UDim2.new(0, 40, 0, 40)
-            circleFrame.Position = UDim2.new(0, 5, 0.5, -20)
-            circleFrame.BackgroundColor3 = Library.Theme.Accent
-            circleFrame.BorderColor3 = Library.Theme.Border
-            circleFrame.BorderSizePixel = 2
-            circleFrame.Parent = ItemFrame
-
-            local circleCorner = Instance.new("UICorner")
-            circleCorner.CornerRadius = UDim.new(1, 0)
-            circleCorner.Parent = circleFrame
-
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.Parent = circleFrame
-
-            local coordsLabel = Instance.new("TextLabel")
-            coordsLabel.Size = UDim2.new(0.6, 0, 1, 0)
-            coordsLabel.Position = UDim2.new(0.12, 0, 0, 0)
-            coordsLabel.BackgroundTransparency = 1
-            coordsLabel.Text = "X:" .. math.floor(pos.X) .. " Y:" .. math.floor(pos.Y) .. " Z:" .. math.floor(pos.Z)
-            coordsLabel.TextColor3 = Library.Theme.Text
-            coordsLabel.TextScaled = true
-            coordsLabel.TextXAlignment = Enum.TextXAlignment.Left
-            coordsLabel.Font = Enum.Font.SourceSans
-            coordsLabel.Parent = ItemFrame
-
-            local TeleportPointBtn = Instance.new("TextButton")
-            TeleportPointBtn.Size = UDim2.new(0.13, -5, 0.7, 0)
-            TeleportPointBtn.Position = UDim2.new(0.75, 0, 0.15, 0)
-            TeleportPointBtn.BackgroundColor3 = Library.Theme.Accent
-            TeleportPointBtn.BorderColor3 = Library.Theme.Border
-            TeleportPointBtn.BorderSizePixel = 1
-            TeleportPointBtn.Text = "TP"
-            TeleportPointBtn.TextColor3 = Library.Theme.Text
-            TeleportPointBtn.TextScaled = true
-            TeleportPointBtn.Font = Enum.Font.SourceSansBold
-            TeleportPointBtn.BackgroundTransparency = 0.3
-            TeleportPointBtn.Parent = ItemFrame
-
-            local tpCorner = Instance.new("UICorner")
-            tpCorner.CornerRadius = UDim.new(0, 8)
-            tpCorner.Parent = TeleportPointBtn
-
-            TeleportPointBtn.MouseButton1Click:Connect(function()
-                TeleportToPosition(pos)
-            end)
-
-            local DeleteBtn = Instance.new("TextButton")
-            DeleteBtn.Size = UDim2.new(0.1, 0, 0.7, 0)
-            DeleteBtn.Position = UDim2.new(0.9, 0, 0.15, 0)
-            DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-            DeleteBtn.BorderColor3 = Library.Theme.Border
-            DeleteBtn.BorderSizePixel = 1
-            DeleteBtn.Text = "X"
-            DeleteBtn.TextColor3 = Library.Theme.Text
-            DeleteBtn.TextScaled = true
-            DeleteBtn.Font = Enum.Font.SourceSansBold
-            DeleteBtn.BackgroundTransparency = 0.3
-            DeleteBtn.Parent = ItemFrame
-
-            local delCorner = Instance.new("UICorner")
-            delCorner.CornerRadius = UDim.new(0, 8)
-            delCorner.Parent = DeleteBtn
-
-            DeleteBtn.MouseButton1Click:Connect(function()
-                table.remove(PointsData, i)
-                UpdatePointsList()
-                UpdatePointInfo()
-                UpdatePointVisuals()
-            end)
-        end
-
-        local count = #PointsData
-        PointsList.CanvasSize = UDim2.new(0, 0, 0, count * 50 + 10)
-    end
-
-    function UpdatePointInfo()
-        local PointInfo = _G.PointInfo
-        if PointInfo then
-            PointInfo.Text = "Points: " .. #PointsData
-        end
-    end
-
-    function SetPoint()
-        local player = game.Players.LocalPlayer
-        if not player or not player.Character then return end
-
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-
-        if #PointsData >= MAX_POINTS then return end
-
-        local pos = hrp.Position
-        table.insert(PointsData, {pos = pos})
-        UpdatePointsList()
-        UpdatePointInfo()
-        UpdatePointVisuals()
-    end
-
-    function ClearAllPoints()
-        PointsData = {}
-        UpdatePointsList()
-        UpdatePointInfo()
-        ClearPointVisuals()
-    end
-
-    local pointsTab = Tabs[1]
-    if pointsTab then
-        local control = pointsTab:FindFirstChild("PointControl")
-        if control then
-            local SetBtn = control:FindFirstChild("SetBtn")
-            local TeleportBtn = control:FindFirstChild("TeleportBtn")
-            local ClearBtn = control:FindFirstChild("ClearBtn")
-
-            if SetBtn then SetBtn.MouseButton1Click:Connect(SetPoint) end
-            if TeleportBtn then TeleportBtn.MouseButton1Click:Connect(TeleportToLastPoint) end
-            if ClearBtn then ClearBtn.MouseButton1Click:Connect(ClearAllPoints) end
-        end
-    end
-
-    print("✅ Points are saved WITHOUT names")
-    print("✅ In the list only the number in a circle and coordinates are displayed")
-end)
-
-pcall(function()
-    local PointVisuals = {}
-
-    function ClearPointVisuals()
-        for _, obj in pairs(PointVisuals) do
-            if obj and obj.Parent then
-                obj:Destroy()
-            end
-        end
-        PointVisuals = {}
-    end
-
-    function UpdatePointVisuals()
-        ClearPointVisuals()
-
-        for i, data in ipairs(PointsData) do
-            local pos = data.pos
-
-            local sphere = Instance.new("Part")
-            sphere.Size = Vector3.new(2.5, 2.5, 2.5)
-            sphere.Position = pos
-            sphere.Anchored = true
-            sphere.CanCollide = false
-            sphere.Material = Enum.Material.Neon
-            sphere.BrickColor = BrickColor.new("Bright blue")
-            sphere.Transparency = 0.3
-            sphere.Shape = Enum.PartType.Ball
-            sphere.Parent = workspace
-            table.insert(PointVisuals, sphere)
-
-            local highlight = Instance.new("Highlight")
-            highlight.Parent = sphere
-            highlight.FillColor = Color3.fromRGB(0, 150, 255)
-            highlight.FillTransparency = 0.3
-            highlight.OutlineColor = Color3.fromRGB(0, 200, 255)
-            highlight.OutlineTransparency = 0
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            table.insert(PointVisuals, highlight)
-
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "PointNumber"
-            billboard.Size = UDim2.new(0, 60, 0, 60)
-            billboard.StudsOffset = Vector3.new(0, 3.5, 0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = sphere
-            table.insert(PointVisuals, billboard)
-
-            local bgFrame = Instance.new("Frame")
-            bgFrame.Size = UDim2.new(1, 0, 1, 0)
-            bgFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-            bgFrame.BackgroundTransparency = 0.2
-            bgFrame.BorderSizePixel = 2
-            bgFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
-            bgFrame.Parent = billboard
-
-            local bgCorner = Instance.new("UICorner")
-            bgCorner.CornerRadius = UDim.new(1, 0)
-            bgCorner.Parent = bgFrame
-
-            local numLabel = Instance.new("TextLabel")
-            numLabel.Size = UDim2.new(1, 0, 1, 0)
-            numLabel.BackgroundTransparency = 1
-            numLabel.Text = tostring(i)
-            numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            numLabel.TextScaled = true
-            numLabel.Font = Enum.Font.SourceSansBold
-            numLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            numLabel.TextStrokeTransparency = 0.3
-            numLabel.Parent = bgFrame
-            table.insert(PointVisuals, numLabel)
-        end
-    end
-
-    task.wait(0.5)
-    UpdatePointVisuals()
-
-    for i, btn in ipairs(TabButtons) do
-        btn.MouseButton1Click:Connect(function()
-            if i == 1 then
-                task.wait(0.1)
-                UpdatePointVisuals()
-            end
-        end)
-    end
-
-    game.Players.LocalPlayer.CharacterAdded:Connect(function()
-        task.wait(1)
-        UpdatePointVisuals()
-    end)
-
-    print("✅ Only numbers in circles are displayed in the world")
-    print("✅ Point names are completely removed")
 end)
 
 -- ===== SPEED INDICATOR WITH AUTO-RESPAWN AND COLOR CHANGE (GREEN → RED) =====
@@ -6344,15 +5450,15 @@ pcall(function()
         if speed <= 3 then
             return Color3.fromRGB(0, 200, 0)
         end
-        
+
         local t = (speed - 3) / 147
         t = math.min(t, 1)
         t = t * t * (3 - 2 * t)
-        
+
         local r = 0 + t * 255
         local g = 200 - t * 200
         local b = 0
-        
+
         return Color3.fromRGB(
             math.floor(math.max(0, math.min(255, r))),
             math.floor(math.max(0, math.min(255, g))),
@@ -6486,11 +5592,11 @@ pcall(function()
                     if SpeedIndicatorLabel then
                         local currentColor = SpeedIndicatorLabel.TextColor3
                         local isCurrentlyRed = currentColor.R > 100 and currentColor.G < 100
-                        
+
                         if displaySpeed < 150 and isCurrentlyRed then
                             ResetColorToGreenInstant()
                         end
-                        
+
                         local targetColor = GetSpeedColor(displaySpeed)
 
                         if not SpeedIndicatorLabel:GetAttribute("IsResetAnimation") then
@@ -6655,17 +5761,6 @@ pcall(function()
     end
 
     SetupDeathHandler()
-
-    print("========================================")
-    print("✅ SPEED INDICATOR UPDATED!")
-    print("📌 Color changes: green → red smoothly from 0 to 150")
-    print("📌 Speed 0-3: green")
-    print("📌 Speed 3-150: green to red gradient")
-    print("📌 Speed above 150: RED")
-    print("📌 When speed drops below 150: INSTANTLY turns GREEN (NO animation)")
-    print("📌 No hotkey for toggle, shows when moving")
-    print("📌 On death: resets after 2 seconds")
-    print("========================================")
 end)
 
 -- ===== SPEED TAB =====
@@ -6770,26 +5865,29 @@ pcall(function()
     speedToggleCorner.CornerRadius = UDim.new(1, 0)
     speedToggleCorner.Parent = toggleBtn
 
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.58, 0)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Speed modification: Disabled"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-    statusLabel.TextScaled = true
-    statusLabel.Font = Enum.Font.SourceSans
-    statusLabel.Parent = mainFrame
-
     local currentSpeedLabel = Instance.new("TextLabel")
-    currentSpeedLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    currentSpeedLabel.Position = UDim2.new(0, 0, 0.68, 0)
+    currentSpeedLabel.Size = UDim2.new(0.45, 0, 0.08, 0)
+    currentSpeedLabel.Position = UDim2.new(0.05, 0, 0.62, 0)
     currentSpeedLabel.BackgroundTransparency = 1
     currentSpeedLabel.Text = "Current speed: 16"
-    currentSpeedLabel.TextColor3 = Library.Theme.Text
+    currentSpeedLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
     currentSpeedLabel.TextScaled = true
-    currentSpeedLabel.Font = Enum.Font.SourceSans
+    currentSpeedLabel.Font = Enum.Font.SourceSansBold
+    currentSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
     currentSpeedLabel.Parent = mainFrame
 
+    local defaultSpeedLabel = Instance.new("TextLabel")
+    defaultSpeedLabel.Size = UDim2.new(0.45, 0, 0.08, 0)
+    defaultSpeedLabel.Position = UDim2.new(0.5, 0, 0.62, 0)
+    defaultSpeedLabel.BackgroundTransparency = 1
+    defaultSpeedLabel.Text = "Default speed: 16"
+    defaultSpeedLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
+    defaultSpeedLabel.TextScaled = true
+    defaultSpeedLabel.Font = Enum.Font.SourceSansBold
+    defaultSpeedLabel.TextXAlignment = Enum.TextXAlignment.Right
+    defaultSpeedLabel.Parent = mainFrame
+
+    -- ===== ВЕРНУТАЯ надпись скорости =====
     local speedLabel = Instance.new("TextLabel")
     speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
     speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
@@ -6801,38 +5899,44 @@ pcall(function()
     speedLabel.TextXAlignment = Enum.TextXAlignment.Left
     speedLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local speedSlider = Instance.new("Frame")
-    speedSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    speedSlider.Name = "OrionSliderTrack"
+    speedSlider.Size = UDim2.new(0.55, -10, 0, 6)
     speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
-    speedSlider.BackgroundColor3 = Library.Theme.Border
+    speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     speedSlider.BorderSizePixel = 0
+    speedSlider.BackgroundTransparency = 0
     speedSlider.Parent = mainFrame
 
     local speedFill = Instance.new("Frame")
+    speedFill.Name = "OrionSliderFill"
     speedFill.Size = UDim2.new(0, 0, 1, 0)
-    speedFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    speedFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     speedFill.BorderSizePixel = 0
+    speedFill.BackgroundTransparency = 0
     speedFill.Parent = speedSlider
 
     local speedButton = Instance.new("TextButton")
-    speedButton.Size = UDim2.new(0, 15, 1.8, 0)
-    speedButton.Position = UDim2.new(0, -7.5, -0.4, 0)
+    speedButton.Name = "OrionSliderButton"
+    speedButton.Size = UDim2.new(0, 14, 0, 14)
+    speedButton.Position = UDim2.new(0, -7, 0.5, -7)
     speedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    speedButton.BorderColor3 = Library.Theme.Border
-    speedButton.BorderSizePixel = 2
+    speedButton.BorderSizePixel = 0
     speedButton.Text = ""
     speedButton.Parent = speedSlider
     speedButton.BackgroundTransparency = 0
 
-    local speedButtonCorner = Instance.new("UICorner")
-    speedButtonCorner.CornerRadius = UDim.new(1, 0)
-    speedButtonCorner.Parent = speedButton
+    local speedCorner = Instance.new("UICorner")
+    speedCorner.CornerRadius = UDim.new(1, 0)
+    speedCorner.Parent = speedButton
 
     local SpeedEnabled = false
     local TargetSpeed = 16
     local MIN_SPEED = 16
     local MAX_SPEED = 300
     local SpeedConnection = nil
+    local DefaultSpeed = 16
 
     local function UpdateSpeed()
         local player = game.Players.LocalPlayer
@@ -6849,16 +5953,8 @@ pcall(function()
     local function UpdateSlider()
         local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
         speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7.5, -0.4, 0)
+        speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
         speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
-
-        local player = game.Players.LocalPlayer
-        if player and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
-            end
-        end
     end
 
     local function EnableSpeed()
@@ -6867,8 +5963,6 @@ pcall(function()
 
         toggleBtn.Text = "ON"
         toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        statusLabel.Text = "Speed modification: Enabled"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
 
         UpdateSpeed()
 
@@ -6883,8 +5977,6 @@ pcall(function()
                 UpdateSpeed()
             end
         end)
-
-        print("✅ Speed modification enabled (target: " .. TargetSpeed .. ")")
     end
 
     local function DisableSpeed()
@@ -6900,17 +5992,12 @@ pcall(function()
         if player and player.Character then
             local humanoid = player.Character:FindFirstChild("Humanoid")
             if humanoid then
-                humanoid.WalkSpeed = 16
-                currentSpeedLabel.Text = "Current speed: 16"
+                humanoid.WalkSpeed = DefaultSpeed
             end
         end
 
         toggleBtn.Text = "OFF"
         toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        statusLabel.Text = "Speed modification: Disabled"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
-
-        print("✅ Speed modification disabled")
     end
 
     local function ToggleSpeed()
@@ -6957,6 +6044,25 @@ pcall(function()
 
     UpdateSlider()
 
+    task.spawn(function()
+        while true do
+            task.wait(0.2)
+            if speedTab.Visible then
+                local player = game.Players.LocalPlayer
+                if player and player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
+                        if not SpeedEnabled then
+                            DefaultSpeed = math.floor(humanoid.WalkSpeed)
+                        end
+                        defaultSpeedLabel.Text = "Default speed: " .. math.floor(DefaultSpeed)
+                    end
+                end
+            end
+        end
+    end)
+
     game.Players.LocalPlayer.CharacterAdded:Connect(function()
         task.wait(0.5)
         if SpeedEnabled then
@@ -6965,30 +6071,7 @@ pcall(function()
         UpdateSlider()
     end)
 
-    spawn(function()
-        while true do
-            wait(1)
-            if not SpeedEnabled then
-                local player = game.Players.LocalPlayer
-                if player and player.Character then
-                    local humanoid = player.Character:FindFirstChild("Humanoid")
-                    if humanoid and humanoid.WalkSpeed ~= 16 then
-                        currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
-                    end
-                end
-            end
-        end
-    end)
-
     _G.ToggleSpeed = ToggleSpeed
-
-    print("========================================")
-    print("✅ 'SPEED' TAB ADDED!")
-    print("📌 Alt+M - toggle speed modification")
-    print("📌 Slider adjusts speed (16 - 300)")
-    print("📌 Toggle via button or hotkey")
-    print("📌 Slider button is FULL ROUND")
-    print("========================================")
 end)
 
 -- ===== ROUNDED BUTTONS FOR PLAYERS, CLICKER AND SPEED TABS =====
@@ -7052,8 +6135,6 @@ pcall(function()
             end
         end
     end
-
-    print("✅ FULL ROUND corners (1,0) added to all buttons in Players, Clicker and Speed tabs")
 end)
 
 -- ===== REMOVE REFRESH BUTTON FROM PLAYERS TAB =====
@@ -7063,16 +6144,14 @@ pcall(function()
         for _, child in pairs(playersTab:GetDescendants()) do
             if child:IsA("TextButton") and child.Text == "REFRESH" then
                 child:Destroy()
-                print("✅ Refresh button removed from Players tab")
             end
         end
-        
+
         local controlPanel = playersTab:FindFirstChild("PlayersControlPanel")
         if controlPanel then
             for _, child in pairs(controlPanel:GetDescendants()) do
                 if child:IsA("TextButton") and child.Text == "REFRESH" then
                     child:Destroy()
-                    print("✅ Refresh button removed from PlayersControlPanel")
                 end
             end
         end
@@ -7086,7 +6165,15 @@ pcall(function()
             btn.BackgroundTransparency = 0.7
         end
     end
-    print("✅ Tabs are now 50% transparent")
+end)
+
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ЕЩЁ РАЗ) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" or obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
 end)
 
 -- =====================================================
@@ -7177,6 +6264,7 @@ pcall(function()
     info.TextXAlignment = Enum.TextXAlignment.Left
     info.Parent = mainFrame
 
+    -- ===== ВЕРНУТАЯ надпись дистанции =====
     local distanceLabel = Instance.new("TextLabel")
     distanceLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
     distanceLabel.Position = UDim2.new(0.05, 0, 0.4, 0)
@@ -7188,32 +6276,37 @@ pcall(function()
     distanceLabel.TextXAlignment = Enum.TextXAlignment.Left
     distanceLabel.Parent = mainFrame
 
+    -- ===== ORION STYLE SLIDER (непрозрачный) =====
     local distanceSlider = Instance.new("Frame")
-    distanceSlider.Size = UDim2.new(0.55, -10, 0.05, 0)
+    distanceSlider.Name = "OrionSliderTrack"
+    distanceSlider.Size = UDim2.new(0.55, -10, 0, 6)
     distanceSlider.Position = UDim2.new(0.35, 0, 0.44, 0)
-    distanceSlider.BackgroundColor3 = Library.Theme.Border
+    distanceSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     distanceSlider.BorderSizePixel = 0
+    distanceSlider.BackgroundTransparency = 0
     distanceSlider.Parent = mainFrame
 
     local distanceFill = Instance.new("Frame")
+    distanceFill.Name = "OrionSliderFill"
     distanceFill.Size = UDim2.new(0.0408, 0, 1, 0)
-    distanceFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    distanceFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     distanceFill.BorderSizePixel = 0
+    distanceFill.BackgroundTransparency = 0
     distanceFill.Parent = distanceSlider
 
     local distanceButton = Instance.new("TextButton")
-    distanceButton.Size = UDim2.new(0, 18, 1.8, 0)
-    distanceButton.Position = UDim2.new(0.0408, -9, -0.4, 0)
+    distanceButton.Name = "OrionSliderButton"
+    distanceButton.Size = UDim2.new(0, 14, 0, 14)
+    distanceButton.Position = UDim2.new(0.0408, -7, 0.5, -7)
     distanceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    distanceButton.BorderColor3 = Library.Theme.Border
-    distanceButton.BorderSizePixel = 2
+    distanceButton.BorderSizePixel = 0
     distanceButton.Text = ""
     distanceButton.Parent = distanceSlider
     distanceButton.BackgroundTransparency = 0
 
-    local distanceButtonCorner = Instance.new("UICorner")
-    distanceButtonCorner.CornerRadius = UDim.new(1, 0)
-    distanceButtonCorner.Parent = distanceButton
+    local distanceCorner = Instance.new("UICorner")
+    distanceCorner.CornerRadius = UDim.new(1, 0)
+    distanceCorner.Parent = distanceButton
 
     local forwardBtn = Instance.new("TextButton")
     forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
@@ -7246,13 +6339,11 @@ pcall(function()
     local MIN_DISTANCE = 1
     local MAX_DISTANCE = 50
 
-    -- ===== КРАСНАЯ ЛИНИЯ С ШАРИКОМ (ВИДНА ТОЛЬКО НА ВКЛАДКЕ FORWARD) =====
     local RedBeamObjects = {}
     local RedBeamConnection = nil
     local RedBeamVisible = false
     local currentCharacter = nil
 
-    -- Функция для полного удаления всех объектов линии
     local function ClearRedBeam()
         for _, obj in pairs(RedBeamObjects) do
             if obj and obj.Parent then
@@ -7265,8 +6356,7 @@ pcall(function()
             RedBeamConnection = nil
         end
         RedBeamVisible = false
-        
-        -- Удаляем папку если она есть
+
         if currentCharacter then
             local folder = currentCharacter:FindFirstChild("RedBeamFolder")
             if folder then
@@ -7275,64 +6365,53 @@ pcall(function()
         end
     end
 
-    -- Функция создания красной линии с шариком на уровне живота
     local function CreateRedBeam()
-        -- Удаляем старые объекты
         ClearRedBeam()
-        
-        -- Проверяем что мы на вкладке Forward
+
         if CurrentTab ~= forwardTabIndex then
             return
         end
-        
+
         local player = game.Players.LocalPlayer
         if not player or not player.Character then return end
-        
+
         local char = player.Character
         currentCharacter = char
-        
-        -- Находим торс (живот)
+
         local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
         if not torso then return end
-        
-        -- Создаем папку для объектов
+
         local beamFolder = Instance.new("Folder")
         beamFolder.Name = "RedBeamFolder"
         beamFolder.Parent = char
         table.insert(RedBeamObjects, beamFolder)
-        
-        -- Получаем позицию живота и направление камеры
+
         local camera = workspace.CurrentCamera
         if not camera then return end
-        
+
         local lookVector = camera.CFrame.LookVector
         local startPos = torso.Position
-        
-        -- Длина линии = forwardDistance
+
         local beamLength = forwardDistance
-        
-        -- Создаем основную полосу (Part) - красная светящаяся
+
         local beamPart = Instance.new("Part")
         beamPart.Name = "BeamPart"
         beamPart.Size = Vector3.new(0.15, 0.15, beamLength)
         beamPart.Anchored = false
         beamPart.CanCollide = false
         beamPart.Material = Enum.Material.Neon
-        beamPart.Color = Color3.new(1, 0, 0) -- Красный
+        beamPart.Color = Color3.new(1, 0, 0)
         beamPart.Transparency = 0.2
         beamPart.Parent = beamFolder
-        
-        -- Прикрепляем полосу к торсу через Weld
+
         local weldBeam = Instance.new("Weld")
         weldBeam.Part0 = torso
         weldBeam.Part1 = beamPart
-        -- Смещаем вперед на половину длины + небольшой отступ от тела
         local offset = beamLength / 2 + 0.3
         weldBeam.C0 = CFrame.new(0, 0, -offset) * CFrame.Angles(0, 0, 0)
         weldBeam.Parent = beamPart
         table.insert(RedBeamObjects, weldBeam)
-        
-        -- Создаем шар на конце линии
+
         local sphere = Instance.new("Part")
         sphere.Name = "SphereEnd"
         sphere.Size = Vector3.new(0.5, 0.5, 0.5)
@@ -7340,19 +6419,17 @@ pcall(function()
         sphere.Anchored = false
         sphere.CanCollide = false
         sphere.Material = Enum.Material.Neon
-        sphere.Color = Color3.new(1, 0, 0) -- Красный
+        sphere.Color = Color3.new(1, 0, 0)
         sphere.Transparency = 0.1
         sphere.Parent = beamFolder
-        
-        -- Прикрепляем шар к концу полосы
+
         local weldSphere = Instance.new("Weld")
         weldSphere.Part0 = beamPart
         weldSphere.Part1 = sphere
         weldSphere.C0 = CFrame.new(0, 0, -beamLength / 2) * CFrame.Angles(0, 0, 0)
         weldSphere.Parent = sphere
         table.insert(RedBeamObjects, weldSphere)
-        
-        -- Источник света на шаре
+
         local light = Instance.new("PointLight")
         light.Name = "RedLight"
         light.Color = Color3.new(1, 0, 0)
@@ -7361,8 +6438,7 @@ pcall(function()
         light.Shadows = true
         light.Parent = sphere
         table.insert(RedBeamObjects, light)
-        
-        -- Источник света на полосе
+
         local lightBeam = Instance.new("PointLight")
         lightBeam.Name = "BeamLight"
         lightBeam.Color = Color3.new(1, 0, 0)
@@ -7371,12 +6447,11 @@ pcall(function()
         lightBeam.Shadows = true
         lightBeam.Parent = beamPart
         table.insert(RedBeamObjects, lightBeam)
-        
-        -- Частицы на шаре
+
         local attachment = Instance.new("Attachment")
         attachment.Parent = sphere
         table.insert(RedBeamObjects, attachment)
-        
+
         local particleEmitter = Instance.new("ParticleEmitter")
         particleEmitter.Parent = attachment
         particleEmitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
@@ -7390,78 +6465,50 @@ pcall(function()
         particleEmitter.Speed = NumberRange.new(0.5, 1.5)
         particleEmitter.Enabled = true
         table.insert(RedBeamObjects, particleEmitter)
-        
-        -- Эффект пульсации для шара (размер)
-        local tweenInfo = TweenInfo.new(
-            1.5,
-            Enum.EasingStyle.Sine,
-            Enum.EasingDirection.InOut,
-            -1,
-            true
-        )
-        
-        local tween = TweenService:Create(sphere, tweenInfo, {
-            Size = Vector3.new(0.7, 0.7, 0.7)
-        })
-        tween:Play()
-        table.insert(RedBeamObjects, tween)
-        
-        -- Пульсация свечения
-        local lightTween = TweenService:Create(light, tweenInfo, {
-            Brightness = 6,
-            Range = 12
-        })
-        lightTween:Play()
-        table.insert(RedBeamObjects, lightTween)
-        
+
         RedBeamVisible = true
     end
 
-    -- Обновление линии при изменении расстояния
     local function UpdateRedBeam()
         if CurrentTab == forwardTabIndex then
             CreateRedBeam()
         end
     end
 
-    -- Функция для обновления позиции линии (направление камеры)
     local function UpdateRedBeamDirection()
         if not RedBeamVisible then return end
         if CurrentTab ~= forwardTabIndex then return end
-        
+
         local player = game.Players.LocalPlayer
         if not player or not player.Character then return end
-        
+
         local char = player.Character
         local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
         local beamFolder = char:FindFirstChild("RedBeamFolder")
-        
+
         if not torso or not beamFolder then return end
-        
+
         local beamPart = beamFolder:FindFirstChild("BeamPart")
         local sphere = beamFolder:FindFirstChild("SphereEnd")
-        
+
         if not beamPart or not sphere then return end
-        
-        -- Обновляем направление weld для синхронизации с камерой
+
         local weldBeam = beamPart:FindFirstChildWhichIsA("Weld")
         if weldBeam then
             local beamLength = forwardDistance
             local offset = beamLength / 2 + 0.3
             weldBeam.C0 = CFrame.new(0, 0, -offset) * CFrame.Angles(0, 0, 0)
         end
-        
+
         local weldSphere = sphere:FindFirstChildWhichIsA("Weld")
         if weldSphere then
             local beamLength = forwardDistance
             weldSphere.C0 = CFrame.new(0, 0, -beamLength / 2) * CFrame.Angles(0, 0, 0)
         end
-        
-        -- Обновляем размер полосы
+
         beamPart.Size = Vector3.new(0.15, 0.15, forwardDistance)
     end
 
-    -- Обновление визуализации при входе во вкладку
     local function UpdateForwardVisuals()
         if CurrentTab == forwardTabIndex then
             CreateRedBeam()
@@ -7470,7 +6517,6 @@ pcall(function()
         end
     end
 
-    -- Обновляем при переключении вкладок
     for i, btn in ipairs(TabButtons) do
         btn.MouseButton1Click:Connect(function()
             if i == forwardTabIndex then
@@ -7486,21 +6532,18 @@ pcall(function()
         end)
     end
 
-    -- Обновление при движении камеры (только если вкладка активна)
     local cameraRenderConnection = game:GetService("RunService").RenderStepped:Connect(function()
         if CurrentTab == forwardTabIndex and RedBeamVisible then
             UpdateRedBeamDirection()
         end
     end)
 
-    -- Обновляем при изменении позиции игрока
     local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function()
         if CurrentTab == forwardTabIndex and not RedBeamVisible then
             CreateRedBeam()
         end
     end)
 
-    -- Очищаем при смерти и пересоздаем
     local player = game.Players.LocalPlayer
     if player then
         player.CharacterAdded:Connect(function(newChar)
@@ -7515,7 +6558,7 @@ pcall(function()
     local function UpdateSlider()
         local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
-        distanceButton.Position = UDim2.new(percent, -9, -0.4, 0)
+        distanceButton.Position = UDim2.new(percent, -7, 0.5, -7)
         distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
         UpdateRedBeam()
     end
@@ -7523,26 +6566,19 @@ pcall(function()
     local function DoForwardTeleport()
         local player = game.Players.LocalPlayer
         if not player or not player.Character then
-            statusLabel.Text = "Error: No character"
-            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
             return
         end
 
         local hrp = player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then
-            statusLabel.Text = "Error: No HumanoidRootPart"
-            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
             return
         end
 
         local camera = workspace.CurrentCamera
         if not camera then
-            statusLabel.Text = "Error: No camera"
-            statusLabel.TextColor3 = Color3.fromRGB(200, 40, 40)
             return
         end
 
-        -- Используем направление КАМЕРЫ!
         local lookVector = camera.CFrame.LookVector
         local newPos = hrp.Position + lookVector * forwardDistance
 
@@ -7568,18 +6604,6 @@ pcall(function()
         end
 
         hrp.CFrame = CFrame.new(adjustedPos)
-
-        statusLabel.Text = "Teleported " .. math.floor(forwardDistance) .. "m forward"
-        statusLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-
-        spawn(function()
-            task.wait(2)
-            if statusLabel then
-                statusLabel.Text = "Ready"
-                statusLabel.TextColor3 = Library.Theme.Text            end
-        end)
-
-        print("✅ Teleported " .. forwardDistance .. " meters forward (camera direction)")
     end
 
     forwardBtn.MouseButton1Click:Connect(DoForwardTeleport)
@@ -7606,16 +6630,15 @@ pcall(function()
     end)
 
     UpdateSlider()
+end)
 
-    print("========================================")
-    print("✅ 'FORWARD' TAB WITH RED BEAM!")
-    print("📌 Red beam + sphere appear ONLY on Forward tab")
-    print("📌 Beam length controlled by slider (1-50m)")
-    print("📌 Beam follows CAMERA direction")
-    print("📌 Sphere stays at the end of the beam")
-    print("📌 With particles, glow and pulsing")
-    print("📌 Press FORWARD button to teleport")
-    print("========================================")
+-- ===== ФИНАЛЬНАЯ ЗАЩИТА СЛАЙДЕРОВ ОТ ПРОЗРАЧНОСТИ (ПОСЛЕДНИЙ РАЗ) =====
+pcall(function()
+    for _, obj in pairs(MenuPanel:GetDescendants()) do
+        if obj.Name == "OrionSliderTrack" or obj.Name == "OrionSliderFill" or obj.Name == "OrionSliderButton" then
+            obj.BackgroundTransparency = 0
+        end
+    end
 end)
 
 -- ===== SETUP DRAG SYSTEMS =====
@@ -7624,23 +6647,6 @@ SetupMenuDrag()
 
 -- ===== APPLY INITIAL THEME =====
 ApplyThemeColors(Library.Theme)
-
-print("========================================")
-print("✅ ALL SYSTEMS READY!")
-print("📌 Menu works on FIRST click!")
-print("📌 Click GG+ button to expand/collapse")
-print("📌 Drag GG+ button to move it")
-print("📌 Drag ANYWHERE on the panel to move it (not just title!)")
-print("📌 Freecam saves and restores menu state!")
-print("📌 Resize buttons - ТОЛЬКО ПО УГЛАМ! (4 штуки)")
-print("📌 ALL resize buttons are FULL ROUND (including corners!)")
-print("📌 Кнопки по стенкам УДАЛЕНЫ!")
-print("📌 Полоска WAVE внизу УДАЛЕНА!")
-print("📌 'Forward' tab - RED BEAM appears ONLY on this tab!")
-print("📌 Beam length controlled by slider (1-50m)")
-print("📌 Beam follows CAMERA direction")
-print("📌 Sphere with particles and glow at the end")
-print("========================================")
 
 -- Запуск анимации загрузки
 ShowLoadingAnimation()
