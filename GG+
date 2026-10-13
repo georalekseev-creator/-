@@ -1,5 +1,51 @@
 -- GG+ - Marine Style with Anchors and Waves + Click-Teleport + Auto-Walk by Points with Visualization + Noclip + Platforms + Teleport to Players + X-Ray + SPI + Smooth Tab Scrolling + ALL ROUND RESIZE BUTTONS (ТОЛЬКО ПО УГЛАМ!) + FLY (Solara Edition) - FIXED FLY BUTTON + WORKING FREECAM TAB (SQUARE SLIDER, MAX 300, NO INFO, CLICKABLE MENU)
 
+-- ===== MANUAL INPUT HELPER (ADDED) =====
+local function AddManualInput(parentFrame, posX, posY, sizeX, sizeY, getValue, setValue, minVal, maxVal, labelText)
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(sizeX, 0, sizeY, 0)
+    box.Position = UDim2.new(posX, 0, posY, 0)
+    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    box.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    box.BorderSizePixel = 1
+    box.Text = tostring(math.floor(getValue()))
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.TextScaled = true
+    box.Font = Enum.Font.SourceSans
+    box.PlaceholderText = labelText or "Value"
+    box.Parent = parentFrame
+
+    local applyBtn = Instance.new("TextButton")
+    applyBtn.Size = UDim2.new(0.18, 0, sizeY, 0)
+    applyBtn.Position = UDim2.new(posX + sizeX + 0.01, 0, posY, 0)
+    applyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    applyBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    applyBtn.BorderSizePixel = 1
+    applyBtn.Text = "OK"
+    applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    applyBtn.TextScaled = true
+    applyBtn.Font = Enum.Font.SourceSansBold
+    applyBtn.Parent = parentFrame
+
+    local function apply()
+        local num = tonumber(box.Text)
+        if num then
+            -- NO CLAMPING HERE: allow any value the user wants
+            setValue(num)
+            box.Text = tostring(math.floor(num))
+        else
+            box.Text = tostring(math.floor(getValue()))
+        end
+    end
+
+    applyBtn.MouseButton1Click:Connect(apply)
+    box.FocusLost:Connect(function(enterPressed)
+        if enterPressed then apply() end
+    end)
+
+    return box, applyBtn
+end
+
 -- ===== LOADING ANIMATION (fullscreen, 10x enlarged) =====
 local function ShowLoadingAnimation()
     local loadingGui = Instance.new("ScreenGui")
@@ -996,7 +1042,7 @@ do
     flyToggleBtn.Font = Enum.Font.SourceSansBold
     flyToggleBtn.Parent = FlyFrame
 
-    -- ===== VERнутая надпись скорости =====
+    -- ===== ВЕРНУТАЯ надпись скорости =====
     local flySpeedTitle = Instance.new("TextLabel")
     flySpeedTitle.Size = UDim2.new(0.3, 0, 0.08, 0)
     flySpeedTitle.Position = UDim2.new(0.05, 0, 0.43, 0)
@@ -1039,6 +1085,24 @@ do
     local flySpeedCorner = Instance.new("UICorner")
     flySpeedCorner.CornerRadius = UDim.new(1, 0)
     flySpeedCorner.Parent = flySpeedButton
+
+    -- ===== MANUAL INPUT FOR FLY SPEED =====
+    local flyManualInput
+    flyManualInput = AddManualInput(FlyFrame, 0.4, 0.55, 0.2, 0.08,
+        function() return FLY_CONFIG.flySpeed end,
+        function(v)
+            -- NO CLAMP: allow any value
+            FLY_CONFIG.flySpeed = v
+            local ratio = math.clamp(
+                (FLY_CONFIG.flySpeed - FLY_CONFIG.minSpeed) / (FLY_CONFIG.maxSpeed - FLY_CONFIG.minSpeed),
+                0, 1
+            )
+            flySpeedFill.Size = UDim2.new(ratio, 0, 1, 0)
+            flySpeedButton.Position = UDim2.new(ratio, -7, 0.5, -7)
+            flySpeedTitle.Text = "Speed: " .. math.floor(FLY_CONFIG.flySpeed)
+        end,
+        FLY_CONFIG.minSpeed, FLY_CONFIG.maxSpeed, "Fly Speed"
+    )
 
     local isDraggingFlySpeed = false
 
@@ -1150,7 +1214,7 @@ do
     updateFlySpeedUI()
 end
 
--- ===== TAB 4: AUTO-WALK =====
+-- ===== TAB 4: AUTO-WALK (FIXED: manual input no longer overlaps text) =====
 local WalkTab = Tabs[4]
 
 local WalkFrame = Instance.new("Frame")
@@ -1207,8 +1271,8 @@ WalkClearBtn.Font = Enum.Font.SourceSansBold
 WalkClearBtn.Parent = WalkFrame
 
 local WalkStatus = Instance.new("TextLabel")
-WalkStatus.Size = UDim2.new(1, 0, 0.15, 0)
-WalkStatus.Position = UDim2.new(0, 0, 0.65, 0)
+WalkStatus.Size = UDim2.new(1, 0, 0.1, 0)
+WalkStatus.Position = UDim2.new(0, 0, 0.62, 0)
 WalkStatus.BackgroundTransparency = 1
 WalkStatus.Text = "Status: Stopped"
 WalkStatus.TextColor3 = Library.Theme.Text
@@ -1218,20 +1282,21 @@ WalkStatus.Parent = WalkFrame
 
 -- ===== ВЕРНУТАЯ надпись скорости =====
 local WalkSpeedLabel = Instance.new("TextLabel")
-WalkSpeedLabel.Size = UDim2.new(0.3, 0, 0.15, 0)
-WalkSpeedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
+WalkSpeedLabel.Size = UDim2.new(0.4, 0, 0.08, 0)
+WalkSpeedLabel.Position = UDim2.new(0.05, 0, 0.72, 0)
 WalkSpeedLabel.BackgroundTransparency = 1
 WalkSpeedLabel.Text = "Speed: 16"
 WalkSpeedLabel.TextColor3 = Library.Theme.Text
 WalkSpeedLabel.TextScaled = true
 WalkSpeedLabel.Font = Enum.Font.SourceSans
+WalkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 WalkSpeedLabel.Parent = WalkFrame
 
 -- ===== ORION STYLE SLIDER (непрозрачный) =====
 local WalkSpeedSlider = Instance.new("Frame")
 WalkSpeedSlider.Name = "OrionSliderTrack"
 WalkSpeedSlider.Size = UDim2.new(0.4, -10, 0, 6)
-WalkSpeedSlider.Position = UDim2.new(0.45, 0, 0.87, 0)
+WalkSpeedSlider.Position = UDim2.new(0.45, 0, 0.74, 0)
 WalkSpeedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 WalkSpeedSlider.BorderSizePixel = 0
 WalkSpeedSlider.BackgroundTransparency = 0
@@ -1258,6 +1323,23 @@ WalkSpeedButton.BackgroundTransparency = 0
 local WalkSpeedCorner = Instance.new("UICorner")
 WalkSpeedCorner.CornerRadius = UDim.new(1, 0)
 WalkSpeedCorner.Parent = WalkSpeedButton
+
+-- ===== MANUAL INPUT FOR WALK SPEED (позиция ниже слайдера, не перекрывает текст) =====
+local WalkSpeed = 16
+local MAX_WALK_SPEED = 300
+
+AddManualInput(WalkFrame, 0.45, 0.82, 0.2, 0.08,
+    function() return WalkSpeed end,
+    function(v)
+        -- NO CLAMP: allow any value
+        WalkSpeed = v
+        local percent = math.clamp((WalkSpeed - 10) / (MAX_WALK_SPEED - 10), 0, 1)
+        WalkSpeedFill.Size = UDim2.new(percent, 0, 1, 0)
+        WalkSpeedButton.Position = UDim2.new(percent, -7, 0.5, -7)
+        WalkSpeedLabel.Text = "Speed: " .. math.floor(WalkSpeed)
+    end,
+    10, MAX_WALK_SPEED, "Walk Speed"
+)
 
 local WalkPointsList = Instance.new("ScrollingFrame")
 WalkPointsList.Size = UDim2.new(1, 0, 0.4, 0)
@@ -1428,6 +1510,34 @@ WidthCorner.Parent = WidthButton
 
 local MinSize = 1
 local MaxSize = 50
+
+-- ===== MANUAL INPUT FOR PLATFORM LENGTH =====
+AddManualInput(PlatformFrame, 0.35, 0.22, 0.2, 0.08,
+    function() return PlatformLength end,
+    function(v)
+        -- NO CLAMP: allow any value
+        PlatformLength = v
+        local percent = math.clamp((PlatformLength - MinSize) / (MaxSize - MinSize), 0, 1)
+        LengthFill.Size = UDim2.new(percent, 0, 1, 0)
+        LengthButton.Position = UDim2.new(percent, -7, 0.5, -7)
+        LengthLabel.Text = "Length: " .. math.floor(PlatformLength) .. " m"
+    end,
+    MinSize, MaxSize, "Length"
+)
+
+-- ===== MANUAL INPUT FOR PLATFORM WIDTH =====
+AddManualInput(PlatformFrame, 0.35, 0.37, 0.2, 0.08,
+    function() return PlatformWidth end,
+    function(v)
+        -- NO CLAMP: allow any value
+        PlatformWidth = v
+        local percent = math.clamp((PlatformWidth - MinSize) / (MaxSize - MinSize), 0, 1)
+        WidthFill.Size = UDim2.new(percent, 0, 1, 0)
+        WidthButton.Position = UDim2.new(percent, -7, 0.5, -7)
+        WidthLabel.Text = "Width: " .. math.floor(PlatformWidth) .. " m"
+    end,
+    MinSize, MaxSize, "Width"
+)
 
 local CreatePlatformBtn = Instance.new("TextButton")
 CreatePlatformBtn.Size = UDim2.new(0.6, -10, 0.15, -5)
@@ -1842,8 +1952,23 @@ local XRayCorner = Instance.new("UICorner")
 XRayCorner.CornerRadius = UDim.new(1, 0)
 XRayCorner.Parent = XRaySliderButton
 
+-- ===== MANUAL INPUT FOR X-RAY TRANSPARENCY =====
+AddManualInput(XRayControlFrame, 0.3, 0.62, 0.2, 0.08,
+    function() return XRayTransparency end,
+    function(v)
+        -- NO CLAMP: allow any value
+        XRayTransparency = v
+        local percent = math.clamp(XRayTransparency / 100, 0, 1)
+        XRayFill.Size = UDim2.new(percent, 0, 1, 0)
+        XRaySliderButton.Position = UDim2.new(percent, -7, 0.5, -7)
+        XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
+        if XRayActive then UpdateXRay() end
+    end,
+    1, 100, "X-Ray %"
+)
+
 local function UpdateXRaySlider()
-    local percent = XRayTransparency / 100
+    local percent = math.clamp(XRayTransparency / 100, 0, 1)
     XRayFill.Size = UDim2.new(percent, 0, 1, 0)
     XRaySliderButton.Position = UDim2.new(percent, -7, 0.5, -7)
     XRayTransparencyLabel.Text = math.floor(XRayTransparency) .. "%"
@@ -2166,10 +2291,9 @@ local WalkPointsData = {}
 local ClickTeleportEnabled = false
 
 local MAX_POINTS = 1000
-local MAX_WALK_SPEED = 300
+-- MAX_WALK_SPEED already defined above as 300
 
 local WalkEnabled = false
-local WalkSpeed = 16
 local WalkLoop = nil
 local CurrentWalkIndex = 1
 local WalkVisuals = {}
@@ -3375,6 +3499,8 @@ do
         FC.savedAutoRotate = nil
         FC.savedPlatformStand = nil
         FC.savedAnchored = nil
+        FC.savedMouseBehavior = nil
+        FC.mouseLocked = true
 
         local LookGui = nil
         local lookTouchId = nil
@@ -3505,6 +3631,19 @@ do
         toggleCorner.CornerRadius = UDim.new(1, 0)
         toggleCorner.Parent = toggleBtn
 
+        -- Подсказка по разблокировке мыши клавишей Alt
+        local mouseHint = Instance.new("TextLabel")
+        mouseHint.Name = "MouseUnlockHint"
+        mouseHint.Size = UDim2.new(1, -20, 0, 20)
+        mouseHint.Position = UDim2.new(0, 10, 0.33, 0)
+        mouseHint.BackgroundTransparency = 1
+        mouseHint.Text = "Press ALT to unlock the mouse"
+        mouseHint.TextColor3 = Library.Theme.Text
+        mouseHint.TextScaled = true
+        mouseHint.Font = Enum.Font.SourceSans
+        mouseHint.TextXAlignment = Enum.TextXAlignment.Left
+        mouseHint.Parent = mainFrame
+
         -- ===== ВЕРНУТАЯ надпись скорости =====
         local speedTitle = Instance.new("TextLabel")
         speedTitle.Size = UDim2.new(1, -20, 0, 20)
@@ -3548,8 +3687,22 @@ do
         speedCorner.CornerRadius = UDim.new(1, 0)
         speedCorner.Parent = speedButton
 
+        -- ===== MANUAL INPUT FOR FREECAM SPEED =====
+        AddManualInput(mainFrame, 0.05, 0.68, 0.25, 0.1,
+            function() return FC.baseSpeed end,
+            function(v)
+                -- NO CLAMP: allow any value
+                FC.baseSpeed = v
+                local percent = math.clamp((FC.baseSpeed - 1) / (FC.maxSpeed - 1), 0, 1)
+                speedFill.Size = UDim2.new(percent, 0, 1, 0)
+                speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
+                speedTitle.Text = "Speed: " .. math.floor(FC.baseSpeed)
+            end,
+            1, FC.maxSpeed, "Freecam Speed"
+        )
+
         local function updateSpeedSlider()
-            local percent = (FC.baseSpeed - 1) / (FC.maxSpeed - 1)
+            local percent = math.clamp((FC.baseSpeed - 1) / (FC.maxSpeed - 1), 0, 1)
             speedFill.Size = UDim2.new(percent, 0, 1, 0)
             speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
             speedTitle.Text = "Speed: " .. math.floor(FC.baseSpeed)
@@ -3565,6 +3718,9 @@ do
 
             FC.savedCameraCFrame = camera.CFrame
             FC.savedCameraFocus = camera.Focus
+            FC.savedMouseBehavior = userInputService.MouseBehavior
+            FC.mouseLocked = true
+            userInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 
             if char and char:FindFirstChild("HumanoidRootPart") then
                 FC.savedCharacterCFrame = char.HumanoidRootPart.CFrame
@@ -3609,6 +3765,8 @@ do
             local camera = workspace.CurrentCamera
 
             FC.isActive = false
+            userInputService.MouseBehavior = FC.savedMouseBehavior or Enum.MouseBehavior.Default
+            FC.mouseLocked = true
 
             if FC.savedCameraCFrame then
                 camera.CFrame = FC.savedCameraCFrame
@@ -3671,6 +3829,16 @@ do
 
         if userInputService.KeyboardEnabled then
             userInputService.InputBegan:Connect(function(input, gp)
+                if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
+                    if FC.isActive then
+                        FC.mouseLocked = not FC.mouseLocked
+                        userInputService.MouseBehavior = FC.mouseLocked
+                            and Enum.MouseBehavior.LockCenter
+                            or Enum.MouseBehavior.Default
+                    end
+                    return
+                end
+
                 if gp then return end
                 if input.KeyCode == Enum.KeyCode.F9 then
                     if FC.isActive then disableFreecam() else enableFreecam() end
@@ -3691,6 +3859,9 @@ do
 
         game:GetService("RunService").RenderStepped:Connect(function(dt)
             if not FC.isActive then return end
+            userInputService.MouseBehavior = FC.mouseLocked
+                and Enum.MouseBehavior.LockCenter
+                or Enum.MouseBehavior.Default
             local camera = workspace.CurrentCamera
             local moveDirection = Vector3.new(0, 0, 0)
 
@@ -4868,7 +5039,7 @@ pcall(function()
     end
 end)
 
--- ===== TAB 11: CLICKER =====
+-- ===== TAB 11: CLICKER (MODIFIED: NO MS DISPLAY, FIXED 50ms, SLIDER LOCKED) =====
 pcall(function()
     local existingTab = nil
     for i, name in ipairs(TabNames) do
@@ -4999,52 +5170,9 @@ pcall(function()
     clickerCorner.CornerRadius = UDim.new(1, 0)
     clickerCorner.Parent = clickerBtn
 
-    -- ===== ВЕРНУТАЯ надпись задержки =====
-    local delayLabel = Instance.new("TextLabel")
-    delayLabel.Size = UDim2.new(0.3, 0, 0.12, 0)
-    delayLabel.Position = UDim2.new(0.05, 0, 0.78, 0)
-    delayLabel.BackgroundTransparency = 1
-    delayLabel.Text = "Delay: 100 ms"
-    delayLabel.TextColor3 = Library.Theme.Text
-    delayLabel.TextScaled = true
-    delayLabel.Font = Enum.Font.SourceSans
-    delayLabel.TextXAlignment = Enum.TextXAlignment.Left
-    delayLabel.Parent = mainFrame
-
-    -- ===== ORION STYLE SLIDER (непрозрачный) =====
-    local delaySlider = Instance.new("Frame")
-    delaySlider.Name = "OrionSliderTrack"
-    delaySlider.Size = UDim2.new(0.5, -10, 0, 6)
-    delaySlider.Position = UDim2.new(0.4, 0, 0.82, 0)
-    delaySlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    delaySlider.BorderSizePixel = 0
-    delaySlider.BackgroundTransparency = 0
-    delaySlider.Parent = mainFrame
-
-    local delayFill = Instance.new("Frame")
-    delayFill.Name = "OrionSliderFill"
-    delayFill.Size = UDim2.new(0.1, 0, 1, 0)
-    delayFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    delayFill.BorderSizePixel = 0
-    delayFill.BackgroundTransparency = 0
-    delayFill.Parent = delaySlider
-
-    local delayButton = Instance.new("TextButton")
-    delayButton.Name = "OrionSliderButton"
-    delayButton.Size = UDim2.new(0, 14, 0, 14)
-    delayButton.Position = UDim2.new(0.1, -7, 0.5, -7)
-    delayButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    delayButton.BorderSizePixel = 0
-    delayButton.Text = ""
-    delayButton.Parent = delaySlider
-    delayButton.BackgroundTransparency = 0
-
-    local delayCorner = Instance.new("UICorner")
-    delayCorner.CornerRadius = UDim.new(1, 0)
-    delayCorner.Parent = delayButton
-
+    -- Delay is fixed at 50 ms, no display, no manual input
     local isClicking = false
-    local clickDelay = 100
+    local clickDelay = 50
     local clickConnection = nil
     local mouse = game.Players.LocalPlayer:GetMouse()
 
@@ -5133,29 +5261,6 @@ pcall(function()
         if gameProcessed then return end
         if input.KeyCode == Enum.KeyCode.K and input:IsModifierKeyDown(Enum.KeyCode.LeftAlt) then
             ToggleClicker()
-        end
-    end)
-
-    local isDragging = false
-    delayButton.MouseButton1Down:Connect(function() isDragging = true end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local sliderPos = delaySlider.AbsolutePosition
-            local sliderSize = delaySlider.AbsoluteSize
-            local mouseX = input.Position.X
-
-            local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            clickDelay = math.floor(50 + percent * 950)
-            delayFill.Size = UDim2.new(percent, 0, 1, 0)
-            delayButton.Position = UDim2.new(percent, -7, 0.5, -7)
-            delayLabel.Text = "Delay: " .. clickDelay .. " ms"
         end
     end)
 end)
@@ -5763,7 +5868,7 @@ pcall(function()
     SetupDeathHandler()
 end)
 
--- ===== SPEED TAB =====
+-- ===== SPEED TAB (MODIFIED: AUTO-DETECT MAX, MANUAL INPUT, MIN/MAX LABELS REMOVED) =====
 pcall(function()
     local speedTabIndex = nil
     for i, name in ipairs(TabNames) do
@@ -5820,8 +5925,8 @@ pcall(function()
     container.Parent = speedTab
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(1, -20, 0.6, 0)
-    mainFrame.Position = UDim2.new(0, 10, 0.1, 0)
+    mainFrame.Size = UDim2.new(1, -20, 0.7, 0)
+    mainFrame.Position = UDim2.new(0, 10, 0.05, 0)
     mainFrame.BackgroundColor3 = Library.Theme.Panel
     mainFrame.BorderColor3 = Library.Theme.Border
     mainFrame.BorderSizePixel = 2
@@ -5829,7 +5934,7 @@ pcall(function()
     mainFrame.Parent = container
 
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.Size = UDim2.new(1, 0, 0.1, 0)
     title.BackgroundTransparency = 1
     title.Text = "SPEED MODIFICATION"
     title.TextColor3 = Library.Theme.Text
@@ -5838,10 +5943,10 @@ pcall(function()
     title.Parent = mainFrame
 
     local info = Instance.new("TextLabel")
-    info.Size = UDim2.new(1, -20, 0.12, 0)
-    info.Position = UDim2.new(0, 10, 0.17, 0)
+    info.Size = UDim2.new(1, -20, 0.08, 0)
+    info.Position = UDim2.new(0, 10, 0.11, 0)
     info.BackgroundTransparency = 1
-    info.Text = "Changes player movement speed (16 - 300)"
+    info.Text = "Changes player movement speed"
     info.TextColor3 = Library.Theme.Accent
     info.TextScaled = true
     info.Font = Enum.Font.SourceSans
@@ -5849,8 +5954,8 @@ pcall(function()
     info.Parent = mainFrame
 
     local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0.4, -10, 0.2, 0)
-    toggleBtn.Position = UDim2.new(0.3, 0, 0.35, 0)
+    toggleBtn.Size = UDim2.new(0.4, -10, 0.12, 0)
+    toggleBtn.Position = UDim2.new(0.3, 0, 0.30, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
     toggleBtn.BorderColor3 = Library.Theme.Border
     toggleBtn.BorderSizePixel = 2
@@ -5865,32 +5970,22 @@ pcall(function()
     speedToggleCorner.CornerRadius = UDim.new(1, 0)
     speedToggleCorner.Parent = toggleBtn
 
-    local currentSpeedLabel = Instance.new("TextLabel")
-    currentSpeedLabel.Size = UDim2.new(0.45, 0, 0.08, 0)
-    currentSpeedLabel.Position = UDim2.new(0.05, 0, 0.62, 0)
-    currentSpeedLabel.BackgroundTransparency = 1
-    currentSpeedLabel.Text = "Current speed: 16"
-    currentSpeedLabel.TextColor3 = Color3.fromRGB(0, 200, 100)
-    currentSpeedLabel.TextScaled = true
-    currentSpeedLabel.Font = Enum.Font.SourceSansBold
-    currentSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    currentSpeedLabel.Parent = mainFrame
-
+    -- Default speed label (Current speed removed)
     local defaultSpeedLabel = Instance.new("TextLabel")
-    defaultSpeedLabel.Size = UDim2.new(0.45, 0, 0.08, 0)
-    defaultSpeedLabel.Position = UDim2.new(0.5, 0, 0.62, 0)
+    defaultSpeedLabel.Size = UDim2.new(0.9, 0, 0.07, 0)
+    defaultSpeedLabel.Position = UDim2.new(0.05, 0, 0.44, 0)
     defaultSpeedLabel.BackgroundTransparency = 1
     defaultSpeedLabel.Text = "Default speed: 16"
     defaultSpeedLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
     defaultSpeedLabel.TextScaled = true
     defaultSpeedLabel.Font = Enum.Font.SourceSansBold
-    defaultSpeedLabel.TextXAlignment = Enum.TextXAlignment.Right
+    defaultSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
     defaultSpeedLabel.Parent = mainFrame
 
-    -- ===== ВЕРНУТАЯ надпись скорости =====
+    -- Speed label
     local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0.25, 0, 0.12, 0)
-    speedLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
+    speedLabel.Size = UDim2.new(0.25, 0, 0.1, 0)
+    speedLabel.Position = UDim2.new(0.05, 0, 0.60, 0)
     speedLabel.BackgroundTransparency = 1
     speedLabel.Text = "Speed: 16"
     speedLabel.TextColor3 = Library.Theme.Text
@@ -5899,11 +5994,11 @@ pcall(function()
     speedLabel.TextXAlignment = Enum.TextXAlignment.Left
     speedLabel.Parent = mainFrame
 
-    -- ===== ORION STYLE SLIDER (непрозрачный) =====
+    -- ORION STYLE SLIDER
     local speedSlider = Instance.new("Frame")
     speedSlider.Name = "OrionSliderTrack"
     speedSlider.Size = UDim2.new(0.55, -10, 0, 6)
-    speedSlider.Position = UDim2.new(0.35, 0, 0.85, 0)
+    speedSlider.Position = UDim2.new(0.35, 0, 0.64, 0)
     speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     speedSlider.BorderSizePixel = 0
     speedSlider.BackgroundTransparency = 0
@@ -5935,8 +6030,75 @@ pcall(function()
     local TargetSpeed = 16
     local MIN_SPEED = 16
     local MAX_SPEED = 300
+    local DETECTED_MAX = 300
     local SpeedConnection = nil
     local DefaultSpeed = 16
+    local detecting = false
+
+    -- Manual input for speed
+    local manualSpeedInput
+    manualSpeedInput = AddManualInput(mainFrame, 0.35, 0.75, 0.2, 0.08,
+        function() return TargetSpeed end,
+        function(v)
+            -- NO CLAMP: allow any value
+            TargetSpeed = v
+            local percent = math.clamp((TargetSpeed - MIN_SPEED) / (DETECTED_MAX - MIN_SPEED), 0, 1)
+            speedFill.Size = UDim2.new(percent, 0, 1, 0)
+            speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
+            speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
+            if SpeedEnabled then
+                local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                if humanoid then humanoid.WalkSpeed = TargetSpeed end
+            end
+        end,
+        MIN_SPEED, MAX_SPEED, "Speed"
+    )
+
+    local function UpdateSlider()
+        local percent = math.clamp((TargetSpeed - MIN_SPEED) / (DETECTED_MAX - MIN_SPEED), 0, 1)
+        speedFill.Size = UDim2.new(percent, 0, 1, 0)
+        speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
+        speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
+    end
+
+    -- Auto-detect safe max speed
+    local function DetectMaxSpeed()
+        if detecting then return end
+        detecting = true
+        local player = game.Players.LocalPlayer
+        if not player or not player.Character then
+            detecting = false
+            return
+        end
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        if not humanoid then detecting = false; return end
+
+        local originalSpeed = humanoid.WalkSpeed
+        local originalPos = player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
+
+        local testSpeeds = {16, 50, 100, 200, 300, 500, 600, 800, 1000}
+        local lastWorking = 16
+
+        for _, spd in ipairs(testSpeeds) do
+            humanoid.WalkSpeed = spd
+            task.wait(0.3)
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local newPos = player.Character.HumanoidRootPart.Position
+                if originalPos and (newPos - originalPos).Magnitude > 1000 then
+                    break
+                end
+                lastWorking = spd
+            else
+                break
+            end
+        end
+
+        humanoid.WalkSpeed = originalSpeed
+        DETECTED_MAX = lastWorking
+        MAX_SPEED = math.max(lastWorking, 16)
+        -- minMaxLabel removed
+        detecting = false
+    end
 
     local function UpdateSpeed()
         local player = game.Players.LocalPlayer
@@ -5948,13 +6110,6 @@ pcall(function()
         if SpeedEnabled then
             humanoid.WalkSpeed = TargetSpeed
         end
-    end
-
-    local function UpdateSlider()
-        local percent = (TargetSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED)
-        speedFill.Size = UDim2.new(percent, 0, 1, 0)
-        speedButton.Position = UDim2.new(percent, -7, 0.5, -7)
-        speedLabel.Text = "Speed: " .. math.floor(TargetSpeed)
     end
 
     local function EnableSpeed()
@@ -6033,7 +6188,7 @@ pcall(function()
             local mouseX = input.Position.X
 
             local percent = math.clamp((mouseX - sliderPos.X) / sliderSize.X, 0, 1)
-            TargetSpeed = math.floor(MIN_SPEED + percent * (MAX_SPEED - MIN_SPEED))
+            TargetSpeed = math.floor(MIN_SPEED + percent * (DETECTED_MAX - MIN_SPEED))
             UpdateSlider()
 
             if SpeedEnabled then
@@ -6044,6 +6199,12 @@ pcall(function()
 
     UpdateSlider()
 
+    -- Start detection on tab open
+    task.spawn(function()
+        task.wait(1)
+        DetectMaxSpeed()
+    end)
+
     task.spawn(function()
         while true do
             task.wait(0.2)
@@ -6052,7 +6213,6 @@ pcall(function()
                 if player and player.Character then
                     local humanoid = player.Character:FindFirstChild("Humanoid")
                     if humanoid then
-                        currentSpeedLabel.Text = "Current speed: " .. math.floor(humanoid.WalkSpeed)
                         if not SpeedEnabled then
                             DefaultSpeed = math.floor(humanoid.WalkSpeed)
                         end
@@ -6177,7 +6337,7 @@ pcall(function()
 end)
 
 -- =====================================================
--- ===== TAB 13: FORWARD (ТЕЛЕПОРТ ПО НАПРАВЛЕНИЮ КАМЕРЫ) =====
+-- ===== TAB 13: FORWARD (FIXED: manual input no longer overlaps button) =====
 -- =====================================================
 
 pcall(function()
@@ -6234,6 +6394,16 @@ pcall(function()
     container.Size = UDim2.new(1, 0, 1, 0)
     container.BackgroundTransparency = 1
     container.Parent = forwardTab
+
+    -- ✅ FIX: объявляем переменные ДО AddManualInput
+    local forwardDistance = 3
+    local MIN_DISTANCE = 1
+    local MAX_DISTANCE = 50
+    local RedBeamObjects = {}
+    local RedBeamConnection = nil
+    local RedBeamVisible = false
+    local currentCharacter = nil
+    local UpdateRedBeam  -- forward declaration
 
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(1, -20, 0.5, 0)
@@ -6308,9 +6478,25 @@ pcall(function()
     distanceCorner.CornerRadius = UDim.new(1, 0)
     distanceCorner.Parent = distanceButton
 
+    -- ===== MANUAL INPUT FOR FORWARD DISTANCE (МЕСТО: выше кнопки, не пересекается) =====
+    AddManualInput(mainFrame, 0.35, 0.55, 0.2, 0.08,
+        function() return forwardDistance end,
+        function(v)
+            -- NO CLAMP: allow any value
+            forwardDistance = v
+            local percent = math.clamp((forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0, 1)
+            distanceFill.Size = UDim2.new(percent, 0, 1, 0)
+            distanceButton.Position = UDim2.new(percent, -7, 0.5, -7)
+            distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
+            if UpdateRedBeam then UpdateRedBeam() end
+        end,
+        MIN_DISTANCE, MAX_DISTANCE, "Distance"
+    )
+
+    -- Кнопка "FORWARD" перемещена ниже, чтобы не пересекаться с manual input
     local forwardBtn = Instance.new("TextButton")
-    forwardBtn.Size = UDim2.new(0.5, -10, 0.2, 0)
-    forwardBtn.Position = UDim2.new(0.25, 0, 0.6, 0)
+    forwardBtn.Size = UDim2.new(0.5, -10, 0.18, 0)
+    forwardBtn.Position = UDim2.new(0.25, 0, 0.72, 0)  -- было 0.6, сдвинуто ниже
     forwardBtn.BackgroundColor3 = Library.Theme.Success
     forwardBtn.BorderColor3 = Library.Theme.Border
     forwardBtn.BorderSizePixel = 2
@@ -6327,22 +6513,13 @@ pcall(function()
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    statusLabel.Position = UDim2.new(0, 0, 0.85, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.9, 0)  -- было 0.85, сдвинуто, чтобы не пересекаться
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = "Ready"
     statusLabel.TextColor3 = Library.Theme.Text
     statusLabel.TextScaled = true
     statusLabel.Font = Enum.Font.SourceSans
     statusLabel.Parent = mainFrame
-
-    local forwardDistance = 3
-    local MIN_DISTANCE = 1
-    local MAX_DISTANCE = 50
-
-    local RedBeamObjects = {}
-    local RedBeamConnection = nil
-    local RedBeamVisible = false
-    local currentCharacter = nil
 
     local function ClearRedBeam()
         for _, obj in pairs(RedBeamObjects) do
@@ -6469,7 +6646,7 @@ pcall(function()
         RedBeamVisible = true
     end
 
-    local function UpdateRedBeam()
+    UpdateRedBeam = function()
         if CurrentTab == forwardTabIndex then
             CreateRedBeam()
         end
@@ -6556,11 +6733,11 @@ pcall(function()
     end
 
     local function UpdateSlider()
-        local percent = (forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE)
+        local percent = math.clamp((forwardDistance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0, 1)
         distanceFill.Size = UDim2.new(percent, 0, 1, 0)
         distanceButton.Position = UDim2.new(percent, -7, 0.5, -7)
         distanceLabel.Text = "Distance: " .. math.floor(forwardDistance) .. " m"
-        UpdateRedBeam()
+        if UpdateRedBeam then UpdateRedBeam() end
     end
 
     local function DoForwardTeleport()
